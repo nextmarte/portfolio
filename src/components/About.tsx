@@ -38,13 +38,13 @@ export function About() {
             </p>
             <p className="text-muted-foreground leading-relaxed text-justify">
               Possuo experiência em ciência de dados com R e Python, programação funcional,
-              construção de pipelines de dados (ETL/Lakehouse), desenvolvimento de sistemas
-              com Django, Streamlit e Shiny, visualização de dados e automação de processos organizacionais.
+              construção de pipelines de dados (ETL/Lakehouse), desenvolvimento de sistemas e dashboards
+              com NextJs, React, Django, Streamlit, Gradio e Shiny, visualização de dados e automação de processos organizacionais.
             </p>
             <p className="text-muted-foreground leading-relaxed text-justify">
               Sou autor e tradutor de materiais sobre ciência de dados, coorganizador do Seminário
-              Internacional de Estatística com R e docente em cursos de pós-graduação e educação
-              executiva na UFF. Meus interesses de pesquisa concentram-se em Governança de IA,
+              Internacional de Estatística com R e fui docente em cursos de pós-graduação e educação
+              executiva na UFF em Ciência de Dados. Meus interesses de pesquisa concentram-se em Governança de IA na administração pública,
               cultura de dados no setor público e sistemas inteligentes aplicados a problemas organizacionais.
             </p>
 
