@@ -3,6 +3,7 @@ import { Space_Grotesk, Outfit } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import ChatBot from "@/components/ChatBot";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -101,6 +102,7 @@ export default function RootLayout({
           <Header />
           <main id="main">{children}</main>
           <Footer />
+          <ChatBot />
         </ThemeProvider>
       </body>
     </html>
