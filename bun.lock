@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "portfolio",
+      "name": "Marcus Ramalho Portfolio",
       "dependencies": {
         "clsx": "^2.1.1",
         "lucide-react": "^0.575.0",

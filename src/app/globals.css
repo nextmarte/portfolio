@@ -221,6 +221,17 @@ html {
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
+/* ═══ Header Mini Character Jump Animation ═══ */
+@keyframes headerBounce {
+  0%, 100% { transform: translateY(0) scaleY(1) scaleX(1); }
+  10% { transform: translateY(0) scaleY(0.85) scaleX(1.1); }
+  30% { transform: translateY(-8px) scaleY(1.1) scaleX(0.95); }
+  50% { transform: translateY(-10px) scaleY(1.05) scaleX(1); }
+  70% { transform: translateY(-4px) scaleY(1.02) scaleX(1); }
+  85% { transform: translateY(0) scaleY(0.92) scaleX(1.06); }
+  95% { transform: translateY(0) scaleY(1.02) scaleX(0.99); }
+}
+
 /* ═══ Pixel Character Walking Animations ═══ */
 
 /* Body bounce — subtle squash/stretch for weight feel */

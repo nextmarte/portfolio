@@ -7,45 +7,59 @@ import { SectionTitle } from "./SectionTitle";
 
 const projects = [
   {
-    title: "Treinamento",
-    description: "Plataforma de treinamento moderna construída com Next.js e JavaScript. Hospedada em Vercel para máxima escalabilidade.",
-    tags: ["Next.js", "JavaScript", "Tailwind CSS"],
-    github: "https://github.com/nextmarte/Treinamento",
-    demo: "https://treinamento-theta.vercel.app",
+    title: "TalkingHead AI",
+    description:
+      "Sistema de agentes conversacionais com interface estilo Skype. Integra STT (Whisper), RAG (ChromaDB), LLM (GPT-4) e TTS (XTTS/ElevenLabs) com streaming via WebSocket. Suporte a múltiplos agentes com base de conhecimento própria, painel admin e autenticação.",
+    tags: ["Next.js", "FastAPI", "Whisper", "RAG", "Docker", "CUDA"],
+    github: "https://github.com/nextmarte/talkinghead",
+    demo: null,
   },
   {
-    title: "Introdução a Git & GitHub",
-    description: "Repositório educacional do curso de introdução a Git e GitHub na Formação de Executivos em Ciência de Dados da UFF.",
-    tags: ["Git", "GitHub", "Educação", "JavaScript"],
-    github: "https://github.com/nextmarte/introgit-uff",
-    demo: "https://nextmarte.github.io/introgit-uff/",
+    title: "☃️ Snowman AI",
+    description:
+      "Agente autônomo de revisão de literatura científica vencedor do Gradio MCP Hackathon. Extrai referências de PDFs, busca em 6 bases acadêmicas (CrossRef, Semantic Scholar, OpenAlex), avalia papers com IA e expõe MCP Server para Claude Desktop e Cursor.",
+    tags: ["LangGraph", "Gradio", "GPT-4o", "MCP Server", "Python", "🏆 Hackathon Winner"],
+    github: "https://github.com/nextmarte/snowball",
+    demo: "https://www.gradio.app/mcp-birthday-winners",
   },
   {
     title: "Daredevil",
-    description: "Projeto de análise e experimentação em Python com foco em processamento de dados e machine learning.",
-    tags: ["Python", "Data Science", "Machine Learning"],
+    description:
+      "API de transcrição de áudio e vídeo otimizada para PT-BR. Usa Django Ninja + Whisper com aceleração GPU NVIDIA CUDA, processamento assíncrono via Celery + Redis, cache inteligente e suporte a 23 formatos de mídia em processamento batch.",
+    tags: ["Python", "Django Ninja", "Whisper", "CUDA", "Celery", "Docker"],
     github: "https://github.com/nextmarte/daredevil",
     demo: null,
   },
   {
-    title: "Fofoca Remunerada",
-    description: "Aplicação TypeScript desenvolvida com propósitos de pesquisa e inovação em comunicação digital.",
-    tags: ["TypeScript", "Node.js", "Firebase"],
-    github: "https://github.com/nextmarte/fofoca_remunerada",
-    demo: null,
-  },
-  {
     title: "Devel",
-    description: "Plataforma de desenvolvimento especializada em TypeScript. Projeto ativo com múltiplas features em desenvolvimento.",
-    tags: ["TypeScript", "Next.js", "React"],
+    description:
+      "Plataforma full-stack de transcrição assíncrona com isolamento multi-usuário. Frontend Next.js para a API Daredevil, com modos sync/async, polling em tempo real, correção de texto e identificação de speakers via Genkit AI.",
+    tags: ["TypeScript", "Next.js", "Prisma", "Genkit AI", "React"],
     github: "https://github.com/nextmarte/Devel",
     demo: null,
   },
   {
-    title: "Raspador Colaborativo",
-    description: "Ferramenta Python para web scraping e coleta de dados com foco em pesquisa colaborativa.",
-    tags: ["Python", "Web Scraping", "Data Collection"],
+    title: "Raspa Colab",
+    description:
+      "Web scraper automatizado para a plataforma Colab.re de reclamações cidadãs. Autenticação automática, navegação por scroll infinito, filtragem por data e exportação em JSON. Construído com Playwright e BeautifulSoup.",
+    tags: ["Python", "Playwright", "BeautifulSoup", "Web Scraping"],
     github: "https://github.com/nextmarte/raspa_colab",
+    demo: null,
+  },
+  {
+    title: "PROSPECTA",
+    description:
+      "Sistema de gestão de oportunidades de vendas com autenticação OAuth 2.0 (Google/GitHub), controle de acesso baseado em roles (RBAC), pipeline de vendas com etapas e atividades, painel admin completo e auditoria de ações.",
+    tags: ["Django", "PostgreSQL", "HTMX", "Tailwind CSS", "OAuth 2.0"],
+    github: "https://github.com/nextmarte/Outlook",
+    demo: null,
+  },
+  {
+    title: "LAGUNA",
+    description:
+      "Sistema de gerenciamento de amostras de qualidade da água para o projeto Lagoa Viva (CID-UFF). Dashboard com calendário, previsão do tempo, checklist de campanhas de coleta, cálculo de IQA, mapas GIS com Folium e geração de etiquetas.",
+    tags: ["Django", "PostgreSQL", "Plotly", "Folium", "Bootstrap"],
+    github: "https://github.com/CIDUFF/LAGUNA",
     demo: null,
   },
 ];
