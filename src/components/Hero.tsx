@@ -3,6 +3,7 @@
 import { ArrowDown, Download, Github, Linkedin, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import HeroBackground from "./HeroBackground";
 
 const socialLinks = [
   {
@@ -45,14 +46,17 @@ export function Hero() {
       id="hero"
       className="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden"
     >
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+      {/* Pixel-art animated background */}
+      <HeroBackground />
 
-      <div className="container mx-auto px-4 text-center relative z-10">
+      {/* Readability overlay — covers the text area, fades to transparent near the bottom */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-transparent dark:from-slate-900/80 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5]" />
+
+      <div className="container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56">
         <div className="animate-fade-in-up mb-6">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 drop-shadow-sm">
             Olá, eu sou{" "}
-            <span className="text-primary inline-block min-w-[300px] md:min-w-[450px] lg:min-w-[550px] text-left">
+            <span className="text-primary">
               {displayedText}
               <span className="animate-blink-cursor">|</span>
             </span>
@@ -60,10 +64,10 @@ export function Hero() {
         </div>
 
         <p
-          className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-2xl mx-auto animate-slide-in-left"
+          className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-2xl mx-auto animate-slide-in-left drop-shadow-sm"
           style={{ animationDelay: "0.2s" }}
         >
-          AI Researcher • Ph.D. Student @ COPPEAD/UFRJ • Data Scientist @ CID-UFF
+          AI Researcher/Developer • Ph.D. Student @ COPPEAD/UFRJ • Data Scientist @ CID-UFF
         </p>
 
         {/* Social Links */}
@@ -77,7 +81,7 @@ export function Hero() {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2.5 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-300 hover:scale-110"
+              className="p-2.5 rounded-full border border-border bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-300 hover:scale-110"
               title={link.label}
             >
               <link.icon className="w-5 h-5" />
@@ -93,18 +97,18 @@ export function Hero() {
             href="#projects"
             className={cn(
               "px-6 py-3 rounded-lg font-medium transition-all duration-300",
-              "bg-primary text-primary-foreground",
+              "bg-primary text-primary-foreground shadow-md",
               "hover:bg-primary/90 hover:shadow-lg hover:scale-105"
             )}
           >
             Ver Projetos
           </a>
           <a
-            href="/cv-marcus-ramalho.pdf"
+            href="/CV.pdf"
             download
             className={cn(
               "px-6 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center gap-2",
-              "border border-border text-foreground",
+              "border border-border bg-card/80 backdrop-blur-sm text-foreground",
               "hover:bg-secondary hover:shadow-lg hover:scale-105"
             )}
           >
@@ -115,7 +119,7 @@ export function Hero() {
             href="#contact"
             className={cn(
               "px-6 py-3 rounded-lg font-medium transition-all duration-300",
-              "border border-border text-foreground",
+              "border border-border bg-card/80 backdrop-blur-sm text-foreground",
               "hover:bg-secondary hover:shadow-lg hover:scale-105"
             )}
           >
@@ -125,7 +129,7 @@ export function Hero() {
 
         <a
           href="#about"
-          className="inline-flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors animate-float"
+          className="inline-flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors animate-float drop-shadow-sm"
         >
           <span className="text-sm mb-2">Saiba mais</span>
           <ArrowDown className="w-5 h-5 animate-bounce" />

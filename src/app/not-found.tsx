@@ -61,7 +61,7 @@ export default function NotFound() {
               outfit="casual"
               isWalking={true}
               hasMask={false}
-              scale={6}
+              scale={7.2}
             />
           </div>
         </div>

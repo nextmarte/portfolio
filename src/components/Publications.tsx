@@ -33,7 +33,7 @@ const publications: Publication[] = [
   },
   {
     title: "Arquitetura Lakehouse com RAG para Gestão do Conhecimento",
-    description: "Trabalho completo publicado nos anais de congresso em Aracaju. Abordagem integrada para análise de dados em empresas públicas.",
+    description: "Trabalho completo publicado nos anais da Enanpad em Aracaju. Abordagem integrada para análise de dados em empresas públicas.",
     year: "2025",
     type: "conference",
   },

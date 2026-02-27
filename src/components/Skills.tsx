@@ -29,7 +29,7 @@ import {
   SiGoogle,
   SiAnthropic,
 } from "react-icons/si";
-import { Zap, Sliders, Sparkles } from "lucide-react";
+import { Zap, Sliders, Sparkles, BrainCircuit, Workflow } from "lucide-react";
 
 interface Skill {
   name: string;
@@ -77,6 +77,7 @@ const categories: SkillCategory[] = [
       { name: "Ollama", icon: SiOllama, color: "#FB542B" },
       { name: "Claude", icon: SiAnthropic, color: "#9333EA" },
       { name: "Google Gen AI SDK", icon: Sparkles, color: "#8B5CF6" },
+      { name: "RAG", icon: BrainCircuit, color: "#10B981" },
     ],
   },
   {
@@ -86,6 +87,7 @@ const categories: SkillCategory[] = [
       { name: "GitHub", icon: SiGithub, color: "#181717" },
       { name: "GitHub Copilot", icon: SiGithub, color: "#010409" },
       { name: "MCP", icon: Zap, color: "#00A0DF" },
+      { name: "n8n", icon: Workflow, color: "#EA4B71" },
     ],
   },
 ];

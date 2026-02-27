@@ -222,53 +222,94 @@ html {
 }
 
 /* ═══ Pixel Character Walking Animations ═══ */
+
+/* Body bounce — subtle squash/stretch for weight feel */
 @keyframes pixelBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-1px); }
+  0% { transform: translateY(0) scaleY(1); }
+  15% { transform: translateY(-1.5px) scaleY(1.02); }
+  30% { transform: translateY(-2px) scaleY(1.03); }
+  50% { transform: translateY(-1px) scaleY(1.01); }
+  65% { transform: translateY(0.5px) scaleY(0.98); }
+  80% { transform: translateY(0) scaleY(1); }
+  100% { transform: translateY(0) scaleY(1); }
 }
 
+/* Arms swing with natural follow-through */
 @keyframes pixelLeftArm {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(20deg); }
-  75% { transform: rotate(-20deg); }
+  0% { transform: rotate(0deg) translateY(0); }
+  15% { transform: rotate(12deg) translateY(-0.3px); }
+  30% { transform: rotate(22deg) translateY(-0.5px); }
+  50% { transform: rotate(8deg) translateY(0); }
+  65% { transform: rotate(-15deg) translateY(0.3px); }
+  80% { transform: rotate(-22deg) translateY(0.2px); }
+  90% { transform: rotate(-10deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
 }
 
 @keyframes pixelRightArm {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-20deg); }
-  75% { transform: rotate(20deg); }
+  0% { transform: rotate(0deg) translateY(0); }
+  15% { transform: rotate(-12deg) translateY(-0.3px); }
+  30% { transform: rotate(-22deg) translateY(-0.5px); }
+  50% { transform: rotate(-8deg) translateY(0); }
+  65% { transform: rotate(15deg) translateY(0.3px); }
+  80% { transform: rotate(22deg) translateY(0.2px); }
+  90% { transform: rotate(10deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
 }
 
+/* Legs — longer stride cycle with contact/push-off phases */
 @keyframes pixelLeftLeg {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-15deg); }
-  75% { transform: rotate(15deg); }
+  0% { transform: rotate(0deg) translateX(0); }
+  12% { transform: rotate(-10deg) translateX(-0.3px); }
+  25% { transform: rotate(-18deg) translateX(-0.5px); }
+  40% { transform: rotate(-8deg) translateX(-0.2px); }
+  55% { transform: rotate(8deg) translateX(0.2px); }
+  70% { transform: rotate(18deg) translateX(0.5px); }
+  85% { transform: rotate(10deg) translateX(0.3px); }
+  100% { transform: rotate(0deg) translateX(0); }
 }
 
 @keyframes pixelRightLeg {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(15deg); }
-  75% { transform: rotate(-15deg); }
+  0% { transform: rotate(0deg) translateX(0); }
+  12% { transform: rotate(10deg) translateX(0.3px); }
+  25% { transform: rotate(18deg) translateX(0.5px); }
+  40% { transform: rotate(8deg) translateX(0.2px); }
+  55% { transform: rotate(-8deg) translateX(-0.2px); }
+  70% { transform: rotate(-18deg) translateX(-0.5px); }
+  85% { transform: rotate(-10deg) translateX(-0.3px); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+/* Head bob — subtle tilt to follow body weight */
+@keyframes pixelHeadBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-0.5px) rotate(0.5deg); }
+  50% { transform: translateY(0.3px) rotate(0deg); }
+  75% { transform: translateY(-0.5px) rotate(-0.5deg); }
 }
 
 .pixel-walking .pixel-body-bounce {
-  animation: pixelBounce 0.35s ease-in-out infinite;
+  animation: pixelBounce 0.42s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
+.pixel-walking .pixel-head {
+  animation: pixelHeadBob 0.42s cubic-bezier(0.37, 0, 0.63, 1) infinite;
 }
 
 .pixel-walking .pixel-left-arm {
-  animation: pixelLeftArm 0.5s ease-in-out infinite;
+  animation: pixelLeftArm 0.56s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .pixel-walking .pixel-right-arm {
-  animation: pixelRightArm 0.5s ease-in-out infinite;
+  animation: pixelRightArm 0.56s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .pixel-walking .pixel-left-leg {
-  animation: pixelLeftLeg 0.5s ease-in-out infinite;
+  animation: pixelLeftLeg 0.56s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .pixel-walking .pixel-right-leg {
-  animation: pixelRightLeg 0.5s ease-in-out infinite;
+  animation: pixelRightLeg 0.56s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 /* Ensure pixel art stays crisp */

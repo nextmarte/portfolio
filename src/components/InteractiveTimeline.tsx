@@ -42,18 +42,18 @@ interface BuildingDef {
 }
 
 const BUILDINGS: BuildingDef[] = [
-  { yearPos: 2007.5, label: 'CEFET/RJ', subLabel: 'Mecânica Industrial', color: '#8B4513', colorDark: '#5D2E0A', roofColor: '#A0522D', height: 3, width: 2, windows: 2, type: 'industrial' },
-  { yearPos: 2011.5, label: 'Chemtech', subLabel: 'Projeto RENEST', color: '#2F4F4F', colorDark: '#1A2F2F', roofColor: '#4A7A7A', height: 3, width: 2, windows: 2, type: 'industrial' },
-  { yearPos: 2015, label: 'Câmara Niterói', color: '#4A6FA5', colorDark: '#2A4F85', roofColor: '#3A5F95', height: 3, width: 2, windows: 2, type: 'government' },
-  { yearPos: 2018, label: 'UFF', subLabel: 'Administração', color: '#1B3A5C', colorDark: '#0E2240', roofColor: '#2A4F7A', height: 4, width: 3, windows: 3, type: 'university' },
-  { yearPos: 2019.2, label: 'FAPERJ', color: '#2C6B4F', colorDark: '#1A4030', roofColor: '#3A8B6F', height: 2, width: 2, windows: 1, type: 'lab' },
-  { yearPos: 2020.5, label: 'CL Web Rádio', color: '#8B2252', colorDark: '#5B1232', roofColor: '#AB3272', height: 2, width: 2, windows: 1, type: 'radio' },
-  { yearPos: 2023, label: 'UFF', subLabel: 'Mestrado Finance & DS', color: '#1B3A5C', colorDark: '#0E2240', roofColor: '#2A4F7A', height: 4, width: 3, windows: 3, type: 'university' },
-  { yearPos: 2025, label: 'CID – UFF', subLabel: 'AI Engineer', color: '#1A1A2E', colorDark: '#0D0D1A', roofColor: '#2E2E4E', height: 4, width: 3, windows: 3, type: 'tech' },
-  { yearPos: 2028, label: 'COPPEAD/UFRJ', subLabel: 'Ph.D. AI Governance', color: '#800020', colorDark: '#500010', roofColor: '#A03040', height: 4, width: 3, windows: 3, type: 'academic' },
+  { yearPos: 2008, label: 'CEFET/RJ', subLabel: 'Mecânica Industrial', color: '#8B4513', colorDark: '#5D2E0A', roofColor: '#A0522D', height: 3, width: 2, windows: 2, type: 'industrial' },
+  { yearPos: 2011.5, label: 'Chemtech', subLabel: 'Siemens', color: '#2F4F4F', colorDark: '#1A2F2F', roofColor: '#4A7A7A', height: 3, width: 2, windows: 2, type: 'industrial' },
+  { yearPos: 2016.5, label: 'UFF', subLabel: 'Administração', color: '#1B3A5C', colorDark: '#0E2240', roofColor: '#2A4F7A', height: 4, width: 3, windows: 3, type: 'university' },
+  { yearPos: 2017.8, label: 'Águas do Brasil', color: '#2196F3', colorDark: '#1565C0', roofColor: '#42A5F5', height: 2, width: 2, windows: 1, type: 'government' },
+  { yearPos: 2019, label: 'FAPERJ', color: '#2C6B4F', colorDark: '#1A4030', roofColor: '#3A8B6F', height: 2, width: 2, windows: 1, type: 'lab' },
+  { yearPos: 2020, label: 'CL Web Rádio', color: '#8B2252', colorDark: '#5B1232', roofColor: '#AB3272', height: 2, width: 2, windows: 1, type: 'radio' },
+  { yearPos: 2023, label: 'UFF', subLabel: 'Mestrado', color: '#1B3A5C', colorDark: '#0E2240', roofColor: '#2A4F7A', height: 4, width: 3, windows: 3, type: 'university' },
+  { yearPos: 2025.5, label: 'CID – UFF', subLabel: 'Pesquisador', color: '#1A1A2E', colorDark: '#0D0D1A', roofColor: '#2E2E4E', height: 4, width: 3, windows: 3, type: 'tech' },
+  { yearPos: 2028, label: 'COPPEAD/UFRJ', subLabel: 'Doutorado', color: '#800020', colorDark: '#500010', roofColor: '#A03040', height: 4, width: 3, windows: 3, type: 'academic' },
 ];
 
-const TREE_POSITIONS = [2008.5, 2010, 2013, 2014, 2016.5, 2017, 2019.7, 2021.5, 2022, 2024, 2026.5, 2029];
+const TREE_POSITIONS = [2009.5, 2010, 2013, 2014.5, 2015.5, 2021, 2022, 2024, 2026.5, 2029];
 
 /* ─── Helpers ─── */
 function getOutfitForYear(year: number, experiences: TimelineExperience[]): OutfitType {
@@ -230,10 +230,10 @@ const InteractiveTimeline: React.FC<InteractiveTimelineProps> = ({ experiences }
   const activeExperiences = getActiveExperiences(currentYear, experiences);
   const currentOutfit = getOutfitForYear(currentYear, experiences);
 
-  // CEFET is at yearToX(2007.5)=6.25% of the scenery div, which is 3.5× the viewport
-  // So on screen at progress=0, CEFET appears at 6.25% × 3.5 = 21.875% of viewport
+  // CEFET is at yearToX(2008)=8.33% of the scenery div, which is 3.5× the viewport
+  // So on screen at progress=0, CEFET appears at 8.33% × 3.5 = 29.17% of viewport
   const SCENERY_MULT = 3.5;
-  const CEFET_INIT_SCREEN = ((2007.5 - START_YEAR) / TOTAL_YEARS) * 100 * SCENERY_MULT; // ~21.875%
+  const CEFET_INIT_SCREEN = ((2008 - START_YEAR) / TOTAL_YEARS) * 100 * SCENERY_MULT; // ~29.17%
   const CENTER_POS = 42;
   const WALK_IN_PHASE = 0.05; // character walks from CEFET to center in first 5%
 
@@ -441,7 +441,7 @@ const InteractiveTimeline: React.FC<InteractiveTimelineProps> = ({ experiences }
             outfit={currentOutfit}
             isWalking={isPlaying}
             hasMask={hasMask}
-            scale={4}
+            scale={4.8}
           />
         </div>
 

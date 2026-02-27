@@ -7,7 +7,7 @@ import { SectionTitle } from "./SectionTitle";
 
 const certifications = [
   {
-    title: "Gradio Agents & MCP Hackathon",
+    title: "Gradio Agents & MCP Hackathon Winner",
     issuer: "Hugging Face",
     date: "2025",
   },
