@@ -50,11 +50,11 @@ export function Hero() {
       <HeroBackground />
 
       {/* Readability overlay — covers the text area, fades to transparent near the bottom */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-transparent dark:from-slate-900/80 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5]" />
+      <div className="absolute inset-0 bg-gradient-to-b dark:from-slate-900/80 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5]" />
 
       <div className="container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56">
         <div className="animate-fade-in-up mb-6">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 drop-shadow-sm">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-sm">
             Olá, eu sou{" "}
             <span className="text-primary">
               {displayedText}
