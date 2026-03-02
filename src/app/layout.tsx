@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -103,6 +104,7 @@ export default function RootLayout({
           <main id="main">{children}</main>
           <Footer />
           <ChatBot />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
