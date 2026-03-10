@@ -7,6 +7,9 @@ import ChatBot from "@/components/ChatBot";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
+// ISR: Revalidate layout every 1 hour
+export const revalidate = 3600;
+
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],

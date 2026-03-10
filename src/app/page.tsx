@@ -7,6 +7,9 @@ import { Certifications } from "@/components/Certifications";
 import { Publications } from "@/components/Publications";
 import { Contact } from "@/components/Contact";
 
+// ISR: Revalidate this page every 1 hour
+export const revalidate = 3600;
+
 export default function Home() {
   return (
     <>
