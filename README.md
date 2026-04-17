@@ -97,7 +97,18 @@ Transcrição de áudio com Whisper otimizada para PT-BR.
 
 ---
 
-## 💼 Experiência
+## 💼 Experiência Profissional
+
+**Founder** - BaXiJen (jan/2026-presente)  
+*Tempo integral | Remoto (Niterói, RJ)*  
+- Liderança e gestão de projetos de IA
+
+**Artificial Intelligence Engineer** - IVIG/COPPE/UFRJ (mar/2026-presente)  
+*Temporário | Remoto*  
+- Desenvolvimento de plataforma educacional para Portos Rio
+- Infraestrutura de IA para 1600 usuários
+- CI/CD pipeline
+- JavaScript, Processamento de Linguagem Natural (NLP)
 
 **Pesquisador & Desenvolvedor** - CID-UFF / Fundação Euclides da Cunha (2024-presente)  
 **Professor de MBA** - UFF (2023-presente)  
