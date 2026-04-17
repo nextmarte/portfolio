@@ -19,6 +19,28 @@ interface Experience {
 
 const experiences: Experience[] = [
   {
+    id: "0a",
+    type: "work",
+    title: "Founder",
+    organization: "BaXiJen",
+    period: "2026 – Presente",
+    description:
+      "Fundador e gestor de projetos de IA. Desenvolvimento de soluções personalizadas em ciência de dados e inteligência artificial para clientes diversos.",
+    outfit: "engineer",
+    tools: ["Python", "R", "IA Generativa", "NLP", "Consultoria"],
+  },
+  {
+    id: "0b",
+    type: "work",
+    title: "Artificial Intelligence Engineer",
+    organization: "IVIG/COPPE/UFRJ",
+    period: "2026 – Presente",
+    description:
+      "Desenvolvimento de plataforma educacional para Portos Rio. Infraestrutura de IA para 1600 usuários e implementação de pipeline CI/CD.",
+    outfit: "engineer",
+    tools: ["JavaScript", "NLP", "CI/CD", "Docker", "Educação"],
+  },
+  {
     id: "1",
     type: "education",
     title: "Doutorando em Administração",
