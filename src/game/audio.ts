@@ -238,6 +238,79 @@ class RetroAudio {
       // Silently fail
     }
   }
+
+  public playLevelUp() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const notes = [392.0, 523.25, 659.25, 783.99, 1046.5];
+      const durations = [0.1, 0.1, 0.1, 0.15, 0.5];
+      let t = now;
+      notes.forEach((freq, i) => {
+        const osc = this.ctx!.createOscillator();
+        const gain = this.ctx!.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + durations[i]);
+        osc.connect(gain);
+        gain.connect(this.ctx!.destination);
+        osc.start(t);
+        osc.stop(t + durations[i]);
+        t += durations[i] * 0.85;
+      });
+    } catch {
+      // Silently fail
+    }
+  }
+
+  public playMenuOpen() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(880, now + 0.05);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } catch {
+      // Silently fail
+    }
+  }
+
+  public playMenuSelect() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(660, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.06);
+    } catch {
+      // Silently fail
+    }
+  }
 }
 
 export const retroAudio = new RetroAudio();

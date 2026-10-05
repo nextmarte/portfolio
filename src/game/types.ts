@@ -45,6 +45,7 @@ export interface Obstacle {
   type: ObstacleType;
   label?: string;
   animTimer?: number;
+  dodged?: boolean;
 }
 
 export interface Platform {
@@ -154,7 +155,32 @@ export interface BuildingInterior {
     y: number;
     direction: TopDownDirection;
     dialog: string;
+    avatar?: string;
   };
+}
+
+export interface PlayerCareerStats {
+  level: number;
+  title: string;
+  currentXp: number;
+  nextLevelXp: number;
+  totalSkillsCollected: number;
+  totalOrbsCollected: number;
+  dodgeCombo: number;
+  visitedBuildings: Record<string, boolean>;
+  completedBuildings: Record<string, boolean>;
+}
+
+export interface EraBadge {
+  id: string;
+  name: string;
+  period: string;
+  institution: string;
+  icon: string;
+  color: string;
+  skillsCount: number;
+  unlocked: boolean;
+  completed: boolean;
 }
 
 export interface GameInput {

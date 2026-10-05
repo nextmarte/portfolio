@@ -433,6 +433,29 @@ export class CareerGameEngine {
   private lastTime: number = 0;
   private animId: number | null = null;
 
+  // Estatísticas & RPG Progression
+  private stats: {
+    level: number;
+    title: string;
+    currentXp: number;
+    nextLevelXp: number;
+    totalSkillsCollected: number;
+    totalOrbsCollected: number;
+    dodgeCombo: number;
+    visitedBuildings: Record<string, boolean>;
+    completedBuildings: Record<string, boolean>;
+  } = {
+    level: 1,
+    title: 'Estudante Técnico (2008)',
+    currentXp: 0,
+    nextLevelXp: 200,
+    totalSkillsCollected: 0,
+    totalOrbsCollected: 0,
+    dodgeCombo: 0,
+    visitedBuildings: {},
+    completedBuildings: {},
+  };
+
   // Callbacks para UI
   public onMilestoneNear: ((milestone: Milestone | null) => void) | null = null;
   public onOrbsUpdate: ((collected: number, total: number) => void) | null = null;
@@ -440,6 +463,9 @@ export class CareerGameEngine {
   public onViewChange: ((view: GameView, interior: BuildingInterior | null) => void) | null = null;
   public onSkillAcquired: ((skill: InteriorSkillItem, building: BuildingInterior) => void) | null = null;
   public onDialog: ((dialog: { speaker: string; role: string; text: string } | null) => void) | null = null;
+  public onStatsUpdate: ((stats: any) => void) | null = null;
+  public onLevelUp: ((level: number, title: string) => void) | null = null;
+  public onComboDodge: ((combo: number) => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, isDark: boolean) {
     this.canvas = canvas;
@@ -508,6 +534,71 @@ export class CareerGameEngine {
     this.input = { ...this.input, ...newInput };
   }
 
+  public getStats() {
+    return { ...this.stats };
+  }
+
+  public getInteriors(): Record<string, BuildingInterior> {
+    return this.interiors;
+  }
+
+  public getMilestones(): Milestone[] {
+    return MILESTONES;
+  }
+
+  public getTechOrbs(): TechOrb[] {
+    return this.techOrbs;
+  }
+
+  public getPlayerX(): number {
+    return this.player.x;
+  }
+
+  public getWorldLength(): number {
+    return this.worldLength;
+  }
+
+  public addXp(amount: number) {
+    this.stats.currentXp += amount;
+
+    const levels = [
+      { level: 1, xp: 0, title: 'Estudante Técnico (2008)' },
+      { level: 2, xp: 200, title: 'Engenheiro de Automação (2011)' },
+      { level: 3, xp: 500, title: 'Administrador & Mestre (2016)' },
+      { level: 4, xp: 900, title: 'Cientista de Dados Laguna (2024)' },
+      { level: 5, xp: 1400, title: 'Doutorando em IA COPPEAD (2025)' },
+      { level: 6, xp: 2000, title: 'AI Architect Supremo @ BaXiJen (2026)' },
+    ];
+
+    let newLevel = 1;
+    let newTitle = levels[0].title;
+    let nextXp = levels[1].xp;
+
+    for (let i = levels.length - 1; i >= 0; i--) {
+      if (this.stats.currentXp >= levels[i].xp) {
+        newLevel = levels[i].level;
+        newTitle = levels[i].title;
+        nextXp = levels[i + 1] ? levels[i + 1].xp : levels[i].xp + 1000;
+        break;
+      }
+    }
+
+    if (newLevel > this.stats.level) {
+      this.stats.level = newLevel;
+      this.stats.title = newTitle;
+      retroAudio.playLevelUp();
+      this.createSparkles(this.player.x, this.player.y - 30, 25, ['#FACC15', '#F59E0B', '#38BDF8', '#FFFFFF']);
+      if (this.onLevelUp) {
+        this.onLevelUp(newLevel, newTitle);
+      }
+    }
+
+    this.stats.nextLevelXp = nextXp;
+    if (this.onStatsUpdate) {
+      this.onStatsUpdate({ ...this.stats });
+    }
+  }
+
   /**
    * Entra no prédio com transição clássica de RPG
    */
@@ -533,6 +624,9 @@ export class CareerGameEngine {
         this.topDownPlayer.y = interior.doorY - 25;
         this.topDownPlayer.direction = 'up';
         this.topDownPlayer.outfit = this.player.outfit;
+
+        this.stats.visitedBuildings[buildingId] = true;
+        this.addXp(20);
 
         if (this.onViewChange) {
           this.onViewChange('interior', interior);
@@ -771,9 +865,26 @@ export class CareerGameEngine {
 
     this.player.x = Math.max(30, this.player.x);
 
-    // Colisão com obstáculos
-    if (this.player.invulnerableTimer <= 0) {
-      for (const obs of this.obstacles) {
+    // Colisão com obstáculos e esquivas
+    for (const obs of this.obstacles) {
+      // Esquiva bem-sucedida (pulando sobre o obstáculo)
+      if (
+        !obs.dodged &&
+        this.player.isJumping &&
+        this.player.x > obs.x + obs.width &&
+        this.player.x - (obs.x + obs.width) < 55 &&
+        this.player.y < this.groundY - 15
+      ) {
+        obs.dodged = true;
+        this.stats.dodgeCombo++;
+        this.addXp(40);
+        if (this.onComboDodge) {
+          this.onComboDodge(this.stats.dodgeCombo);
+        }
+        this.createSparkles(obs.x + (obs.width / 2), this.groundY - 20, 8, ['#FACC15', '#38BDF8']);
+      }
+
+      if (this.player.invulnerableTimer <= 0) {
         const playerFootY = this.player.y;
         const playerTopY = this.player.y - 36;
         const obsTopY = obs.y;
@@ -787,6 +898,7 @@ export class CareerGameEngine {
         ) {
           this.player.stumbleTimer = 0.35;
           this.player.invulnerableTimer = 1.2;
+          this.stats.dodgeCombo = 0; // Perde o combo ao tropeçar
           retroAudio.playHurt();
           this.createSparkles(this.player.x, this.player.y - 20, 8, ['#EF4444', '#F87171', '#FEF08A']);
           break;
@@ -831,6 +943,8 @@ export class CareerGameEngine {
         if (dist < 28) {
           orb.collected = true;
           this.collectedCount++;
+          this.stats.totalOrbsCollected++;
+          this.addXp(60);
           retroAudio.playCollect();
           this.createSparkles(orb.x, orb.y, 12, ['#38BDF8', '#FACC15', '#34D399', '#A78BFA']);
           if (this.onOrbsUpdate) {
@@ -970,7 +1084,16 @@ export class CareerGameEngine {
         if (dist < 26) {
           skill.collected = true;
           this.acquiredSkillsTotal++;
+          this.stats.totalSkillsCollected++;
+          this.addXp(180);
           retroAudio.playSkillFanfare();
+
+          // Verifica se dominou todas as skills do prédio
+          if (interior.skills.every(s => s.collected) && !this.stats.completedBuildings[interior.buildingId]) {
+            this.stats.completedBuildings[interior.buildingId] = true;
+            this.addXp(300);
+            retroAudio.playVictory();
+          }
 
           // Cria partículas de celebração ao redor da skill
           const originX = Math.floor((this.width - interior.roomWidth) / 2);
