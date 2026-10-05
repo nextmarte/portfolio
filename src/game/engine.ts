@@ -1585,20 +1585,33 @@ export class CareerGameEngine {
 
     const assets = assetManager.getAssets();
 
-    // Backdrop Panorâmico com Paralaxe Realista (Rio de Janeiro / Niterói em 16-bit Pixel Art)
+    // Backdrop Panorâmico Pan-Cinemático (Rio de Janeiro / Niterói em 16-bit Pixel Art)
+    // Cobre 100% da tela em monitores grandes sem emendas, cortes ou repetições duplicadas.
     const bgImg = assets.backgrounds.rioSkyline;
     if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
-      const bgAspect = bgImg.naturalWidth / bgImg.naturalHeight;
-      const targetBgH = this.groundY;
-      const targetBgW = targetBgH * bgAspect;
-      const parallaxFactor = 0.12;
-      const offset = (this.cameraX * parallaxFactor) % targetBgW;
+      const imgW = bgImg.naturalWidth;
+      const imgH = bgImg.naturalHeight;
+
+      // Margem de paralaxe horizontal que se adapta ao tamanho da tela (ao menos 35% de largura extra)
+      const parallaxMargin = Math.max(W * 0.35, 450);
+      const scale = Math.max((W + parallaxMargin) / imgW, this.groundY / imgH);
+      const dw = imgW * scale;
+      const dh = imgH * scale;
+
+      // Progresso da jornada ao longo da carreira (0 = 2008 CEFET, 1 = 2026 BaXiJen)
+      const maxCamX = Math.max(1, this.worldLength - W);
+      const progress = Math.min(1, Math.max(0, this.cameraX / maxCamX));
+
+      // Deslocamento horizontal: o panorama desliza suavemente em paralaxe cinematográfica única
+      const dx = -progress * (dw - W);
+
+      // Alinhamento vertical que equilibra o céu estrelado no topo e a baía/reflexos tocando o chão
+      const excessH = dh - this.groundY;
+      const dy = -excessH * 0.52;
 
       ctx.save();
-      ctx.globalAlpha = isDark ? 0.78 : 0.95;
-      for (let x = -offset - targetBgW; x < W + targetBgW; x += targetBgW) {
-        ctx.drawImage(bgImg, Math.floor(x), 0, Math.ceil(targetBgW), Math.ceil(targetBgH));
-      }
+      ctx.globalAlpha = isDark ? 0.82 : 0.95;
+      ctx.drawImage(bgImg, Math.floor(dx), Math.floor(dy), Math.ceil(dw), Math.ceil(dh));
       ctx.restore();
     } else {
       // Estrelas / Lua ou Sol (fallback)
