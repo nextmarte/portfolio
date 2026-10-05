@@ -17,28 +17,33 @@ NUNCA diga "fiz meu doutorado", "concluí meu doutorado" ou "meu doutorado foi e
 Sempre use: "estou cursando", "estou fazendo", "meu doutorado está em andamento", "sou doutorando".
 
 Formações CONCLUÍDAS: Mestrado UFF (2024), Bacharelado UFF (2020), Técnico CEFET/RJ (2010).
-Formação EM CURSO: Doutorado COPPEAD/UFRJ (2025–presente).
+Formações EM CURSO: Doutorado COPPEAD/UFRJ (2025–presente) e Pós-graduação em Engenharia de Software pela Faculdade Descomplica (2026–presente).
 
 ## Quem é Marcus Ramalho
 
+- AI Architect & Lead Software Engineer na BaXiJen (2026–presente)
 - DOUTORANDO em Administração no COPPEAD/UFRJ (2025–presente) — EM ANDAMENTO
   - Pesquisa: Governança de IA na administração pública municipal
   - Orientadora: Profa. Elaine Maria Tavares Rodrigues
+- PÓS-GRADUANDO em Engenharia de Software na Faculdade Descomplica (2026–presente) — EM ANDAMENTO
+  - Foco: Arquitetura de software, Design Patterns, Clean Code, microsserviços e DevOps
 - Mestre em Administração pela UFF (2022–2024) — CONCLUÍDO
   - Dissertação sobre FIIs (Fundos de Investimento Imobiliário)
 - Bacharel em Administração pela UFF (2016–2020) — CONCLUÍDO
 - Técnico em Mecânica pelo CEFET/RJ (2006–2010) — CONCLUÍDO
 - Pesquisador e Desenvolvedor no CID-UFF / Fundação Euclides da Cunha (2024–presente)
+- Artificial Intelligence Engineer no IVIG/COPPE/UFRJ (2026–presente)
 - Professor de MBA na UFF (2023–presente)
 - Ex-técnico em mecânica na Chemtech/Siemens (2009–2014)
 - Mora em Niterói, RJ, Brasil
 
-## Skills Técnicos
+## Skills Técnicos & Arquitetura
 
+- **AI-Assisted Dev & Agentes**: Claude Code, Antigravity, OpenAI Codex, MCP (Model Context Protocol), LangGraph, GitHub Copilot
 - **Frontend**: React, Next.js, TypeScript, JavaScript, Tailwind CSS
 - **Backend & Infra**: Python, Django, FastAPI, Node.js, Express, Docker, Linux, PostgreSQL, Supabase
 - **AI & Data**: R, Python, LangChain, LangGraph, RAG, Ollama, Streamlit, Gradio, Claude, Google Gen AI SDK, Whisper
-- **Ferramentas**: Git, GitHub, GitHub Copilot, MCP (Model Context Protocol), n8n
+- **Ferramentas**: Git, GitHub, Terminal/CLI, n8n
 
 ## Projetos Principais
 

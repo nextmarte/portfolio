@@ -21,13 +21,39 @@ const experiences: Experience[] = [
   {
     id: "0a",
     type: "work",
-    title: "Founder",
+    title: "AI Architect & Lead Software Engineer",
     organization: "BaXiJen",
     period: "2026 – Presente",
     description:
-      "Fundador e gestor de projetos de IA. Desenvolvimento de soluções personalizadas em ciência de dados e inteligência artificial para clientes diversos.",
+      "Liderança técnica na arquitetura de sistemas com inteligência artificial e engenharia de software full-stack. Concepção de soluções agênticas, pipelines de dados, integrações via MCP e desenvolvimento acelerado por IA.",
     outfit: "engineer",
-    tools: ["Python", "R", "IA Generativa", "NLP", "Consultoria"],
+    tools: [
+      "Arquitetura de Software",
+      "IA Agêntica",
+      "Claude Code",
+      "Antigravity",
+      "Codex",
+      "MCP",
+      "Python",
+      "Next.js",
+    ],
+  },
+  {
+    id: "0c",
+    type: "education",
+    title: "Pós-graduação em Engenharia de Software",
+    organization: "Faculdade Descomplica",
+    period: "2026 – Presente",
+    description:
+      "Especialização com foco em arquitetura de software moderna, padrões de projeto (Design Patterns), Clean Code, microsserviços, modelagem de sistemas e práticas ágeis/DevOps.",
+    outfit: "university",
+    tools: [
+      "Arquitetura de Software",
+      "Design Patterns",
+      "Clean Code",
+      "Microsserviços",
+      "DevOps",
+    ],
   },
   {
     id: "0b",

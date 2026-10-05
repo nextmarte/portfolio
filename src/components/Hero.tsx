@@ -73,10 +73,17 @@ export function Hero() {
         </div>
 
         <p
-          className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-2xl mx-auto animate-slide-in-left drop-shadow-sm"
+          className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-3xl mx-auto animate-slide-in-left drop-shadow-sm font-medium"
           style={{ animationDelay: "0.2s" }}
         >
-          Pesquisador e Desenvolvedor em IA • Doutorando no COPPEAD/UFRJ • Cientista de Dados no CID-UFF
+          AI Architect &amp; Software Engineer @ BaXiJen • Pesquisador em IA @ COPPEAD/UFRJ • Data Scientist @ CID-UFF
+        </p>
+
+        <p
+          className="text-sm md:text-base text-muted-foreground/90 mb-8 max-w-2xl mx-auto animate-fade-in-up"
+          style={{ animationDelay: "0.25s" }}
+        >
+          Arquitetura de sistemas inteligentes, orquestração de agentes e engenharia de software assistida por IA (Claude Code, Antigravity, Codex e MCP).
         </p>
 
         {/* Social Links */}

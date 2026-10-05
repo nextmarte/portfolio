@@ -29,7 +29,7 @@ import {
   SiGoogle,
   SiAnthropic,
 } from "react-icons/si";
-import { Zap, Sliders, Sparkles, BrainCircuit, Workflow } from "lucide-react";
+import { Zap, Sliders, Sparkles, BrainCircuit, Workflow, Bot, Terminal } from "lucide-react";
 
 interface Skill {
   name: string;
@@ -43,6 +43,17 @@ interface SkillCategory {
 }
 
 const categories: SkillCategory[] = [
+  {
+    label: "AI-Assisted Dev & Agentes",
+    skills: [
+      { name: "Claude Code", icon: SiAnthropic, color: "#D97706" },
+      { name: "Antigravity", icon: Sparkles, color: "#3B82F6" },
+      { name: "OpenAI Codex", icon: SiOpenai, color: "#10A37F" },
+      { name: "MCP (Model Context)", icon: Zap, color: "#00A0DF" },
+      { name: "LangGraph", icon: Workflow, color: "#2563EB" },
+      { name: "GitHub Copilot", icon: SiGithub, color: "#059669" },
+    ],
+  },
   {
     label: "Frontend",
     skills: [
@@ -81,12 +92,11 @@ const categories: SkillCategory[] = [
     ],
   },
   {
-    label: "Ferramentas",
+    label: "Ferramentas & Fluxos",
     skills: [
       { name: "Git", icon: SiGit, color: "#F05032" },
       { name: "GitHub", icon: SiGithub, color: "#181717" },
-      { name: "GitHub Copilot", icon: SiGithub, color: "#010409" },
-      { name: "MCP", icon: Zap, color: "#00A0DF" },
+      { name: "Terminal / CLI", icon: Terminal, color: "#4B5563" },
       { name: "n8n", icon: Workflow, color: "#EA4B71" },
     ],
   },

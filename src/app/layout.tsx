@@ -24,9 +24,9 @@ const outfit = Outfit({
 
 const SITE_URL = "https://marcusramalho.com.br";
 const PHOTO_URL = "https://www.baxijen.com.br/marcus.jpg";
-const TITLE = "Marcus Ramalho | Pesquisador em IA e Cientista de Dados";
+const TITLE = "Marcus Ramalho | AI Architect & Software Engineer";
 const DESCRIPTION =
-  "Pesquisador em IA, doutorando no COPPEAD/UFRJ, cientista de dados no CID-UFF e professor de MBA na UFF. Projetos em Inteligência Artificial, Ciência de Dados e Desenvolvimento Web.";
+  "AI Architect & Software Engineer na BaXiJen, pesquisador em IA e doutorando no COPPEAD/UFRJ, cientista de dados no CID-UFF. Especialista em desenvolvimento assistido por IA (Claude Code, Antigravity, Codex e MCP).";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: PHOTO_URL,
-        alt: "Marcus Ramalho, pesquisador em IA e cientista de dados",
+        alt: "Marcus Ramalho, AI Architect & Software Engineer",
       },
     ],
     locale: "pt_BR",
@@ -65,7 +65,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Marcus Ramalho",
-  jobTitle: "Pesquisador em IA e Cientista de Dados",
+  jobTitle: "AI Architect & Software Engineer",
   image: PHOTO_URL,
   email: "mailto:nextmarted@gmail.com",
   address: {

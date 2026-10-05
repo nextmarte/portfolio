@@ -30,22 +30,20 @@ export function About() {
             isVisible && "visible"
           )}>
             <p className="text-muted-foreground leading-relaxed text-justify">
-              Doutorando em Administração pelo COPPEAD/UFRJ, com mestrado e graduação em
-              Administração pela Universidade Federal Fluminense (UFF). Atuo como pesquisador
-              e desenvolvedor de sistemas no Centro de Inteligência de Dados da UFF (CID-UFF),
-              participando de projetos em parceria com instituições públicas, com foco em
-              engenharia de dados, aplicações analíticas e soluções baseadas em inteligência artificial.
+              Atuo como <strong>AI Architect &amp; Software Engineer</strong> na <strong>BaXiJen</strong>,
+              liderando a arquitetura de soluções inteligentes e sistemas agênticos, além de atuar como pesquisador
+              e desenvolvedor no Centro de Inteligência de Dados da UFF (CID-UFF) em projetos públicos analíticos e de IA.
+              Sou doutorando em Administração pelo COPPEAD/UFRJ e pós-graduando em Engenharia de Software.
             </p>
             <p className="text-muted-foreground leading-relaxed text-justify">
-              Possuo experiência em ciência de dados com R e Python, programação funcional,
-              construção de pipelines de dados (ETL/Lakehouse), desenvolvimento de sistemas e dashboards
-              com NextJs, React, Django, Streamlit, Gradio e Shiny, visualização de dados e automação de processos organizacionais.
+              Especialista em <strong>desenvolvimento assistido por IA</strong> de alta performance (Claude Code, Antigravity, OpenAI Codex e MCP),
+              construo produtos unindo rigor arquitetural, clean code e automação agêntica. Possuo sólida bagagem em Python, R, TypeScript,
+              Next.js, Django, FastAPI e pipelines de dados (ETL/Lakehouse).
             </p>
             <p className="text-muted-foreground leading-relaxed text-justify">
-              Sou autor e tradutor de materiais sobre ciência de dados, coorganizador do Seminário
-              Internacional de Estatística com R e fui docente em cursos de pós-graduação e educação
-              executiva na UFF em Ciência de Dados. Meus interesses de pesquisa concentram-se em Governança de IA na administração pública,
-              cultura de dados no setor público e sistemas inteligentes aplicados a problemas organizacionais.
+              Autor e tradutor de obras sobre ciência de dados e IA, coorganizador do Seminário Internacional de Estatística com R e docente em
+              pós-graduações da UFF. Meus focos convergem em <strong>Arquitetura de Sistemas Inteligentes</strong>, Governança de IA no setor público
+              e engenharia de software contemporânea acelerada por agentes.
             </p>
 
             {/* Stats */}

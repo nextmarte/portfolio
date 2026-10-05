@@ -18,6 +18,10 @@ Orientadora: Profa. Elaine Maria Tavares Rodrigues.
 - Orientadora: Elaine Maria Tavares Rodrigues
 - Palavras-chave: IA, governança, setor público, NLP, administração pública
 
+### Pós-graduação em Engenharia de Software — Faculdade Descomplica (2026 – PRESENTE / EM ANDAMENTO)
+- Status: EM CURSO / IN PROGRESS
+- Foco: Arquitetura de software moderna, Design Patterns, Clean Code, microsserviços, modelagem de sistemas e DevOps
+
 ### Mestrado em Administração — Universidade Federal Fluminense / UFF (2022 – 2024)
 - Status: CONCLUÍDO
 - Dissertação: "Fundos de Investimento Imobiliário — análise dos principais indicadores de performance"
@@ -35,6 +39,17 @@ Orientadora: Profa. Elaine Maria Tavares Rodrigues.
 - Destaque Acadêmico pela PUC-Rio (2010)
 
 ## Experiência Profissional Atual
+
+### AI Architect & Lead Software Engineer — BaXiJen (2026 – PRESENTE)
+- Liderança técnica na arquitetura de sistemas inteligentes e engenharia de software full-stack
+- Concepção de soluções agênticas, pipelines analíticos e integrações via MCP (Model Context Protocol)
+- Desenvolvimento acelerado e assistido por IA (Claude Code, Antigravity, Codex)
+- Stack: Python, Next.js, TypeScript, Docker, IA Agêntica
+
+### Artificial Intelligence Engineer — IVIG/COPPE/UFRJ (2026 – PRESENTE)
+- Desenvolvimento de plataforma educacional para Portos Rio
+- Infraestrutura de IA para 1600 usuários e implementação de pipeline CI/CD
+- Stack: JavaScript, NLP, CI/CD, Docker, Educação
 
 ### Pesquisador & Desenvolvedor — CID-UFF / Fundação Euclides da Cunha (2024 – PRESENTE)
 - Pesquisa aplicada no projeto Lagoa Viva
