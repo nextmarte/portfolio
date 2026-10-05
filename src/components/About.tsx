@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const stats = [
   { icon: Calendar, value: "8+", label: "Anos em Data & IA" },
-  { icon: BookOpen, value: "4", label: "Livros Publicados" },
+  { icon: BookOpen, value: "4+", label: "Livros & Capítulos" },
   { icon: GraduationCap, value: "3", label: "Orientações de MBA" },
   { icon: Wrench, value: "25+", label: "Tecnologias" },
 ];

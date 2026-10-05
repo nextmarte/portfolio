@@ -7,55 +7,79 @@ import { SectionTitle } from "./SectionTitle";
 
 interface Publication {
   title: string;
+  subtitle?: string;
   description: string;
   year: string;
-  type: "book" | "article" | "conference" | "translation";
+  type: "book" | "chapter" | "article" | "conference" | "translation";
   /** Optional link (DOI, publisher page, etc.). When set, the title becomes clickable. */
   url?: string;
 }
 
 const publications: Publication[] = [
   {
+    title: "O Quarto como ferramenta de PKM para pesquisa científica",
+    subtitle: "Capítulo 3 (p. 61–84) em 'Aplicações em R: encurtando distâncias nas ciências'",
+    description:
+      "Capítulo sobre gestão do conhecimento pessoal (PKM) e reprodutibilidade científica utilizando Quarto e R. Publicado pela Universidade de São Paulo (USP).",
+    year: "2024",
+    type: "chapter",
+    url: "https://doi.org/10.11606/9786587023397",
+  },
+  {
+    title: "Análise e Otimização de uma Carteira de Ações com R",
+    subtitle: "Capítulo 1 (p. 22–45) em 'A inteligência artificial nas ciências de dados'",
+    description:
+      "Capítulo sobre modelagem quantitativa, análise de risco-retorno e otimização de carteiras de ativos financeiros com R. Publicado pela Universidade de São Paulo (USP).",
+    year: "2024",
+    type: "chapter",
+    url: "https://doi.org/10.11606/9786587023465",
+  },
+  {
+    title: "Editando os gráficos do pacote Likert",
+    subtitle: "Capítulo 11 (p. 265–288) em 'Aplicações em R: encurtando distâncias nas ciências'",
+    description:
+      "Capítulo técnico demonstrando customizações avançadas e visualização de dados de pesquisas de opinião/satisfação com o pacote Likert em R. Publicado pela USP.",
+    year: "2024",
+    type: "chapter",
+    url: "https://doi.org/10.11606/9786587023397",
+  },
+  {
     title: "Análise empírica sobre fundos imobiliários no Brasil",
-    description: "Livro publicado pela Editora Atena. Pesquisa abrangente sobre o mercado de FIIs brasileiro.",
+    description:
+      "Livro publicado pela Editora Atena. Pesquisa abrangente sobre modelagem e comportamento do mercado de Fundos de Investimento Imobiliário (FIIs) brasileiro.",
     year: "2025",
-    type: "book",
-  },
-  {
-    title: "Aplicações em R: encurtando distâncias nas ciências",
-    description: "Livro publicado pela USP (288p). Material voltado à disseminação da ciência de dados com R.",
-    year: "2024",
-    type: "book",
-  },
-  {
-    title: "A inteligência artificial nas ciências de dados",
-    description: "Livro publicado pela USP (192p). Exploração de aplicações práticas de IA em R para pesquisa científica.",
-    year: "2024",
     type: "book",
   },
   {
     title: "Arquitetura Lakehouse com RAG para Gestão do Conhecimento",
-    description: "Trabalho completo publicado nos anais da Enanpad em Aracaju. Abordagem integrada para análise de dados em empresas públicas.",
+    subtitle: "Showcase de Produtos Técnico-Tecnológicos (PTT 260) — EnANPAD 2025",
+    description:
+      "Trabalho publicado nos anais do XLIX Encontro da ANPAD (Aracaju). Abordagem integrada unindo Lakehouse e RAG para inteligência de dados no setor público.",
     year: "2025",
     type: "conference",
+    url: "https://anpad.org.br",
   },
   {
     title: "Potencial e Desafios da ABP e IA no Ensino de Programação",
-    description: "Artigo completo publicado em periódico (DOI: 10.5281/zenodo.12709058). Pesquisa sobre aprendizagem baseada em problemas com IA.",
+    description:
+      "Artigo completo publicado em periódico científico (DOI: 10.5281/zenodo.12709058). Pesquisa empírica sobre aprendizagem baseada em problemas com auxílio de IA.",
     year: "2024",
     type: "article",
     url: "https://doi.org/10.5281/zenodo.12709058",
   },
   {
-    title: "R para Ciência de Dados",
-    description: "Tradução para português do livro referência da comunidade R.",
+    title: "R para Ciência de Dados (2ª Edição)",
+    description:
+      "Tradução oficial e comunitária para a língua portuguesa do clássico 'R for Data Science' de Hadley Wickham, Mine Çetinkaya-Rundel e Garrett Grolemund.",
     year: "2023",
     type: "translation",
+    url: "https://pt.r4ds.hadley.nz/",
   },
 ];
 
 const typeConfig = {
   book: { icon: BookOpen, label: "Livro", color: "text-blue-600 dark:text-blue-400" },
+  chapter: { icon: BookOpen, label: "Capítulo", color: "text-cyan-600 dark:text-cyan-400" },
   article: { icon: FileText, label: "Artigo", color: "text-green-600 dark:text-green-400" },
   conference: { icon: Presentation, label: "Congresso", color: "text-purple-600 dark:text-purple-400" },
   translation: { icon: Languages, label: "Tradução", color: "text-amber-600 dark:text-amber-400" },
@@ -112,6 +136,11 @@ export function Publications() {
                           pub.title
                         )}
                       </h3>
+                      {pub.subtitle && (
+                        <p className="text-xs font-medium text-primary/90 mb-2">
+                          {pub.subtitle}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {pub.description}
                       </p>

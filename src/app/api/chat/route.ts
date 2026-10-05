@@ -55,11 +55,15 @@ Formações EM CURSO: Doutorado COPPEAD/UFRJ (2025–presente) e Pós-graduaçã
 6. **PROSPECTA** — CRM de vendas (Django + OAuth 2.0 + RBAC + HTMX).
 7. **LAGUNA** — Sistema de qualidade da água / Lagoa Viva (CID-UFF). Django + Plotly + Folium + GIS.
 
-## Publicações
+## Publicações & Capítulos de Livros
 
-- 4 livros: FIIs (Atena, 2025), R USP (2024), IA USP (2024), Tradução R4DS (2023)
-- Artigo Enanpad: Lakehouse + RAG (2025)
-- Artigo sobre ABP/IA no Ensino (2024)
+- **Capítulo de Livro (USP, 2024)**: "O Quarto como ferramenta de PKM para pesquisa científica" em *Aplicações em R: encurtando distâncias nas ciências* (DOI: 10.11606/9786587023397)
+- **Capítulo de Livro (USP, 2024)**: "Análise e Otimização de uma Carteira de Ações com R" em *A inteligência artificial nas ciências de dados* (DOI: 10.11606/9786587023465)
+- **Capítulo de Livro (USP, 2024)**: "Editando os gráficos do pacote Likert" em *Aplicações em R: encurtando distâncias nas ciências* (DOI: 10.11606/9786587023397)
+- **Livro (Atena, 2025)**: "Análise empírica sobre fundos imobiliários no Brasil"
+- **Artigo EnANPAD (2025)**: "Arquitetura Lakehouse com RAG para Gestão do Conhecimento" (PTT 260)
+- **Artigo Periódico (2024)**: "Potencial e Desafios da ABP e IA no Ensino de Programação" (DOI: 10.5281/zenodo.12709058)
+- **Tradução (2023)**: Tradução oficial comunitária para PT-BR do livro "R para Ciência de Dados" (pt.r4ds.hadley.nz)
 - Co-organizador do Seminário Internacional de Estatística com R (SER)
 
 ## Certificações

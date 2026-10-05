@@ -137,17 +137,20 @@ Orientadora: Profa. Elaine Maria Tavares Rodrigues.
 - Stack: Django, PostgreSQL, Plotly, Folium, Bootstrap
 - GitHub: github.com/CIDUFF/LAGUNA
 
-## Publicações e Livros
+## Publicações, Livros e Capítulos
+
+### Capítulos de Livros Publicados
+- 2024: "O Quarto como ferramenta de PKM para pesquisa científica" — Capítulo 3 (p. 61–84) no livro *Aplicações em R: encurtando distâncias nas ciências*, Universidade de São Paulo (USP). DOI: 10.11606/9786587023397
+- 2024: "Análise e Otimização de uma Carteira de Ações com R" — Capítulo 1 (p. 22–45) no livro *A inteligência artificial nas ciências de dados*, Universidade de São Paulo (USP). DOI: 10.11606/9786587023465
+- 2024: "Editando os gráficos do pacote Likert" — Capítulo 11 (p. 265–288) no livro *Aplicações em R: encurtando distâncias nas ciências*, Universidade de São Paulo (USP). DOI: 10.11606/9786587023397
 
 ### Livros
-- 2025: "Análise empírica sobre fundos imobiliários no Brasil" — Editora Atena
-- 2024: "Aplicações em R: encurtando distâncias nas ciências" — USP (288p)
-- 2024: "A inteligência artificial nas ciências de dados" — USP (192p)
-- 2023: Tradução "R para Ciência de Dados" — tradução do livro de Hadley Wickham
+- 2025: "Análise empírica sobre fundos imobiliários no Brasil" — Editora Atena (pesquisa e modelagem do mercado de FIIs)
+- 2023: Tradução oficial colaborativa "R para Ciência de Dados" (2ª Edição) — pt.r4ds.hadley.nz (Hadley Wickham et al.)
 
 ### Artigos e Conferências
-- 2025: "Arquitetura Lakehouse com RAG para Gestão do Conhecimento" — Enanpad, Aracaju
-- 2024: "Potencial e Desafios da ABP e IA no Ensino de Programação" — DOI: 10.5281/zenodo.12709058
+- 2025: "Arquitetura Lakehouse com RAG para Gestão do Conhecimento" — XLIX EnANPAD, Aracaju (Showcase de Produtos Técnico-Tecnológicos PTT 260)
+- 2024: "Potencial e Desafios da ABP e IA no Ensino de Programação" — Artigo completo (DOI: 10.5281/zenodo.12709058)
 
 ### Organização de Eventos
 - Co-organizador do Seminário Internacional de Estatística com R (SER)
