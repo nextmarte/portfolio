@@ -1,0 +1,127 @@
+// Web Audio API procedural 8-bit sound generator (Zero external MP3 dependencies)
+class RetroAudio {
+  private ctx: AudioContext | null = null;
+  private isMuted: boolean = true;
+
+  constructor() {
+    // AudioContext is initialized on first user gesture
+  }
+
+  private initContext() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  public setMuted(muted: boolean) {
+    this.isMuted = muted;
+    if (!muted) {
+      this.initContext();
+    }
+  }
+
+  public getMuted(): boolean {
+    return this.isMuted;
+  }
+
+  public toggleMute(): boolean {
+    this.setMuted(!this.isMuted);
+    return this.isMuted;
+  }
+
+  public playJump() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'square';
+      const now = this.ctx.currentTime;
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(380, now + 0.12);
+
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } catch {
+      // Audio playback silently fails if autoplay restricted
+    }
+  }
+
+  public playCollect() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+
+      // Two-note coin sound (B5 -> E6)
+      const osc1 = this.ctx.createOscillator();
+      const gain1 = this.ctx.createGain();
+      osc1.type = 'square';
+      osc1.frequency.setValueAtTime(987.77, now); // B5
+      gain1.gain.setValueAtTime(0.08, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc1.connect(gain1);
+      gain1.connect(this.ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.08);
+
+      const osc2 = this.ctx.createOscillator();
+      const gain2 = this.ctx.createGain();
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+      gain2.gain.setValueAtTime(0.08, now + 0.08);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc2.connect(gain2);
+      gain2.connect(this.ctx.destination);
+      osc2.start(now + 0.08);
+      osc2.stop(now + 0.25);
+    } catch {
+      // Audio playback silently fails
+    }
+  }
+
+  public playInspect() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+      notes.forEach((freq, i) => {
+        const osc = this.ctx!.createOscillator();
+        const gain = this.ctx!.createGain();
+        const start = now + i * 0.06;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.07, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx!.destination);
+        osc.start(start);
+        osc.stop(start + 0.15);
+      });
+    } catch {
+      // Audio playback silently fails
+    }
+  }
+}
+
+export const retroAudio = new RetroAudio();

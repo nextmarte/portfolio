@@ -3,7 +3,7 @@
 import { ArrowDown, Download, Github, Linkedin, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import HeroBackground from "./HeroBackground";
+import CareerGame from "./CareerGame";
 
 const socialLinks = [
   {
@@ -51,11 +51,11 @@ export function Hero() {
       id="hero"
       className="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden"
     >
-      {/* Pixel-art animated background */}
-      <HeroBackground />
+      {/* 2D Retro Pixel-Art Career Game */}
+      <CareerGame />
 
-      {/* Readability overlay — covers the text area, fades to transparent near the bottom */}
-      <div className="absolute inset-0 bg-gradient-to-b dark:from-slate-900/80 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5]" />
+      {/* Readability overlay — covers the text area while allowing the game world & runner to shine through */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-transparent dark:from-slate-950/85 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5]" />
 
       <div className="container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56">
         <div className="animate-fade-in-up mb-6">
