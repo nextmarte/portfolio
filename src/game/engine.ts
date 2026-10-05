@@ -1347,7 +1347,8 @@ export class CareerGameEngine {
     });
 
     this.obstacles.forEach(obs => {
-      drawObstacle(ctx, obs, this.groundY, isDark, now);
+      const obsSprite = assets.obstacles[obs.type];
+      drawObstacle(ctx, obs, this.groundY, isDark, now, obsSprite);
     });
 
     this.techOrbs.forEach(orb => {
@@ -1359,7 +1360,17 @@ export class CareerGameEngine {
       ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
     });
 
-    // Personagem na rua
+    // Personagem na rua com Sprite Oficial
+    let playerSprite: HTMLImageElement | null = null;
+    if (this.player.isJumping || !this.player.isGrounded) {
+      playerSprite = assets.playerOverworld.jump;
+    } else if (Math.abs(this.player.vx) > 10) {
+      const runIdx = this.player.frame % 4;
+      playerSprite = assets.playerOverworld.run[runIdx] || null;
+    } else {
+      playerSprite = assets.playerOverworld.idle;
+    }
+
     drawCharacter(
       ctx,
       this.player.x,
@@ -1370,7 +1381,8 @@ export class CareerGameEngine {
       this.player.facing,
       this.player.outfit,
       this.player.stumbleTimer,
-      this.player.invulnerableTimer
+      this.player.invulnerableTimer,
+      playerSprite
     );
 
     ctx.restore();
@@ -1382,6 +1394,7 @@ export class CareerGameEngine {
     const interior = this.currentInterior;
     const originX = Math.floor((this.width - interior.roomWidth) / 2);
     const originY = Math.floor((this.height - interior.roomHeight) / 2);
+    const assets = assetManager.getAssets();
 
     // 1. Sala (Piso, Paredes, Porta)
     drawTopDownRoom(ctx, interior, this.width, this.height, now);
@@ -1393,7 +1406,7 @@ export class CareerGameEngine {
 
     // 3. NPC / Mentor
     if (interior.npc) {
-      drawNPC(ctx, interior.npc, originX, originY);
+      drawNPC(ctx, interior.npc, originX, originY, now);
     }
 
     // 4. Skills Colecionáveis na Sala
@@ -1407,14 +1420,20 @@ export class CareerGameEngine {
       ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
     });
 
-    // 6. Personagem Top-Down
+    // 6. Personagem Top-Down com Sprite Oficial
+    const dirFrames = assets.playerTopDown[this.topDownPlayer.direction];
+    const tdSprite = dirFrames && dirFrames.length > 0
+      ? dirFrames[this.topDownPlayer.frame % dirFrames.length]
+      : null;
+
     drawTopDownCharacter(
       ctx,
       originX + this.topDownPlayer.x,
       originY + this.topDownPlayer.y,
       this.topDownPlayer.direction,
       this.topDownPlayer.frame,
-      this.topDownPlayer.outfit
+      this.topDownPlayer.outfit,
+      tdSprite
     );
   }
 }

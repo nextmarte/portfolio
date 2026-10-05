@@ -439,22 +439,26 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
       {/* ========================================================================= */}
       {/* BALÃO DE INTERAÇÃO PARA ENTRAR NO PRÉDIO (OVERWORLD) */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* BALÃO DE INTERAÇÃO PARA ENTRAR NO PRÉDIO (OVERWORLD) */}
+      {/* ========================================================================= */}
       {gameView === 'overworld' && nearMilestone && !inspectedMilestone && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex gap-2">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex items-center gap-3">
           <button
             onClick={() => handleEnterBuilding(nearMilestone.id)}
-            className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold font-mono text-xs shadow-2xl backdrop-blur-md flex items-center gap-2 group transition-all hover:scale-105 border border-white/30"
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 hover:from-cyan-300 hover:to-cyan-200 text-slate-950 font-black font-mono text-sm shadow-[0_0_30px_rgba(6,182,212,0.5)] border-2 border-white flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 group"
           >
-            <DoorOpen className="w-4 h-4 text-slate-950 animate-bounce" />
-            <span>Entrar no Prédio: <strong>{nearMilestone.label}</strong> [E]</span>
+            <DoorOpen className="w-5 h-5 text-slate-950 animate-bounce" />
+            <span>EXPLORAR PRÉDIO: <strong className="text-slate-950 underline decoration-amber-500 decoration-2">{nearMilestone.label}</strong></span>
+            <span className="px-2 py-0.5 rounded bg-slate-950 text-cyan-300 text-xs font-mono ml-1 shadow-sm">TECLA [E]</span>
           </button>
 
           <button
             onClick={() => setInspectedMilestone(nearMilestone)}
-            className="p-2.5 rounded-xl bg-black/70 hover:bg-black/90 text-white border border-white/20 shadow-xl transition-all"
+            className="p-3 rounded-2xl bg-slate-950/90 hover:bg-slate-900 text-white border-2 border-white/20 shadow-xl transition-all hover:scale-105"
             title="Ver informações da era"
           >
-            <Info className="w-4 h-4 text-cyan-400" />
+            <Info className="w-5 h-5 text-cyan-400" />
           </button>
         </div>
       )}
@@ -466,10 +470,10 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex items-center gap-3">
           <button
             onClick={handleExitBuilding}
-            className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold font-mono flex items-center gap-2 shadow-2xl transition-all hover:scale-105 border border-rose-400"
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-600 via-red-500 to-rose-600 hover:from-rose-500 hover:to-rose-400 text-white text-xs font-extrabold font-mono flex items-center gap-2.5 shadow-[0_0_30px_rgba(244,63,94,0.4)] transition-all hover:scale-105 border-2 border-white"
           >
             <LogOut className="w-4 h-4" />
-            <span>Sair para a Rua [E]</span>
+            <span>RETORNAR PARA A AVENIDA [E]</span>
           </button>
         </div>
       )}
@@ -480,13 +484,13 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
       {/* Level Up Banner */}
       {levelUpToast && (
         <div className="absolute top-28 left-1/2 -translate-x-1/2 z-30 animate-fade-in-up">
-          <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-mono shadow-2xl border-2 border-white flex items-center gap-3">
-            <span className="text-2xl animate-bounce">🏆</span>
+          <div className="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-mono shadow-[0_0_40px_rgba(245,158,11,0.6)] border-2 border-white flex items-center gap-3.5">
+            <span className="text-3xl animate-bounce">🏆</span>
             <div>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-900">
+              <p className="text-[10px] uppercase font-black tracking-widest text-slate-900">
                 ⭐ LEVEL UP ALCANÇADO! ⭐
               </p>
-              <h3 className="text-base font-extrabold text-slate-950">
+              <h3 className="text-base font-black text-slate-950">
                 Nível {levelUpToast.level}: {levelUpToast.title}
               </h3>
             </div>
@@ -497,16 +501,14 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
       {/* Skill Acquired Toast */}
       {skillToast && (
         <div className="absolute top-32 left-1/2 -translate-x-1/2 z-30 animate-fade-in-up">
-          <div className="px-5 py-3 rounded-2xl bg-slate-950/95 border-2 border-amber-400 text-white shadow-2xl backdrop-blur-md flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-400/20 border border-amber-400 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5 text-amber-400 animate-pulse" />
-            </div>
+          <div className="px-5 py-3 rounded-2xl bg-slate-950/95 border-2 border-amber-400 text-white shadow-[0_0_30px_rgba(245,158,11,0.4)] backdrop-blur-md flex items-center gap-3">
+            <span className="text-2xl animate-spin">🌟</span>
             <div>
-              <p className="text-[10px] font-mono text-amber-300 uppercase tracking-wider">
-                ✨ Nova Habilidade Adquirida! (+180 XP)
+              <p className="text-[10px] text-amber-300 font-mono uppercase tracking-wider font-bold">
+                Nova Habilidade Desbloqueada! ({skillToast.buildingName})
               </p>
-              <h4 className="text-sm font-bold text-white">
-                {skillToast.skill.name} <span className="text-xs text-slate-400 font-normal">({skillToast.skill.category})</span>
+              <h4 className="text-sm font-bold font-mono text-cyan-300">
+                {skillToast.skill.name} • <span className="text-xs text-amber-400">[{skillToast.skill.category}]</span>
               </h4>
               <p className="text-xs text-slate-300 max-w-sm mt-0.5">
                 {skillToast.skill.description}
@@ -519,25 +521,51 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
       {/* Dodge Combo Toast */}
       {comboToast && (
         <div className="absolute top-36 left-1/2 -translate-x-1/2 z-30 animate-fade-in-up">
-          <div className="px-4 py-1.5 rounded-full bg-slate-950/90 border border-amber-400/80 text-amber-300 font-mono text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
+          <div className="px-5 py-2 rounded-full bg-slate-950/95 border-2 border-amber-400 text-amber-300 font-mono text-xs font-black shadow-[0_0_25px_rgba(245,158,11,0.5)] flex items-center gap-2 animate-bounce">
+            <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
             <span>ESQUIVA PERFEITA! +40 XP (Combo x{comboToast.combo})</span>
           </div>
         </div>
       )}
 
-      {/* Dialog Box com Mentor da Sala */}
+      {/* Dialog Box com Mentor da Sala — Estilo JRPG Clássico */}
       {gameView === 'interior' && dialog && (
-        <div className="absolute bottom-20 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-20 animate-fade-in-up">
-          <div className="bg-slate-950/95 border-2 border-cyan-400 rounded-2xl p-4 text-white shadow-2xl backdrop-blur-md">
-            <div className="flex items-center gap-2 mb-1.5">
-              <MessageSquare className="w-4 h-4 text-cyan-400" />
-              <span className="font-bold text-cyan-300 text-xs font-mono">{dialog.speaker}</span>
-              <span className="text-[10px] text-slate-400 font-mono">({dialog.role})</span>
+        <div className="absolute bottom-20 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-2xl z-20 animate-fade-in-up">
+          <div className="relative bg-slate-950/95 border-4 border-amber-400/90 rounded-2xl p-5 text-white shadow-[0_0_35px_rgba(245,158,11,0.35)] backdrop-blur-md">
+            {/* Rebites nos 4 cantos */}
+            <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-amber-400 shadow-sm" />
+            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400 shadow-sm" />
+            <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-amber-400 shadow-sm" />
+            <div className="absolute bottom-2 right-2 w-2 h-2 rounded-full bg-amber-400 shadow-sm" />
+
+            <div className="flex items-start gap-4">
+              {/* Avatar do Mentor */}
+              <div className="w-12 h-12 rounded-xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center shrink-0 shadow-lg text-2xl">
+                👨‍🏫
+              </div>
+
+              <div className="flex-1">
+                <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-amber-300 text-sm font-mono tracking-wider">{dialog.speaker}</span>
+                    <span className="text-[10px] text-cyan-300 font-mono px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-500/40">{dialog.role}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                    <MessageSquare className="w-3 h-3 text-cyan-400" /> DIÁLOGO
+                  </span>
+                </div>
+
+                <p className="text-sm text-slate-100 leading-relaxed font-mono">
+                  "{dialog.text}"
+                </p>
+
+                <div className="mt-2 text-right">
+                  <span className="text-[10px] font-mono text-amber-300 animate-pulse font-bold">
+                    ▼ [ESPAÇO OU ANDAR PARA FECHAR]
+                  </span>
+                </div>
+              </div>
             </div>
-            <p className="text-xs md:text-sm text-slate-200 leading-relaxed font-sans">
-              "{dialog.text}"
-            </p>
           </div>
         </div>
       )}

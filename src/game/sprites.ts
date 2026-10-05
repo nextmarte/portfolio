@@ -149,24 +149,24 @@ export function drawCharacter(
   facing: 'right' | 'left',
   outfit: EraOutfit,
   stumbleTimer: number,
-  invulnerableTimer: number
+  invulnerableTimer: number,
+  spriteImage?: HTMLImageElement | null
 ) {
   if (invulnerableTimer > 0 && Math.floor(invulnerableTimer * 20) % 2 === 0) {
     return;
   }
 
-  const p = PALETTES[outfit] || PALETTES.baxijen;
   const S = 2; // Pixel scale
 
   ctx.save();
   ctx.translate(Math.floor(x), Math.floor(y));
 
-  // Sombra suave sob os pés
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-  const shadowW = isGrounded ? 18 : 11;
+  // Sombra suave sob os pés na calçada
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  const shadowW = isGrounded ? 18 : 12;
   const shadowOff = isGrounded ? 0 : 5;
   ctx.beginPath();
-  ctx.ellipse(0, 3 + shadowOff, shadowW, 4.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 2 + shadowOff, shadowW, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
   if (facing === 'left') {
@@ -178,6 +178,18 @@ export function drawCharacter(
     ctx.rotate(-0.2);
   }
 
+  // Se o sprite de alta definição pixel-art estiver carregado, desenha-o com prioridade
+  if (spriteImage && spriteImage.complete && spriteImage.naturalWidth > 0) {
+    ctx.imageSmoothingEnabled = false;
+    const targetH = 52;
+    const targetW = targetH * (spriteImage.naturalWidth / spriteImage.naturalHeight);
+    const bounceY = !isGrounded ? -6 : (frame % 2 === 1 ? -1.5 : 0);
+    ctx.drawImage(spriteImage, Math.floor(-targetW / 2), Math.floor(-targetH + bounceY), Math.ceil(targetW), targetH);
+    ctx.restore();
+    return;
+  }
+
+  const p = PALETTES[outfit] || PALETTES.baxijen;
   const bounceY = !isGrounded ? -3 : (frame % 2 === 1 ? -1 : 0);
 
   // Contorno escuro corporal (Dark Outline Retro)
@@ -1060,12 +1072,55 @@ export function drawObstacle(
   obs: Obstacle,
   groundY: number,
   isDark: boolean,
-  time: number
+  time: number,
+  spriteImage?: HTMLImageElement | null
 ) {
   const oX = Math.floor(obs.x);
   const oY = Math.floor(groundY - obs.height);
 
   ctx.save();
+
+  // Se o sprite de alta definição estiver carregado, desenha o sprite oficial
+  if (spriteImage && spriteImage.complete && spriteImage.naturalWidth > 0) {
+    ctx.imageSmoothingEnabled = false;
+
+    // Sombra suave sob o obstáculo
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(oX + (obs.width / 2), groundY - 2, obs.width * 0.45, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (obs.type === 'glitch_bug') {
+      const bugHover = Math.sin(time * 12) * 3;
+      ctx.drawImage(spriteImage, oX, oY + bugHover, obs.width, obs.height);
+
+      // Balão "!BUG" pulsante retrô
+      const pulse = Math.sin(time * 10) > 0;
+      ctx.fillStyle = pulse ? '#EF4444' : '#F87171';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('!BUG', oX + (obs.width / 2), oY + bugHover - 8);
+    } else if (obs.type === 'firewall') {
+      const pulseAlpha = Math.sin(time * 10) * 0.2 + 0.8;
+      ctx.globalAlpha = pulseAlpha;
+      ctx.drawImage(spriteImage, oX, oY, obs.width, obs.height);
+      ctx.globalAlpha = 1.0;
+    } else if (obs.type === 'server_rack') {
+      ctx.drawImage(spriteImage, oX, oY, obs.width, obs.height);
+      // LEDs piscantes em tempo real
+      const led1 = Math.sin(time * 8) > 0;
+      const led2 = Math.cos(time * 12) > 0;
+      ctx.fillStyle = led1 ? '#22C55E' : '#14532D';
+      ctx.fillRect(oX + 7, oY + 12, 3, 3);
+      ctx.fillStyle = led2 ? '#38BDF8' : '#0369A1';
+      ctx.fillRect(oX + 13, oY + 12, 3, 3);
+    } else {
+      ctx.drawImage(spriteImage, oX, oY, obs.width, obs.height);
+    }
+
+    ctx.restore();
+    return;
+  }
 
   if (obs.type === 'glitch_bug') {
     const wingFlap = Math.sin(time * 20) * 4;
@@ -1218,36 +1273,64 @@ export function drawTechOrb(
 
   ctx.save();
 
-  // Glow halo pulsante
-  const haloR = 15 + Math.sin(time * 4 + orb.floatOffset) * 3;
-  ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+  // 1. Halo volumétrico pulsante com gradiente radial
+  const haloR = 18 + Math.sin(time * 4 + orb.floatOffset) * 4;
+  const grad = ctx.createRadialGradient(x, floatY, 2, x, floatY, haloR);
+  grad.addColorStop(0, 'rgba(56, 189, 248, 0.65)');
+  grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.25)');
+  grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+  ctx.fillStyle = grad;
   ctx.beginPath();
   ctx.arc(x, floatY, haloR, 0, Math.PI * 2);
   ctx.fill();
 
-  // Orbe / Cristal 16-bit
-  ctx.fillStyle = '#0284C7';
-  ctx.fillRect(x - 9, floatY - 9, 18, 18);
-  ctx.fillStyle = '#38BDF8';
-  ctx.fillRect(x - 7, floatY - 7, 14, 14);
+  // 2. Anéis quânticos orbitais em perspectiva 3D
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.ellipse(x, floatY, 15, 6, (time * 2 + orb.floatOffset), 0, Math.PI * 2);
+  ctx.stroke();
 
-  // Ícone pixel
+  ctx.strokeStyle = 'rgba(250, 204, 21, 0.75)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(x, floatY, 15, 6, (-time * 1.6 + orb.floatOffset), 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 3. Orbe / Cristal 16-bit com Chanfro e Facetas
+  ctx.fillStyle = '#0284C7';
+  ctx.fillRect(x - 10, floatY - 10, 20, 20);
+  ctx.fillStyle = '#38BDF8';
+  ctx.fillRect(x - 8, floatY - 8, 16, 16);
+  ctx.fillStyle = '#BAE6FD';
+  ctx.fillRect(x - 6, floatY - 6, 6, 6);
+
+  // Brilho estelar cintilante (Star Specular Glint)
+  const glint = Math.sin(time * 5 + orb.floatOffset) > 0.3;
+  if (glint) {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x + 2, floatY - 7, 3, 3);
+    ctx.fillRect(x + 1, floatY - 8, 5, 1);
+    ctx.fillRect(x + 3, floatY - 6, 1, 5);
+  }
+
+  // 4. Ícone pixel de alta definição
   ctx.fillStyle = '#FFFFFF';
   if (orb.iconType === 'python') {
     ctx.fillStyle = '#FACC15';
-    ctx.fillRect(x - 3, floatY - 4, 6, 4);
+    ctx.fillRect(x - 4, floatY - 4, 8, 4);
     ctx.fillStyle = '#38BDF8';
-    ctx.fillRect(x - 3, floatY, 6, 4);
+    ctx.fillRect(x - 4, floatY, 8, 4);
   } else if (orb.iconType === 'docker') {
     ctx.fillStyle = '#0284C7';
-    ctx.fillRect(x - 4, floatY - 2, 8, 4);
+    ctx.fillRect(x - 5, floatY - 2, 10, 4);
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(x - 2, floatY - 4, 4, 2);
+    ctx.fillRect(x - 3, floatY - 4, 6, 2);
   } else if (orb.iconType === 'mcp') {
     ctx.fillStyle = '#FBBF24';
-    ctx.fillRect(x - 2, floatY - 5, 4, 3);
-    ctx.fillRect(x - 4, floatY - 2, 5, 2);
-    ctx.fillRect(x - 1, floatY, 3, 5);
+    ctx.fillRect(x - 3, floatY - 5, 6, 4);
+    ctx.fillRect(x - 5, floatY - 1, 10, 3);
+    ctx.fillRect(x - 2, floatY + 2, 4, 4);
   } else if (orb.iconType === 'claude') {
     ctx.fillStyle = '#D97706';
     ctx.fillRect(x - 4, floatY - 4, 8, 8);
@@ -1256,28 +1339,29 @@ export function drawTechOrb(
   } else if (orb.iconType === 'langgraph') {
     ctx.fillStyle = '#10B981';
     ctx.fillRect(x - 4, floatY - 4, 3, 3);
-    ctx.fillRect(x + 2, floatY - 4, 3, 3);
-    ctx.fillRect(x - 1, floatY + 2, 3, 3);
+    ctx.fillRect(x + 1, floatY - 4, 3, 3);
+    ctx.fillRect(x - 2, floatY + 1, 4, 4);
   } else {
     ctx.fillStyle = '#10B981';
     ctx.fillRect(x - 4, floatY - 4, 8, 8);
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 7px monospace';
+    ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('>', x, floatY + 2);
   }
 
-  // Nome do orbe em cartucho retrô
-  ctx.fillStyle = '#0F172A';
-  ctx.fillRect(x - 24, floatY + 12, 48, 12);
+  // 5. Nome do orbe em cartucho retrô 16-bit
+  const textW = ctx.measureText(orb.name).width + 16;
+  ctx.fillStyle = '#020617';
+  ctx.fillRect(x - (textW / 2), floatY + 13, textW, 13);
   ctx.strokeStyle = '#38BDF8';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x - 24, floatY + 12, 48, 12);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(x - (textW / 2), floatY + 13, textW, 13);
 
   ctx.fillStyle = '#F8FAFC';
   ctx.font = 'bold 8px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(orb.name, x, floatY + 21);
+  ctx.fillText(orb.name, x, floatY + 22);
 
   ctx.restore();
 }
@@ -1292,17 +1376,31 @@ export function drawTopDownCharacter(
   y: number,
   direction: TopDownDirection,
   frame: number,
-  outfit: EraOutfit
+  outfit: EraOutfit,
+  spriteImage?: HTMLImageElement | null
 ) {
-  const p = PALETTES[outfit] || PALETTES.baxijen;
-  const S = 2;
-
   ctx.save();
   ctx.translate(Math.floor(x), Math.floor(y));
 
+  // Sombra suave sob os pés
   ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
   ctx.beginPath();
   ctx.ellipse(0, 4, 11, 4.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Se o sprite de alta definição estiver carregado, desenha o sprite oficial
+  if (spriteImage && spriteImage.complete && spriteImage.naturalWidth > 0) {
+    ctx.imageSmoothingEnabled = false;
+    const targetH = 44;
+    const targetW = targetH * (spriteImage.naturalWidth / spriteImage.naturalHeight);
+    const stepBob = frame % 2 === 1 ? -1.5 : 0;
+    ctx.drawImage(spriteImage, Math.floor(-targetW / 2), Math.floor(-targetH + 4 + stepBob), Math.ceil(targetW), targetH);
+    ctx.restore();
+    return;
+  }
+
+  const p = PALETTES[outfit] || PALETTES.baxijen;
+  const S = 2;
   ctx.fill();
 
   const stepOffset = frame % 2 === 1 ? (Math.sin(frame * Math.PI) > 0 ? 2 : -2) : 0;
@@ -1597,48 +1695,56 @@ export function drawInteriorSkillItem(
 
   const floatY = sY + Math.sin(time * 4) * 4;
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  // 1. Sombra suave no piso
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
   ctx.beginPath();
-  ctx.ellipse(sX, sY + 8, 12, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(sX, sY + 8, 14, 5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  const glow = 14 + Math.sin(time * 6) * 3;
+  // 2. Feixe de luz volumétrica ascendente
+  const beamGrad = ctx.createLinearGradient(sX, floatY + 10, sX, floatY - 40);
+  beamGrad.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
+  beamGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.15)');
+  beamGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+  ctx.fillStyle = beamGrad;
+  ctx.beginPath();
+  ctx.moveTo(sX - 12, floatY + 8);
+  ctx.lineTo(sX + 12, floatY + 8);
+  ctx.lineTo(sX + 6, floatY - 35);
+  ctx.lineTo(sX - 6, floatY - 35);
+  ctx.closePath();
+  ctx.fill();
+
+  // 3. Halo radiante pulsante
+  const glow = 16 + Math.sin(time * 5) * 3;
   ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
   ctx.beginPath();
   ctx.arc(sX, floatY, glow, 0, Math.PI * 2);
   ctx.fill();
 
-  // Pokébola Tech
-  ctx.fillStyle = '#EF4444';
-  ctx.beginPath();
-  ctx.arc(sX, floatY, 9, Math.PI, 0);
-  ctx.fill();
+  // 4. Cartucho Holográfico 3D rotativo
+  const rotScale = Math.cos(time * 3);
+  const diskW = Math.max(3, Math.abs(rotScale) * 12);
 
-  ctx.fillStyle = '#F8FAFC';
-  ctx.beginPath();
-  ctx.arc(sX, floatY, 9, 0, Math.PI);
-  ctx.fill();
-
-  ctx.fillStyle = '#0F172A';
-  ctx.fillRect(sX - 9, floatY - 1, 18, 2);
-
+  ctx.fillStyle = '#0284C7';
+  ctx.fillRect(sX - diskW, floatY - 9, diskW * 2, 18);
   ctx.fillStyle = '#38BDF8';
-  ctx.beginPath();
-  ctx.arc(sX, floatY, 3, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillRect(sX - diskW + 2, floatY - 7, Math.max(2, (diskW - 2) * 2), 14);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(sX - 2, floatY - 5, 4, 10);
 
-  // Etiqueta com nome da skill
-  ctx.fillStyle = '#0F172A';
-  const textW = ctx.measureText(skill.name).width + 12;
-  ctx.fillRect(sX - (textW / 2), floatY - 20, textW, 12);
+  // 5. Etiqueta com nome e categoria da skill
+  ctx.fillStyle = '#020617';
+  const textW = ctx.measureText(skill.name).width + 16;
+  ctx.fillRect(sX - (textW / 2), floatY - 24, textW, 14);
   ctx.strokeStyle = '#38BDF8';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(sX - (textW / 2), floatY - 20, textW, 12);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(sX - (textW / 2), floatY - 24, textW, 14);
 
-  ctx.fillStyle = '#FEF08A';
+  ctx.fillStyle = '#FDE047';
   ctx.font = 'bold 8px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(skill.name, sX, floatY - 11);
+  ctx.fillText(skill.name, sX, floatY - 14);
 
   ctx.restore();
 }
@@ -1647,7 +1753,8 @@ export function drawNPC(
   ctx: CanvasRenderingContext2D,
   npc: { name: string; role: string; x: number; y: number; direction: TopDownDirection },
   originX: number,
-  originY: number
+  originY: number,
+  time: number = 0
 ) {
   const nX = originX + npc.x;
   const nY = originY + npc.y;
@@ -1656,41 +1763,76 @@ export function drawNPC(
   ctx.save();
   ctx.translate(Math.floor(nX), Math.floor(nY));
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  // Sombra no chão
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(0, 4, 10, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 4, 12, 4.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#64748B';
+  // Balão de fala flutuante com animação suave
+  const bubbleY = -34 * S + Math.sin(time * 4) * 2.5;
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(-14, bubbleY - 12, 28, 12);
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(-14, bubbleY - 12, 28, 12);
+
+  ctx.fillStyle = '#38BDF8';
+  ctx.font = 'bold 8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('💬 FALA', 0, bubbleY - 3);
+
+  // Corpo do Mentor
+  const isSiemens = npc.role.toLowerCase().includes('siemens') || npc.role.toLowerCase().includes('automação');
+  const isDoc = npc.role.toLowerCase().includes('orientadora') || npc.role.toLowerCase().includes('dra');
+
+  // Cabeça / Cabelo
+  ctx.fillStyle = isSiemens ? '#F59E0B' : '#64748B'; // Capacete de segurança se Siemens
   ctx.fillRect(-6 * S, -15 * S, 12 * S, 5 * S);
   ctx.fillRect(-7 * S, -14 * S, 14 * S, 4 * S);
 
+  // Rosto
   ctx.fillStyle = '#F5D0A9';
   ctx.fillRect(-5 * S, -10 * S, 10 * S, 6 * S);
 
+  // Óculos se for Professora/Docente
+  if (isDoc) {
+    ctx.strokeStyle = '#0284C7';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-4 * S, -9 * S, 3 * S, 3 * S);
+    ctx.strokeRect(1 * S, -9 * S, 3 * S, 3 * S);
+  }
+
+  // Olhos
   ctx.fillStyle = '#1E293B';
   ctx.fillRect(-3 * S, -8 * S, 2 * S, 2 * S);
   ctx.fillRect(1 * S, -8 * S, 2 * S, 2 * S);
 
-  ctx.fillStyle = '#F8FAFC';
-  ctx.fillRect(-4 * S, -4 * S, 8 * S, 7 * S);
-  ctx.fillStyle = '#2563EB';
+  // Jaleco / Uniforme corporativo
+  ctx.fillStyle = isSiemens ? '#0369A1' : isDoc ? '#F8FAFC' : '#1E293B';
+  ctx.fillRect(-5 * S, -4 * S, 10 * S, 7 * S);
+
+  // Crachá ou gravata
+  ctx.fillStyle = isSiemens ? '#FACC15' : '#2563EB';
   ctx.fillRect(-1 * S, -4 * S, 2 * S, 4 * S);
 
+  // Calça e sapatos
   ctx.fillStyle = '#334155';
   ctx.fillRect(-4 * S, 3 * S, 3 * S, 2 * S);
   ctx.fillRect(1 * S, 3 * S, 3 * S, 2 * S);
 
-  ctx.fillStyle = '#0F172A';
-  ctx.fillRect(-35, -28 * S, 70, 11);
+  // Placa de papel/cargo com moldura dourada
+  const roleW = Math.max(74, ctx.measureText(npc.role).width + 16);
+  ctx.fillStyle = '#020617';
+  ctx.fillRect(-roleW / 2, -26 * S, roleW, 12);
   ctx.strokeStyle = '#F59E0B';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(-35, -28 * S, 70, 11);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-roleW / 2, -26 * S, roleW, 12);
 
-  ctx.fillStyle = '#F59E0B';
-  ctx.font = 'bold 7px monospace';
+  ctx.fillStyle = '#FBBF24';
+  ctx.font = 'bold 8px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(npc.role, 0, -28 * S + 8);
+  ctx.fillText(npc.role, 0, -26 * S + 9);
 
   ctx.restore();
 }
