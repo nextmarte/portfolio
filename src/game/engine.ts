@@ -30,6 +30,7 @@ import {
   drawPixelTree,
 } from './sprites';
 import { retroAudio } from './audio';
+import { assetManager } from './assets';
 
 export const MILESTONES: Milestone[] = [
   {
@@ -505,6 +506,7 @@ export class CareerGameEngine {
     this.props = JSON.parse(JSON.stringify(INITIAL_PROPS));
     this.interiors = JSON.parse(JSON.stringify(BUILDING_INTERIORS));
 
+    assetManager.loadAll();
     this.resize();
   }
 
@@ -1222,52 +1224,71 @@ export class CareerGameEngine {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Estrelas / Lua ou Sol
-    if (isDark) {
-      ctx.fillStyle = '#FFFFFF';
-      for (let i = 0; i < 35; i++) {
-        const sx = ((i * 127) - (this.cameraX * 0.02)) % W;
-        const realSx = sx < 0 ? sx + W : sx;
-        const sy = 20 + (i * 17) % (this.groundY - 140);
-        ctx.fillRect(Math.floor(realSx), sy, 2, 2);
+    const assets = assetManager.getAssets();
+
+    // Backdrop Panorâmico com Paralaxe Realista (Rio de Janeiro / Niterói em 16-bit Pixel Art)
+    const bgImg = assets.backgrounds.rioSkyline;
+    if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+      const bgAspect = bgImg.naturalWidth / bgImg.naturalHeight;
+      const targetBgH = this.groundY;
+      const targetBgW = targetBgH * bgAspect;
+      const parallaxFactor = 0.12;
+      const offset = (this.cameraX * parallaxFactor) % targetBgW;
+
+      ctx.save();
+      ctx.globalAlpha = isDark ? 0.78 : 0.95;
+      for (let x = -offset - targetBgW; x < W + targetBgW; x += targetBgW) {
+        ctx.drawImage(bgImg, Math.floor(x), 0, Math.ceil(targetBgW), Math.ceil(targetBgH));
       }
-      const moonX = W - 120;
-      ctx.fillStyle = '#FEF08A';
-      ctx.fillRect(moonX, 30, 20, 20);
-      ctx.fillStyle = '#FDE047';
-      ctx.fillRect(moonX + 4, 34, 5, 5);
+      ctx.restore();
     } else {
-      const sunX = W - 110;
-      ctx.fillStyle = '#FBBF24';
-      ctx.fillRect(sunX, 30, 22, 22);
-      ctx.fillStyle = '#F59E0B';
-      ctx.fillRect(sunX + 4, 34, 14, 14);
-    }
+      // Estrelas / Lua ou Sol (fallback)
+      if (isDark) {
+        ctx.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 35; i++) {
+          const sx = ((i * 127) - (this.cameraX * 0.02)) % W;
+          const realSx = sx < 0 ? sx + W : sx;
+          const sy = 20 + (i * 17) % (this.groundY - 140);
+          ctx.fillRect(Math.floor(realSx), sy, 2, 2);
+        }
+        const moonX = W - 120;
+        ctx.fillStyle = '#FEF08A';
+        ctx.fillRect(moonX, 30, 20, 20);
+        ctx.fillStyle = '#FDE047';
+        ctx.fillRect(moonX + 4, 34, 5, 5);
+      } else {
+        const sunX = W - 110;
+        ctx.fillStyle = '#FBBF24';
+        ctx.fillRect(sunX, 30, 22, 22);
+        ctx.fillStyle = '#F59E0B';
+        ctx.fillRect(sunX + 4, 34, 14, 14);
+      }
 
-    // Nuvens
-    const cloudColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.7)';
-    ctx.fillStyle = cloudColor;
-    for (let c = 0; c < 12; c++) {
-      const cx = ((c * 350) - (this.cameraX * 0.06) + (now * 6)) % (W + 400);
-      const cy = 35 + (c % 4) * 30;
-      ctx.fillRect(cx - 100, cy, 75, 14);
-      ctx.fillRect(cx - 85, cy - 8, 48, 10);
-      ctx.fillRect(cx - 68, cy - 14, 22, 8);
-    }
+      // Nuvens
+      const cloudColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = cloudColor;
+      for (let c = 0; c < 12; c++) {
+        const cx = ((c * 350) - (this.cameraX * 0.06) + (now * 6)) % (W + 400);
+        const cy = 35 + (c % 4) * 30;
+        ctx.fillRect(cx - 100, cy, 75, 14);
+        ctx.fillRect(cx - 85, cy - 8, 48, 10);
+        ctx.fillRect(cx - 68, cy - 14, 22, 8);
+      }
 
-    // Skyline distante
-    const mountainColor = isDark ? '#0F172A' : '#94A3B8';
-    ctx.fillStyle = mountainColor;
-    ctx.beginPath();
-    ctx.moveTo(0, this.groundY);
-    for (let mx = 0; mx <= W + 40; mx += 60) {
-      const worldMx = mx + (this.cameraX * 0.22);
-      const mH = 55 + Math.sin(worldMx * 0.005) * 40 + Math.cos(worldMx * 0.003) * 25;
-      ctx.lineTo(mx, this.groundY - mH);
+      // Skyline distante
+      const mountainColor = isDark ? '#0F172A' : '#94A3B8';
+      ctx.fillStyle = mountainColor;
+      ctx.beginPath();
+      ctx.moveTo(0, this.groundY);
+      for (let mx = 0; mx <= W + 40; mx += 60) {
+        const worldMx = mx + (this.cameraX * 0.22);
+        const mH = 55 + Math.sin(worldMx * 0.005) * 40 + Math.cos(worldMx * 0.003) * 25;
+        ctx.lineTo(mx, this.groundY - mH);
+      }
+      ctx.lineTo(W, this.groundY);
+      ctx.closePath();
+      ctx.fill();
     }
-    ctx.lineTo(W, this.groundY);
-    ctx.closePath();
-    ctx.fill();
 
     // Mundo com Câmera (Camada 1: Árvores de fundo e Edifícios Históricos)
     ctx.save();
@@ -1278,7 +1299,8 @@ export class CareerGameEngine {
     }
 
     MILESTONES.forEach(m => {
-      drawDetailedBuilding(ctx, m, this.groundY, isDark, now);
+      const sprite = assets.buildings[m.id];
+      drawDetailedBuilding(ctx, m, this.groundY, isDark, now, sprite);
     });
 
     ctx.restore();

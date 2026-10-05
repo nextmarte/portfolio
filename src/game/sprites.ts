@@ -387,7 +387,8 @@ export function drawDetailedBuilding(
   m: Milestone,
   groundY: number,
   isDark: boolean,
-  time: number
+  time: number,
+  spriteImage?: HTMLImageElement | null
 ) {
   const bX = Math.floor(m.x);
   const bY = Math.floor(groundY - m.height);
@@ -399,6 +400,55 @@ export function drawDetailedBuilding(
   // 1. Sombra volumétrica projetada na calçada
   ctx.fillStyle = isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.2)';
   ctx.fillRect(bX - 16, groundY - 4, W + 32, 9);
+
+  // Se o sprite pixel-art de alta fidelidade estiver carregado, desenha-o com prioridade
+  if (spriteImage && spriteImage.complete && spriteImage.naturalWidth > 0) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(spriteImage, bX, bY, W, H);
+
+    // Letreiro iluminado com neon no topo
+    const signH = 20;
+    const signW = Math.min(220, W - 20);
+    const signX = bX + (W / 2) - (signW / 2);
+    const signY = bY - 26;
+
+    ctx.fillStyle = isDark ? 'rgba(2, 6, 23, 0.95)' : 'rgba(15, 23, 42, 0.95)';
+    ctx.fillRect(signX, signY, signW, signH);
+    ctx.strokeStyle = m.neonColor;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(signX, signY, signW, signH);
+
+    ctx.fillStyle = m.neonColor;
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${m.year} • ${m.label}`, bX + (W / 2), signY + 13);
+
+    // Portal / Porta de entrada com beacon luminoso pulsante
+    const doorW = 32;
+    const doorH = 38;
+    const doorX = bX + (W / 2) - (doorW / 2);
+    const doorY = groundY - doorH;
+
+    const pulse = Math.sin(time * 5) * 0.2 + 0.8;
+    ctx.fillStyle = m.neonColor;
+    ctx.globalAlpha = 0.28 * pulse;
+    ctx.fillRect(doorX, doorY, doorW, doorH);
+    ctx.globalAlpha = 1.0;
+
+    ctx.strokeStyle = m.neonColor;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(doorX, doorY, doorW, doorH);
+
+    // Seta indicativa sobre a porta
+    const arrowBounce = Math.sin(time * 6) * 3;
+    ctx.fillStyle = '#FEF08A';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('▼', bX + (W / 2), doorY - 6 + arrowBounce);
+
+    ctx.restore();
+    return;
+  }
 
   // 2. Fachada principal com Chanfro 3D (Borda iluminada à esquerda e sombra à direita)
   ctx.fillStyle = m.color;
