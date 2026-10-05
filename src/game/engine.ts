@@ -15,6 +15,7 @@ import {
   TopDownPlayerState,
 } from './types';
 import {
+  drawArtisticGround,
   drawCharacter,
   drawDetailedBuilding,
   drawFurniture,
@@ -1268,7 +1269,7 @@ export class CareerGameEngine {
     ctx.closePath();
     ctx.fill();
 
-    // Mundo com Câmera
+    // Mundo com Câmera (Camada 1: Árvores de fundo e Edifícios Históricos)
     ctx.save();
     ctx.translate(-Math.floor(this.cameraX), 0);
 
@@ -1276,12 +1277,47 @@ export class CareerGameEngine {
       drawPixelTree(ctx, tx, this.groundY, isDark, Math.floor(tx / 320));
     }
 
-    this.props.forEach(prop => {
-      drawSceneryProps(ctx, prop, this.groundY, isDark);
-    });
-
     MILESTONES.forEach(m => {
       drawDetailedBuilding(ctx, m, this.groundY, isDark, now);
+    });
+
+    ctx.restore();
+
+    // Camada 2: Chão Artístico (Grama com tufos, Calçada de Pedras Portuguesas em ondas, Meio-fio com bueiros e Asfalto)
+    drawArtisticGround(ctx, W, H, this.groundY, this.cameraX, isDark);
+
+    // Mundo com Câmera (Camada 3: Fiação elétrica, Postes, Plataformas, Obstáculos, Orbes, Jogador e Partículas)
+    ctx.save();
+    ctx.translate(-Math.floor(this.cameraX), 0);
+
+    // Fiação elétrica suspensa catenária entre postes
+    const lamps = this.props.filter(p => p.type === 'lamp_classic' || p.type === 'lamp_cyber');
+    ctx.strokeStyle = isDark ? '#334155' : '#64748B';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < lamps.length - 1; i++) {
+      const l1 = lamps[i];
+      const l2 = lamps[i + 1];
+      const x1 = l1.x + 5;
+      const y1 = this.groundY - 71;
+      const x2 = l2.x + 5;
+      const y2 = this.groundY - 71;
+      const midX = (x1 + x2) / 2;
+      const dist = x2 - x1;
+      const sag = Math.min(22, dist * 0.022);
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo(midX, y1 + sag, x2, y2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1 + 3);
+      ctx.quadraticCurveTo(midX, y1 + 3 + sag * 0.85, x2, y2 + 3);
+      ctx.stroke();
+    }
+
+    this.props.forEach(prop => {
+      drawSceneryProps(ctx, prop, this.groundY, isDark);
     });
 
     this.platforms.forEach(plat => {
@@ -1316,20 +1352,6 @@ export class CareerGameEngine {
     );
 
     ctx.restore();
-
-    // Chão
-    ctx.fillStyle = isDark ? '#166534' : '#22C55E';
-    ctx.fillRect(0, this.groundY, W, 4);
-
-    ctx.fillStyle = isDark ? '#1E293B' : '#64748B';
-    ctx.fillRect(0, this.groundY + 4, W, H - (this.groundY + 4));
-
-    ctx.fillStyle = isDark ? '#334155' : '#475569';
-    for (let px = 0; px < W + 30; px += 24) {
-      const offsetX = (px - (Math.floor(this.cameraX) % 24));
-      ctx.fillRect(offsetX, this.groundY + 10, 4, 3);
-      ctx.fillRect(offsetX + 10, this.groundY + 20, 5, 2);
-    }
   }
 
   private renderInterior(now: number) {
