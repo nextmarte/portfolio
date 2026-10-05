@@ -47,7 +47,7 @@ class RetroAudio {
       osc.type = 'square';
       const now = this.ctx.currentTime;
       osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(380, now + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
 
       gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
@@ -97,6 +97,33 @@ class RetroAudio {
     }
   }
 
+  public playHurt() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.linearRampToValueAtTime(90, now + 0.15);
+
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } catch {
+      // Audio playback silently fails
+    }
+  }
+
   public playInspect() {
     if (this.isMuted) return;
     this.initContext();
@@ -120,6 +147,32 @@ class RetroAudio {
       });
     } catch {
       // Audio playback silently fails
+    }
+  }
+
+  public playVictory() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const arpeggio = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98]; // C5, E5, G5, C6, E6, G6
+      arpeggio.forEach((freq, i) => {
+        const osc = this.ctx!.createOscillator();
+        const gain = this.ctx!.createGain();
+        const start = now + i * 0.07;
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.06, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx!.destination);
+        osc.start(start);
+        osc.stop(start + 0.2);
+      });
+    } catch {
+      // Silently fail
     }
   }
 }

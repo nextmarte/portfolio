@@ -159,6 +159,13 @@ export default function CareerGame() {
             </div>
           </div>
 
+          {/* Center hint: Keys guide (desktop) */}
+          {mode === 'playable' && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-cyan-500/30 text-white/80 text-[11px] font-mono shadow-lg pointer-events-auto animate-fade-in-up">
+              <span>🎮 <strong>[A/D/←/→]</strong> Mover • <strong>[Espaço/W/↑]</strong> Pular Obstáculos • <strong>[E]</strong> Inspecionar</span>
+            </div>
+          )}
+
           {/* Right controls: Play/Auto Mode & Audio Toggle */}
           <div className="flex items-center gap-2 pointer-events-auto">
             <button

@@ -1,4 +1,4 @@
-import { EraOutfit } from './types';
+import { EraOutfit, Milestone, Obstacle, Platform, SceneryProp, TechOrb } from './types';
 
 // Helper to draw a pixel block
 export function drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, size: number = 2) {
@@ -9,86 +9,109 @@ export function drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, c
 // 16-bit Character Palette Definition
 interface CharacterPalette {
   hair: string;
+  hairHighlight: string;
   hairShadow: string;
   skin: string;
   skinShadow: string;
   eyes: string;
   shirt: string;
+  shirtHighlight: string;
   shirtShadow: string;
   pants: string;
   pantsShadow: string;
   shoes: string;
+  shoesSole: string;
   accessory?: string;
+  backpack?: string;
+  hat?: string;
 }
 
 const PALETTES: Record<EraOutfit, CharacterPalette> = {
   cefet: {
     hair: '#3E2723',
-    hairShadow: '#271206',
+    hairHighlight: '#5D4037',
+    hairShadow: '#24140E',
     skin: '#F5D0A9',
     skinShadow: '#D4956A',
     eyes: '#2E7D32',
-    shirt: '#D7CCC8', // Uniforme cinza claro
-    shirtShadow: '#A1887F',
-    pants: '#37474F', // Calça azul petróleo
+    shirt: '#CFD8DC', // Uniforme cinza técnico
+    shirtHighlight: '#ECEFF1',
+    shirtShadow: '#90A4AE',
+    pants: '#37474F',
     pantsShadow: '#212121',
     shoes: '#4E342E',
+    shoesSole: '#D7CCC8',
+    backpack: '#C62828', // Mochila de estudante vermelha
   },
   chemtech: {
     hair: '#3E2723',
-    hairShadow: '#271206',
+    hairHighlight: '#5D4037',
+    hairShadow: '#24140E',
     skin: '#F5D0A9',
     skinShadow: '#D4956A',
     eyes: '#2E7D32',
     shirt: '#0288D1', // Azul Siemens / Chemtech
+    shirtHighlight: '#29B6F6',
     shirtShadow: '#01579B',
     pants: '#263238',
     pantsShadow: '#191E20',
     shoes: '#212121',
-    accessory: '#FFA000', // Crachá industrial
+    shoesSole: '#FFA000',
+    accessory: '#FFC107', // Crachá de segurança
+    hat: '#F59E0B', // Capacete industrial
   },
   uff: {
     hair: '#3E2723',
-    hairShadow: '#271206',
+    hairHighlight: '#5D4037',
+    hairShadow: '#24140E',
     skin: '#F5D0A9',
     skinShadow: '#D4956A',
     eyes: '#2E7D32',
-    shirt: '#1976D2', // Azul UFF clássico
+    shirt: '#1565C0', // Azul clássico universitário
+    shirtHighlight: '#42A5F5',
     shirtShadow: '#0D47A1',
     pants: '#455A64',
     pantsShadow: '#263238',
     shoes: '#5D4037',
+    shoesSole: '#8D6E63',
+    backpack: '#424242', // Pasta acadêmica
   },
   cid: {
     hair: '#3E2723',
-    hairShadow: '#271206',
+    hairHighlight: '#5D4037',
+    hairShadow: '#24140E',
     skin: '#F5D0A9',
     skinShadow: '#D4956A',
     eyes: '#2E7D32',
-    shirt: '#311B92', // Púrpura / Data Tech
+    shirt: '#311B92', // Púrpura Data Scientist
+    shirtHighlight: '#5E35B1',
     shirtShadow: '#1A0C54',
     pants: '#1E293B',
     pantsShadow: '#0F172A',
     shoes: '#334155',
-    accessory: '#00E676', // Detalhe verde bio/dados
+    shoesSole: '#64748B',
+    accessory: '#00E676', // Tablet / sensor Laguna
   },
   baxijen: {
     hair: '#3E2723',
-    hairShadow: '#271206',
+    hairHighlight: '#5D4037',
+    hairShadow: '#24140E',
     skin: '#F5D0A9',
     skinShadow: '#D4956A',
     eyes: '#2E7D32',
-    shirt: '#0F172A', // Dark Slate AI Architect
+    shirt: '#090D16', // Dark Cyber AI Architect
+    shirtHighlight: '#1E293B',
     shirtShadow: '#020617',
-    pants: '#1E293B',
-    pantsShadow: '#0F172A',
-    shoes: '#0EA5E9', // Sneaker com detalhe ciano
-    accessory: '#38BDF8', // Cyan AI glow
+    pants: '#0F172A',
+    pantsShadow: '#020617',
+    shoes: '#0EA5E9',
+    shoesSole: '#E0F2FE',
+    accessory: '#38BDF8', // Emblema neural ciano brilhante
   },
 };
 
 /**
- * Draws the 16-bit animated pixel-art character
+ * Renderiza o personagem com detalhes 16-bit autênticos
  */
 export function drawCharacter(
   ctx: CanvasRenderingContext2D,
@@ -98,297 +121,763 @@ export function drawCharacter(
   isJumping: boolean,
   isGrounded: boolean,
   facing: 'right' | 'left',
-  outfit: EraOutfit
+  outfit: EraOutfit,
+  stumbleTimer: number,
+  invulnerableTimer: number
 ) {
+  // Efeito de piscar caso esteja invulnerável após dano
+  if (invulnerableTimer > 0 && Math.floor(invulnerableTimer * 20) % 2 === 0) {
+    return;
+  }
+
   const p = PALETTES[outfit] || PALETTES.baxijen;
-  const S = 2; // Pixel unit size (each retro pixel = 2x2 screen pixels)
+  const S = 2; // Pixel unit size (2x2)
 
   ctx.save();
   ctx.translate(Math.floor(x), Math.floor(y));
+
+  // Sombra dinâmica no chão
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  const shadowWidth = isGrounded ? 18 : 12;
+  const shadowOffset = isGrounded ? 0 : 4;
+  ctx.beginPath();
+  ctx.ellipse(0, 2 + shadowOffset, shadowWidth, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   if (facing === 'left') {
     ctx.scale(-1, 1);
   }
 
-  // Animation walk bounce offset
-  const bounceY = !isGrounded ? -2 : (frame % 2 === 1 ? -1 : 0);
+  // Se estiver tropeçando, ligeira inclinação para trás e cor de alerta
+  const isStumbling = stumbleTimer > 0;
+  if (isStumbling) {
+    ctx.rotate(-0.15);
+  }
 
-  // 1. CABELO & CABEÇA (Topo)
-  // Base do cabelo
-  ctx.fillStyle = p.hair;
-  ctx.fillRect(-6 * S, (-28 + bounceY) * S, 12 * S, 5 * S);
-  ctx.fillRect(-7 * S, (-27 + bounceY) * S, 14 * S, 3 * S);
+  // Animação de bounce
+  const bounceY = !isGrounded ? -3 : (frame % 2 === 1 ? -1 : 0);
+
+  // 1. MOCHILA / ACESSÓRIO NAS COSTAS
+  if (p.backpack) {
+    ctx.fillStyle = p.backpack;
+    ctx.fillRect(-9 * S, (-20 + bounceY) * S, 4 * S, 9 * S);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(-9 * S, (-13 + bounceY) * S, 4 * S, 2 * S);
+  }
+
+  // 2. CABELO & CABEÇA
+  // Topo do cabelo
+  ctx.fillStyle = isStumbling ? '#EF4444' : p.hair;
+  ctx.fillRect(-6 * S, (-30 + bounceY) * S, 12 * S, 6 * S);
+  ctx.fillRect(-7 * S, (-29 + bounceY) * S, 14 * S, 4 * S);
+
+  // Brilho do cabelo
+  ctx.fillStyle = p.hairHighlight;
+  ctx.fillRect(-4 * S, (-31 + bounceY) * S, 7 * S, 1 * S);
+  ctx.fillRect(-5 * S, (-30 + bounceY) * S, 4 * S, 1 * S);
+
+  // Sombra do cabelo
   ctx.fillStyle = p.hairShadow;
-  ctx.fillRect(-6 * S, (-29 + bounceY) * S, 11 * S, 1 * S);
+  ctx.fillRect(-6 * S, (-25 + bounceY) * S, 12 * S, 1 * S);
+
+  // Capacete (se for Chemtech)
+  if (p.hat) {
+    ctx.fillStyle = p.hat;
+    ctx.fillRect(-7 * S, (-33 + bounceY) * S, 14 * S, 4 * S);
+    ctx.fillRect(-8 * S, (-29 + bounceY) * S, 16 * S, 2 * S); // Aba
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(-2 * S, (-32 + bounceY) * S, 4 * S, 2 * S); // Faixa refletiva
+  }
 
   // Rosto / Pele
   ctx.fillStyle = p.skin;
-  ctx.fillRect(-6 * S, (-23 + bounceY) * S, 12 * S, 8 * S);
+  ctx.fillRect(-6 * S, (-24 + bounceY) * S, 12 * S, 8 * S);
   ctx.fillStyle = p.skinShadow;
-  ctx.fillRect(-6 * S, (-16 + bounceY) * S, 12 * S, 1 * S); // Sombra do queixo
+  ctx.fillRect(-6 * S, (-17 + bounceY) * S, 12 * S, 1 * S); // Sombra do queixo
 
-  // Olhos verdes expressivos estilo retrô
+  // Olhos verdes expressivos estilo 16-bit
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(-1 * S, (-20 + bounceY) * S, 3 * S, 3 * S);
-  ctx.fillRect(3 * S, (-20 + bounceY) * S, 3 * S, 3 * S);
+  ctx.fillRect(-1 * S, (-22 + bounceY) * S, 3 * S, 3 * S);
+  ctx.fillRect(3 * S, (-22 + bounceY) * S, 3 * S, 3 * S);
 
   ctx.fillStyle = p.eyes;
-  ctx.fillRect(0 * S, (-19 + bounceY) * S, 2 * S, 2 * S);
-  ctx.fillRect(4 * S, (-19 + bounceY) * S, 2 * S, 2 * S);
+  ctx.fillRect(0 * S, (-21 + bounceY) * S, 2 * S, 2 * S);
+  ctx.fillRect(4 * S, (-21 + bounceY) * S, 2 * S, 2 * S);
 
   // Brilho dos olhos
-  ctx.fillStyle = '#E8F5E9';
-  ctx.fillRect(0 * S, (-20 + bounceY) * S, 1 * S, 1 * S);
-  ctx.fillRect(4 * S, (-20 + bounceY) * S, 1 * S, 1 * S);
+  ctx.fillStyle = '#BBF7D0';
+  ctx.fillRect(0 * S, (-22 + bounceY) * S, 1 * S, 1 * S);
+  ctx.fillRect(4 * S, (-22 + bounceY) * S, 1 * S, 1 * S);
 
-  // Sorriso discreto
-  ctx.fillStyle = p.skinShadow;
-  ctx.fillRect(0 * S, (-16 + bounceY) * S, 4 * S, 1 * S);
-
-  // 2. TRONCO / CAMISA
-  const torsoY = (-15 + bounceY) * S;
-  ctx.fillStyle = p.shirt;
-  ctx.fillRect(-5 * S, torsoY, 10 * S, 9 * S);
-  ctx.fillStyle = p.shirtShadow;
-  ctx.fillRect(-5 * S, torsoY + 7 * S, 10 * S, 2 * S);
-
-  // Detalhe tecnológico do peito (AI glow para BaXiJen / Crachá)
-  if (p.accessory) {
-    ctx.fillStyle = p.accessory;
-    ctx.fillRect(0 * S, torsoY + 2 * S, 2 * S, 3 * S);
+  // Sorriso / Expressão
+  if (isStumbling) {
+    // Boca de "Ouch!"
+    ctx.fillStyle = '#991B1B';
+    ctx.fillRect(1 * S, (-18 + bounceY) * S, 3 * S, 2 * S);
+  } else {
+    // Sorriso confiante
+    ctx.fillStyle = p.skinShadow;
+    ctx.fillRect(0 * S, (-17 + bounceY) * S, 4 * S, 1 * S);
+    ctx.fillRect(3 * S, (-18 + bounceY) * S, 1 * S, 1 * S);
   }
 
-  // 3. BRAÇOS & MÃOS
+  // 3. TRONCO / CAMISA
+  const torsoY = (-16 + bounceY) * S;
+  ctx.fillStyle = p.shirt;
+  ctx.fillRect(-5 * S, torsoY, 10 * S, 10 * S);
+
+  // Brilho e Sombra da camisa
+  ctx.fillStyle = p.shirtHighlight;
+  ctx.fillRect(-5 * S, torsoY, 2 * S, 9 * S);
+  ctx.fillStyle = p.shirtShadow;
+  ctx.fillRect(3 * S, torsoY, 2 * S, 10 * S);
+  ctx.fillRect(-5 * S, torsoY + 8 * S, 10 * S, 2 * S);
+
+  // Detalhe de acessório (ex: crachá, tablet, logo neural da BaXiJen)
+  if (p.accessory) {
+    ctx.fillStyle = p.accessory;
+    ctx.fillRect(0 * S, torsoY + 2 * S, 3 * S, 3 * S);
+    if (outfit === 'baxijen') {
+      // Glow neural pulsante
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(1 * S, torsoY + 3 * S, 1 * S, 1 * S);
+    }
+  }
+
+  // 4. BRAÇOS & MÃOS
   let armSwing = 0;
   if (!isGrounded) {
-    armSwing = -4; // Braços para cima no pulo
+    armSwing = -4; // Braços erguidos no salto
+  } else if (isStumbling) {
+    armSwing = 5; // Braços para trás no tropeço
   } else {
-    // Balanço de corrida
-    armSwing = Math.sin((frame / 4) * Math.PI * 2) * 3;
+    armSwing = Math.sin((frame / 4) * Math.PI * 2) * 4;
   }
 
   // Braço de trás
   ctx.fillStyle = p.shirtShadow;
-  ctx.fillRect((-7 * S) - (armSwing * S * 0.3), torsoY + (1 * S), 2 * S, 7 * S);
+  ctx.fillRect((-7 * S) - (armSwing * S * 0.3), torsoY + (1 * S), 2 * S, 8 * S);
   ctx.fillStyle = p.skin;
-  ctx.fillRect((-7 * S) - (armSwing * S * 0.3), torsoY + (8 * S), 2 * S, 2 * S);
+  ctx.fillRect((-7 * S) - (armSwing * S * 0.3), torsoY + (9 * S), 2 * S, 2 * S);
 
   // Braço da frente
   ctx.fillStyle = p.shirt;
-  ctx.fillRect((5 * S) + (armSwing * S * 0.3), torsoY + (1 * S), 2 * S, 7 * S);
+  ctx.fillRect((5 * S) + (armSwing * S * 0.3), torsoY + (1 * S), 2 * S, 8 * S);
   ctx.fillStyle = p.skin;
-  ctx.fillRect((5 * S) + (armSwing * S * 0.3), torsoY + (8 * S), 2 * S, 2 * S);
+  ctx.fillRect((5 * S) + (armSwing * S * 0.3), torsoY + (9 * S), 2 * S, 2 * S);
 
-  // 4. PERNAS & PÉS
-  const legY = torsoY + (9 * S);
+  // 5. PERNAS & PÉS
+  const legY = torsoY + (10 * S);
 
   if (isJumping) {
     // Perna esquerda dobrada
     ctx.fillStyle = p.pants;
-    ctx.fillRect(-5 * S, legY, 4 * S, 4 * S);
+    ctx.fillRect(-5 * S, legY, 4 * S, 5 * S);
     ctx.fillStyle = p.shoes;
-    ctx.fillRect(-6 * S, legY + 3 * S, 5 * S, 3 * S);
+    ctx.fillRect(-6 * S, legY + 4 * S, 6 * S, 3 * S);
+    ctx.fillStyle = p.shoesSole;
+    ctx.fillRect(-6 * S, legY + 7 * S, 6 * S, 1 * S);
 
     // Perna direita esticada
     ctx.fillStyle = p.pants;
-    ctx.fillRect(1 * S, legY, 4 * S, 6 * S);
+    ctx.fillRect(1 * S, legY, 4 * S, 7 * S);
     ctx.fillStyle = p.shoes;
-    ctx.fillRect(1 * S, legY + 5 * S, 5 * S, 3 * S);
+    ctx.fillRect(1 * S, legY + 6 * S, 6 * S, 3 * S);
+    ctx.fillStyle = p.shoesSole;
+    ctx.fillRect(1 * S, legY + 9 * S, 6 * S, 1 * S);
   } else {
-    // Ciclo de corrida com 4 frames
-    const legOffset1 = Math.sin((frame / 4) * Math.PI * 2) * 3;
+    // Animação de corrida em 4 frames
+    const legOffset1 = Math.sin((frame / 4) * Math.PI * 2) * 4;
     const legOffset2 = -legOffset1;
 
-    // Perna de trás
+    // Perna traseira
     ctx.fillStyle = p.pantsShadow;
-    ctx.fillRect(-5 * S + (legOffset2 * S * 0.5), legY, 4 * S, 6 * S);
+    ctx.fillRect(-5 * S + (legOffset2 * S * 0.6), legY, 4 * S, 7 * S);
     ctx.fillStyle = p.shoes;
-    ctx.fillRect(-6 * S + (legOffset2 * S * 0.5), legY + 6 * S, 5 * S, 2 * S);
+    ctx.fillRect(-6 * S + (legOffset2 * S * 0.6), legY + 7 * S, 6 * S, 3 * S);
+    ctx.fillStyle = p.shoesSole;
+    ctx.fillRect(-6 * S + (legOffset2 * S * 0.6), legY + 9 * S, 6 * S, 1 * S);
 
-    // Perna da frente
+    // Perna dianteira
     ctx.fillStyle = p.pants;
-    ctx.fillRect(1 * S + (legOffset1 * S * 0.5), legY, 4 * S, 6 * S);
+    ctx.fillRect(1 * S + (legOffset1 * S * 0.6), legY, 4 * S, 7 * S);
     ctx.fillStyle = p.shoes;
-    ctx.fillRect(1 * S + (legOffset1 * S * 0.5), legY + 6 * S, 5 * S, 2 * S);
+    ctx.fillRect(1 * S + (legOffset1 * S * 0.6), legY + 7 * S, 6 * S, 3 * S);
+    ctx.fillStyle = p.shoesSole;
+    ctx.fillRect(1 * S + (legOffset1 * S * 0.6), legY + 9 * S, 6 * S, 1 * S);
   }
 
   ctx.restore();
 }
 
 /**
- * Draws a detailed 16-bit landmark building
+ * Desenha os Prédios e Marcos com Arquitetura Realística 16-bit
  */
-export function drawBuilding(
+export function drawDetailedBuilding(
   ctx: CanvasRenderingContext2D,
-  x: number,
+  m: Milestone,
   groundY: number,
-  label: string,
-  subLabel: string,
-  baseColor: string,
-  roofColor: string,
-  width: number,
-  height: number,
-  isDark: boolean
+  isDark: boolean,
+  time: number
 ) {
-  const S = 2; // Pixel unit
-  const bX = Math.floor(x);
-  const bY = Math.floor(groundY - height);
+  const S = 2;
+  const bX = Math.floor(m.x);
+  const bY = Math.floor(groundY - m.height);
+  const W = m.width;
+  const H = m.height;
 
-  // Sombra suave do prédio
-  ctx.fillStyle = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)';
-  ctx.fillRect(bX - 8, groundY - 2, width + 16, 6);
+  ctx.save();
 
-  // Fachada principal
-  ctx.fillStyle = baseColor;
-  ctx.fillRect(bX, bY, width, height);
+  // Sombra suave do edifício
+  ctx.fillStyle = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.18)';
+  ctx.fillRect(bX - 12, groundY - 3, W + 24, 7);
 
-  // Efeito tijolos / textura 16-bit
-  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
-  for (let iy = bY + 12; iy < groundY - 10; iy += 16) {
-    for (let ix = bX + 6; ix < bX + width - 6; ix += 24) {
-      ctx.fillRect(ix, iy, 12, 1);
+  // 1. CORPO PRINCIPAL
+  ctx.fillStyle = m.color;
+  ctx.fillRect(bX, bY, W, H);
+
+  // 2. DETALHES POR ESTILO
+  if (m.buildingStyle === 'cefet') {
+    // Estilo técnico industrial CEFET: Tijolos vermelhos e chaminé
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    for (let iy = bY + 16; iy < groundY - 12; iy += 12) {
+      for (let ix = bX + 6; ix < bX + W - 6; ix += 20) {
+        ctx.fillRect(ix, iy, 10, 1);
+      }
     }
+    // Chaminé lateral de laboratório
+    ctx.fillStyle = '#5D2E0A';
+    ctx.fillRect(bX + W - 24, bY - 30, 16, 30);
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(bX + W - 26, bY - 34, 20, 5);
+
+    // Fumacinha pixelada saindo
+    const smokeOffset = (time * 20) % 40;
+    ctx.fillStyle = 'rgba(200, 200, 200, 0.4)';
+    ctx.fillRect(bX + W - 18, bY - 40 - smokeOffset, 8, 8);
+    ctx.fillRect(bX + W - 14, bY - 55 - smokeOffset, 12, 10);
+  } else if (m.buildingStyle === 'chemtech') {
+    // Estilo Corporativo Siemens: Faixas de vidro e antena de rádio
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(bX + 8, bY + 10, W - 16, H - 30);
+
+    // Antena no topo com luz vermelha piscante
+    ctx.fillStyle = '#64748B';
+    ctx.fillRect(bX + (W / 2) - 2, bY - 36, 4, 36);
+    ctx.fillRect(bX + (W / 2) - 8, bY - 24, 16, 2);
+    const blink = Math.sin(time * 6) > 0;
+    ctx.fillStyle = blink ? '#EF4444' : '#7F1D1D';
+    ctx.fillRect(bX + (W / 2) - 3, bY - 40, 6, 6);
+  } else if (m.buildingStyle === 'uff') {
+    // Estilo Campus Universitário: Colunas clássicas e frontão
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    // 4 colunas clássicas
+    for (let c = 0; c < 4; c++) {
+      const colX = bX + 16 + (c * ((W - 40) / 3));
+      ctx.fillRect(colX, bY + 24, 10, H - 34);
+      // Capitel da coluna
+      ctx.fillStyle = '#E2E8F0';
+      ctx.fillRect(colX - 2, bY + 20, 14, 4);
+    }
+  } else if (m.buildingStyle === 'cid') {
+    // CID - UFF: Painéis solares e sensores IoT
+    // Painel solar no teto inclinado
+    ctx.fillStyle = '#1E3A8A';
+    ctx.fillRect(bX + 12, bY - 14, W - 24, 10);
+    ctx.strokeStyle = '#60A5FA';
+    ctx.strokeRect(bX + 12, bY - 14, W - 24, 10);
+
+    // Letreiro do Projeto LAGUNA
+    ctx.fillStyle = '#065F46';
+    ctx.fillRect(bX + 16, groundY - 45, W - 32, 12);
+    ctx.fillStyle = '#34D399';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PROJETO LAGUNA', bX + (W / 2), groundY - 36);
+  } else if (m.buildingStyle === 'coppead') {
+    // COPPEAD/UFRJ: Cúpula executiva acadêmica
+    ctx.fillStyle = '#831843';
+    ctx.beginPath();
+    ctx.arc(bX + (W / 2), bY, 28, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = '#F59E0B';
+    ctx.fillRect(bX + (W / 2) - 2, bY - 36, 4, 10); // Agulha da cúpula
+  } else if (m.buildingStyle === 'baxijen') {
+    // BaXiJen: Sede Cyberpunk com holograma e neon
+    // Faixas de neon laterais que pulsam
+    const pulse = 0.5 + Math.sin(time * 4) * 0.5;
+    ctx.fillStyle = `rgba(56, 189, 248, ${0.4 + pulse * 0.4})`;
+    ctx.fillRect(bX + 2, bY + 8, 4, H - 16);
+    ctx.fillRect(bX + W - 6, bY + 8, 4, H - 16);
+
+    // Núcleo de IA no topo (Hexágono / Diamante flutuante)
+    const floatY = bY - 32 + Math.sin(time * 3) * 4;
+    ctx.fillStyle = '#38BDF8';
+    ctx.beginPath();
+    ctx.arc(bX + (W / 2), floatY, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(bX + (W / 2), floatY, 6, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  // Telhado / Topo
-  ctx.fillStyle = roofColor;
-  ctx.fillRect(bX - 4, bY - 6, width + 8, 6);
+  // 3. TELHADO & COROAMENTO
+  ctx.fillStyle = m.roofColor;
+  ctx.fillRect(bX - 6, bY - 8, W + 12, 9);
 
-  // Letreiro Retrô no topo
-  ctx.fillStyle = isDark ? '#0F172A' : '#1E293B';
-  ctx.fillRect(bX + 8, bY - 28, width - 16, 18);
-  ctx.strokeStyle = '#38BDF8';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(bX + 8, bY - 28, width - 16, 18);
+  // 4. LETREIRO DE NEON / PLACA INSTITUCIONAL
+  const signH = 22;
+  const signW = W - 20;
+  const signX = bX + 10;
+  const signY = bY - 32;
 
-  ctx.fillStyle = '#38BDF8';
-  ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = isDark ? '#020617' : '#0F172A';
+  ctx.fillRect(signX, signY, signW, signH);
+  ctx.strokeStyle = m.neonColor;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(signX, signY, signW, signH);
+
+  // Texto neon iluminado
+  ctx.fillStyle = m.neonColor;
+  ctx.font = 'bold 11px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(label, bX + (width / 2), bY - 16);
+  ctx.fillText(m.label, bX + (W / 2), signY + 12);
 
-  if (subLabel) {
-    ctx.fillStyle = '#94A3B8';
+  if (m.subLabel) {
+    ctx.fillStyle = '#CBD5E1';
     ctx.font = '8px monospace';
-    ctx.fillText(subLabel, bX + (width / 2), bY - 8);
+    ctx.fillText(m.subLabel, bX + (W / 2), signY + 20);
   }
 
-  // Janelas pixeladas acesas
-  const windowColor = isDark ? '#FEF08A' : '#E0F2FE';
-  const frameColor = isDark ? '#854D0E' : '#38BDF8';
+  // 5. JANELAS RETRÔ ILUMINADAS
+  const winRows = Math.floor((H - 55) / 24);
+  const winCols = Math.floor((W - 24) / 22);
+  const winColor = isDark ? '#FEF08A' : '#E0F2FE';
 
-  const rows = Math.floor((height - 50) / 24);
-  const cols = Math.floor((width - 24) / 20);
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const wx = bX + 16 + (c * 20);
+  for (let r = 0; r < winRows; r++) {
+    for (let c = 0; c < winCols; c++) {
+      const wx = bX + 14 + (c * 22);
       const wy = bY + 16 + (r * 24);
 
-      ctx.fillStyle = frameColor;
-      ctx.fillRect(wx - S, wy - S, 12 + (2 * S), 14 + (2 * S));
+      // Moldura da janela
+      ctx.fillStyle = isDark ? 'rgba(0,0,0,0.5)' : '#94A3B8';
+      ctx.fillRect(wx - 1, wy - 1, 14, 16);
 
-      // Algumas janelas apagadas para realismo
-      const isLit = (r + c + Math.floor(x / 100)) % 4 !== 0;
-      ctx.fillStyle = isLit ? windowColor : (isDark ? '#1E293B' : '#94A3B8');
+      // Vidro
+      const isLit = (r + c + Math.floor(m.x / 50)) % 3 !== 0;
+      ctx.fillStyle = isLit ? winColor : (isDark ? '#1E293B' : '#64748B');
       ctx.fillRect(wx, wy, 12, 14);
 
-      // Divisória da janela
-      ctx.fillStyle = isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)';
+      // Cruzeta da janela
+      ctx.fillStyle = isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.4)';
       ctx.fillRect(wx + 5, wy, 2, 14);
       ctx.fillRect(wx, wy + 6, 12, 2);
     }
   }
 
-  // Porta de entrada
-  const doorW = 20;
-  const doorH = 26;
-  const doorX = bX + (width / 2) - (doorW / 2);
+  // 6. PORTA DE ENTRADA
+  const doorW = 24;
+  const doorH = 30;
+  const doorX = bX + (W / 2) - (doorW / 2);
   const doorY = groundY - doorH;
 
-  ctx.fillStyle = isDark ? '#020617' : '#334155';
+  ctx.fillStyle = isDark ? '#020617' : '#1E293B';
   ctx.fillRect(doorX, doorY, doorW, doorH);
-  ctx.strokeStyle = roofColor;
+  ctx.strokeStyle = m.accentColor;
   ctx.lineWidth = 2;
   ctx.strokeRect(doorX, doorY, doorW, doorH);
 
-  // Maçaneta dourada
+  // Tapete de entrada
+  ctx.fillStyle = m.accentColor;
+  ctx.fillRect(doorX - 4, groundY - 2, doorW + 8, 3);
+
+  // Luz da porta
   ctx.fillStyle = '#F59E0B';
-  ctx.fillRect(doorX + doorW - 5, doorY + (doorH / 2), 2, 3);
-}
-
-/**
- * Draws floating collectible Tech Orbs
- */
-export function drawTechOrb(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  name: string,
-  iconType: string,
-  collected: boolean,
-  time: number
-) {
-  if (collected) return;
-
-  const floatY = y + Math.sin(time * 3 + x) * 5;
-  const S = 2;
-
-  // Glow halo
-  ctx.save();
-  ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-  ctx.beginPath();
-  ctx.arc(x, floatY, 14, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Borda pixelada
-  ctx.fillStyle = '#0284C7';
-  ctx.fillRect(x - 9 * S / 2, floatY - 9 * S / 2, 9 * S, 9 * S);
-  ctx.fillStyle = '#38BDF8';
-  ctx.fillRect(x - 7 * S / 2, floatY - 7 * S / 2, 7 * S, 7 * S);
-
-  // Mini ícone de pixel no centro
-  ctx.fillStyle = '#FFFFFF';
-  if (iconType === 'python') {
-    ctx.fillStyle = '#FACC15';
-    ctx.fillRect(x - 2, floatY - 3, 4, 3);
-    ctx.fillStyle = '#38BDF8';
-    ctx.fillRect(x - 2, floatY, 4, 3);
-  } else if (iconType === 'mcp') {
-    // Raio elétrico
-    ctx.fillStyle = '#FBBF24';
-    ctx.fillRect(x - 1, floatY - 3, 2, 3);
-    ctx.fillRect(x - 2, floatY, 3, 1);
-    ctx.fillRect(x - 1, floatY + 1, 2, 3);
-  } else if (iconType === 'claude') {
-    ctx.fillStyle = '#D97706';
-    ctx.fillRect(x - 2, floatY - 2, 5, 5);
-  } else {
-    // Chip / Core
-    ctx.fillStyle = '#10B981';
-    ctx.fillRect(x - 2, floatY - 2, 4, 4);
-  }
-
-  // Label flutuante abaixo
-  ctx.fillStyle = '#E2E8F0';
-  ctx.font = 'bold 8px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(name, x, floatY + 16);
+  ctx.fillRect(doorX + (doorW / 2) - 2, doorY - 4, 4, 4);
 
   ctx.restore();
 }
 
 /**
- * Draws retro parallax trees
+ * Desenha Obstáculos Retrô (Bugs de software, servidores, cones, firewalls)
  */
-export function drawPixelTree(ctx: CanvasRenderingContext2D, x: number, groundY: number, isDark: boolean) {
-  // Tronco
-  ctx.fillStyle = isDark ? '#3E2723' : '#5D4037';
-  ctx.fillRect(x + 6, groundY - 20, 6, 20);
+export function drawObstacle(
+  ctx: CanvasRenderingContext2D,
+  obs: Obstacle,
+  groundY: number,
+  isDark: boolean,
+  time: number
+) {
+  const oX = Math.floor(obs.x);
+  const oY = Math.floor(groundY - obs.height);
+  const S = 2;
 
-  // Folhagem em camadas pixeladas
-  ctx.fillStyle = isDark ? '#14532D' : '#16A34A';
-  ctx.fillRect(x, groundY - 45, 18, 25);
-  ctx.fillRect(x - 4, groundY - 38, 26, 18);
-  ctx.fillStyle = isDark ? '#166534' : '#22C55E';
-  ctx.fillRect(x + 2, groundY - 43, 14, 10);
+  ctx.save();
+
+  if (obs.type === 'glitch_bug') {
+    // Inseto de Bug de Software animado!
+    const wingFlap = Math.sin(time * 18) * 4;
+    const bugY = oY + Math.sin(time * 6) * 3;
+
+    // Sombra do bug no chão
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(oX + (obs.width / 2), groundY - 2, 10, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Asas
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+    ctx.fillRect(oX + 2, bugY - 6 + wingFlap, 6, 8);
+    ctx.fillRect(oX + 16, bugY - 6 - wingFlap, 6, 8);
+
+    // Corpo de besouro mecânico / Bug
+    ctx.fillStyle = '#DC2626';
+    ctx.fillRect(oX + 6, bugY, 12, 14);
+    ctx.fillStyle = '#991B1B';
+    ctx.fillRect(oX + 8, bugY + 3, 8, 8);
+
+    // Olhos digitais vermelhos incandescentes
+    ctx.fillStyle = '#FEF08A';
+    ctx.fillRect(oX + 8, bugY + 2, 3, 3);
+    ctx.fillRect(oX + 13, bugY + 2, 3, 3);
+
+    // Perninhas mecânicas
+    ctx.fillStyle = '#450A0A';
+    ctx.fillRect(oX + 3, bugY + 12, 3, 4);
+    ctx.fillRect(oX + 18, bugY + 12, 3, 4);
+
+    // Balãozinho de "BUG"
+    ctx.fillStyle = '#EF4444';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('!BUG', oX + (obs.width / 2), bugY - 10);
+  } else if (obs.type === 'server_rack') {
+    // Rack de servidor com LEDs piscando
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(oX, oY, obs.width, obs.height);
+    ctx.strokeStyle = '#334155';
+    ctx.strokeRect(oX, oY, obs.width, obs.height);
+
+    // Blades do servidor
+    for (let by = oY + 4; by < oY + obs.height - 4; by += 8) {
+      ctx.fillStyle = '#1E293B';
+      ctx.fillRect(oX + 3, by, obs.width - 6, 6);
+
+      // LEDs
+      const ledOn1 = Math.sin(time * 10 + by) > 0;
+      const ledOn2 = Math.cos(time * 8 + by) > 0;
+      ctx.fillStyle = ledOn1 ? '#22C55E' : '#14532D';
+      ctx.fillRect(oX + 6, by + 2, 2, 2);
+      ctx.fillStyle = ledOn2 ? '#38BDF8' : '#0369A1';
+      ctx.fillRect(oX + 10, by + 2, 2, 2);
+    }
+  } else if (obs.type === 'hazard_cone') {
+    // Cone de atenção industrial
+    ctx.fillStyle = '#EA580C';
+    ctx.beginPath();
+    ctx.moveTo(oX + (obs.width / 2), oY);
+    ctx.lineTo(oX + obs.width, groundY);
+    ctx.lineTo(oX, groundY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Faixas brancas refletivas
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(oX + 5, oY + 10, obs.width - 10, 4);
+    ctx.fillRect(oX + 3, oY + 18, obs.width - 6, 4);
+
+    // Base preta
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(oX - 2, groundY - 4, obs.width + 4, 4);
+  } else if (obs.type === 'firewall') {
+    // Firewall / Barreira de energia digital
+    const pulse = Math.sin(time * 12) * 0.3 + 0.7;
+    ctx.fillStyle = `rgba(239, 68, 68, ${0.3 * pulse})`;
+    ctx.fillRect(oX - 4, oY, obs.width + 8, obs.height);
+
+    ctx.fillStyle = '#EF4444';
+    ctx.fillRect(oX, oY, obs.width, obs.height);
+
+    // Feixes de eletricidade/código
+    ctx.fillStyle = '#FDE047';
+    for (let ly = oY; ly < groundY; ly += 6) {
+      const jx = Math.sin(ly + time * 15) * 3;
+      ctx.fillRect(oX + (obs.width / 2) + jx, ly, 2, 3);
+    }
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Desenha Plataformas Elevadas para Pulos Verticais
+ */
+export function drawPlatform(
+  ctx: CanvasRenderingContext2D,
+  plat: Platform,
+  isDark: boolean
+) {
+  const pX = Math.floor(plat.x);
+  const pY = Math.floor(plat.y);
+  const W = plat.width;
+  const H = plat.height;
+
+  ctx.save();
+
+  if (plat.type === 'metal') {
+    // Viga metálica de engenharia
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(pX, pY, W, H);
+    ctx.fillStyle = '#64748B';
+    ctx.fillRect(pX, pY, W, 3);
+    // Parafusos / rebites
+    ctx.fillStyle = '#CBD5E1';
+    for (let rx = pX + 4; rx < pX + W; rx += 14) {
+      ctx.fillRect(rx, pY + (H / 2) - 1, 2, 2);
+    }
+  } else if (plat.type === 'brick') {
+    // Tijolos clássicos estilo Mario / Retrô
+    ctx.fillStyle = '#B45309';
+    ctx.fillRect(pX, pY, W, H);
+    ctx.fillStyle = '#F59E0B';
+    ctx.fillRect(pX, pY, W, 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    for (let bx = pX + 16; bx < pX + W; bx += 16) {
+      ctx.fillRect(bx, pY, 2, H);
+    }
+  } else if (plat.type === 'wood') {
+    // Pranchas de madeira do campus
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(pX, pY, W, H);
+    ctx.fillStyle = '#92400E';
+    ctx.fillRect(pX, pY, W, 2);
+  } else if (plat.type === 'cyber') {
+    // Plataforma cibernética futurista com borda neon
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(pX, pY, W, H);
+    ctx.strokeStyle = '#38BDF8';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(pX, pY, W, H);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(pX, pY, W, 2);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Desenha Elementos de Cenário (Postes com Cone de Luz Realista, Bancos, Flores)
+ */
+export function drawSceneryProps(
+  ctx: CanvasRenderingContext2D,
+  prop: SceneryProp,
+  groundY: number,
+  isDark: boolean
+) {
+  const pX = Math.floor(prop.x);
+  ctx.save();
+
+  if (prop.type === 'lamp_classic' || prop.type === 'lamp_cyber') {
+    const lampH = 65;
+    const lampY = groundY - lampH;
+    const isCyber = prop.type === 'lamp_cyber';
+
+    // Poste
+    ctx.fillStyle = isCyber ? '#0F172A' : '#334155';
+    ctx.fillRect(pX + 3, lampY, 4, lampH);
+    ctx.fillStyle = isCyber ? '#38BDF8' : '#64748B';
+    ctx.fillRect(pX, lampY, 10, 4);
+
+    // Lâmpada
+    const lightColor = isCyber ? '#38BDF8' : '#FEF08A';
+    ctx.fillStyle = lightColor;
+    ctx.fillRect(pX + 2, lampY + 4, 6, 6);
+
+    // Cone de Luz Iluminado no chão (Modo Noite)
+    if (isDark) {
+      const grad = ctx.createRadialGradient(
+        pX + 5, lampY + 7, 2,
+        pX + 5, groundY, 70
+      );
+      grad.addColorStop(0, isCyber ? 'rgba(56, 189, 248, 0.45)' : 'rgba(254, 240, 138, 0.4)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(pX + 5, lampY + 7);
+      ctx.lineTo(pX - 45, groundY);
+      ctx.lineTo(pX + 55, groundY);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if (prop.type === 'bench') {
+    // Banco de praça
+    ctx.fillStyle = '#854D0E';
+    ctx.fillRect(pX, groundY - 14, 28, 4); // Assento
+    ctx.fillRect(pX + 2, groundY - 22, 24, 4); // Encosto
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(pX + 4, groundY - 14, 3, 14); // Pés
+    ctx.fillRect(pX + 21, groundY - 14, 3, 14);
+  } else if (prop.type === 'bush_flowers') {
+    // Arbusto com flores coloridas
+    ctx.fillStyle = isDark ? '#14532D' : '#16A34A';
+    ctx.beginPath();
+    ctx.arc(pX + 10, groundY - 8, 12, 0, Math.PI * 2);
+    ctx.arc(pX + 20, groundY - 12, 14, 0, Math.PI * 2);
+    ctx.arc(pX + 30, groundY - 8, 11, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Florzinhas pixeladas
+    ctx.fillStyle = '#F43F5E';
+    ctx.fillRect(pX + 8, groundY - 14, 3, 3);
+    ctx.fillRect(pX + 22, groundY - 18, 3, 3);
+    ctx.fillStyle = '#FBBF24';
+    ctx.fillRect(pX + 16, groundY - 10, 3, 3);
+    ctx.fillRect(pX + 28, groundY - 12, 3, 3);
+  } else if (prop.type === 'hydrant') {
+    // Hidrante vermelho
+    ctx.fillStyle = '#DC2626';
+    ctx.fillRect(pX, groundY - 16, 10, 16);
+    ctx.fillStyle = '#EF4444';
+    ctx.fillRect(pX - 2, groundY - 12, 14, 4);
+    ctx.fillStyle = '#B91C1C';
+    ctx.fillRect(pX + 2, groundY - 19, 6, 4);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Desenha Orbes Colecionáveis com Ícones Específicos
+ */
+export function drawTechOrb(
+  ctx: CanvasRenderingContext2D,
+  orb: TechOrb,
+  time: number
+) {
+  if (orb.collected) return;
+
+  const floatY = orb.y + Math.sin(time * 3 + orb.floatOffset) * 6;
+  const x = Math.floor(orb.x);
+  const S = 2;
+
+  ctx.save();
+
+  // Glow halo pulsante
+  const haloRadius = 14 + Math.sin(time * 4 + orb.floatOffset) * 3;
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+  ctx.beginPath();
+  ctx.arc(x, floatY, haloRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Orbe / Cristais 16-bit
+  ctx.fillStyle = '#0284C7';
+  ctx.fillRect(x - 9, floatY - 9, 18, 18);
+  ctx.fillStyle = '#38BDF8';
+  ctx.fillRect(x - 7, floatY - 7, 14, 14);
+
+  // Ícones específicos desenhados em pixel
+  ctx.fillStyle = '#FFFFFF';
+  if (orb.iconType === 'python') {
+    ctx.fillStyle = '#FACC15';
+    ctx.fillRect(x - 3, floatY - 4, 6, 4);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(x - 3, floatY, 6, 4);
+  } else if (orb.iconType === 'docker') {
+    ctx.fillStyle = '#0284C7';
+    ctx.fillRect(x - 4, floatY - 2, 8, 4);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x - 2, floatY - 4, 4, 2);
+  } else if (orb.iconType === 'mcp') {
+    // Raio elétrico / Conexão MCP
+    ctx.fillStyle = '#FBBF24';
+    ctx.fillRect(x - 2, floatY - 5, 4, 3);
+    ctx.fillRect(x - 4, floatY - 2, 5, 2);
+    ctx.fillRect(x - 1, floatY, 3, 5);
+  } else if (orb.iconType === 'claude') {
+    // Estrela Anthropic
+    ctx.fillStyle = '#D97706';
+    ctx.fillRect(x - 4, floatY - 4, 8, 8);
+    ctx.fillStyle = '#F59E0B';
+    ctx.fillRect(x - 2, floatY - 2, 4, 4);
+  } else if (orb.iconType === 'langgraph') {
+    // Grafo com nós interligados
+    ctx.fillStyle = '#10B981';
+    ctx.fillRect(x - 4, floatY - 4, 3, 3);
+    ctx.fillRect(x + 2, floatY - 4, 3, 3);
+    ctx.fillRect(x - 1, floatY + 2, 3, 3);
+    ctx.fillStyle = '#6EE7B7';
+    ctx.fillRect(x - 2, floatY - 2, 4, 2);
+  } else {
+    // Terminal / Code prompt
+    ctx.fillStyle = '#10B981';
+    ctx.fillRect(x - 4, floatY - 4, 8, 8);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('>', x, floatY + 2);
+  }
+
+  // Nome do orbe em cartucho retrô
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(x - 22, floatY + 12, 44, 12);
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x - 22, floatY + 12, 44, 12);
+
+  ctx.fillStyle = '#F8FAFC';
+  ctx.font = 'bold 8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(orb.name, x, floatY + 21);
+
+  ctx.restore();
+}
+
+/**
+ * Desenha Árvores Retrô com Variações de Espécie
+ */
+export function drawPixelTree(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  groundY: number,
+  isDark: boolean,
+  variant: number = 0
+) {
+  const pX = Math.floor(x);
+  ctx.save();
+
+  // Tronco com galhos
+  ctx.fillStyle = isDark ? '#3E2723' : '#5D4037';
+  ctx.fillRect(pX + 8, groundY - 26, 8, 26);
+  ctx.fillRect(pX + 5, groundY - 18, 4, 3);
+  ctx.fillRect(pX + 15, groundY - 22, 4, 3);
+
+  // Folhagem
+  if (variant % 2 === 0) {
+    // Árvore frondosa clássica
+    ctx.fillStyle = isDark ? '#14532D' : '#16A34A';
+    ctx.fillRect(pX, groundY - 60, 24, 38);
+    ctx.fillRect(pX - 6, groundY - 50, 36, 24);
+    ctx.fillStyle = isDark ? '#166534' : '#22C55E';
+    ctx.fillRect(pX + 3, groundY - 56, 18, 16);
+  } else {
+    // Pinheiro / Cipreste
+    ctx.fillStyle = isDark ? '#064E3B' : '#047857';
+    ctx.beginPath();
+    ctx.moveTo(pX + 12, groundY - 70);
+    ctx.lineTo(pX + 28, groundY - 24);
+    ctx.lineTo(pX - 4, groundY - 24);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = isDark ? '#047857' : '#10B981';
+    ctx.beginPath();
+    ctx.moveTo(pX + 12, groundY - 70);
+    ctx.lineTo(pX + 22, groundY - 40);
+    ctx.lineTo(pX + 2, groundY - 40);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
 }
