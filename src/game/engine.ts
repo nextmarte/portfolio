@@ -1,5 +1,4 @@
 import {
-  Achievement,
   BuildingInterior,
   EraOutfit,
   FloatingText,
@@ -440,20 +439,6 @@ export const INITIAL_POWERUPS: PowerUpItem[] = [
   { id: 'pu-5', x: 6520, y: 0, type: 'shield', label: 'ESCUDO', collected: false, floatOffset: 4 },
 ];
 
-export const INITIAL_ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_jump', title: 'Primeiro Salto', description: 'Executou um salto sobre a avenida.', icon: '🦘', unlocked: false, xpReward: 100 },
-  { id: 'dash_master', title: 'Mestre do Slide', description: 'Executou um Dash/Slide rasante.', icon: '⚡', unlocked: false, xpReward: 120 },
-  { id: 'double_jump', title: 'Propulsão Dupla', description: 'Realizou um salto duplo no ar.', icon: '🚀', unlocked: false, xpReward: 150 },
-  { id: 'perfect_dodge', title: 'Reflexos de Aço', description: 'Acumulou combo de esquivas consecutivas.', icon: '🔥', unlocked: false, xpReward: 200 },
-  { id: 'terminal_hacker', title: 'Terminal Hacker', description: 'Acessou o terminal de projetos de um laboratório.', icon: '💻', unlocked: false, xpReward: 250 },
-  { id: 'shield_hero', title: 'Defesa Quântica', description: 'Ativou um Escudo e absorveu um impacto.', icon: '🛡️', unlocked: false, xpReward: 150 },
-  { id: 'overclock_speed', title: 'Overclocked', description: 'Pegou o acelerador de velocidade Overclock.', icon: '⏱️', unlocked: false, xpReward: 150 },
-  { id: 'magnetic_pull', title: 'Atração Magnética', description: 'Atraiu Tech Orbs usando o Ímã.', icon: '🧲', unlocked: false, xpReward: 150 },
-  { id: 'time_traveler', title: 'Viajante do Tempo', description: 'Visitou todos os marcos históricos (2008-2026).', icon: '⏳', unlocked: false, xpReward: 300 },
-  { id: 'tech_collector', title: 'Tech Hoarder', description: 'Coletou todos os Tech Orbs disponíveis.', icon: '💎', unlocked: false, xpReward: 400 },
-  { id: 'supreme_architect', title: 'AI Architect Supremo', description: 'Atingiu o nível máximo na BaXiJen.', icon: '👑', unlocked: false, xpReward: 500 },
-];
-
 export const INITIAL_TECH_ORBS: TechOrb[] = [
   { id: 'orb-1', name: 'Python', x: 750, y: 0, iconType: 'python', collected: false, floatOffset: 0 },
   { id: 'orb-2', name: 'Docker', x: 1250, y: 0, iconType: 'docker', collected: false, floatOffset: 1 },
@@ -556,7 +541,6 @@ export class CareerGameEngine {
   private powerUps: PowerUpItem[] = [];
   private floatingTexts: FloatingText[] = [];
   private ghostTrails: GhostTrail[] = [];
-  private achievements: Record<string, Achievement> = {};
   private screenShakeTimer: number = 0;
   private screenShakeIntensity: number = 0;
   private dashCooldown: number = 0;
@@ -575,7 +559,6 @@ export class CareerGameEngine {
     terminalsAccessed: {},
     visitedBuildings: {},
     completedBuildings: {},
-    achievements: {},
   };
 
   // Callbacks para UI
@@ -589,7 +572,6 @@ export class CareerGameEngine {
   public onLevelUp: ((level: number, title: string) => void) | null = null;
   public onComboDodge: ((combo: number) => void) | null = null;
   public onTerminalOpen: ((projects: TerminalProject[], buildingName: string) => void) | null = null;
-  public onAchievementUnlocked: ((achievement: Achievement) => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, isDark: boolean) {
     this.canvas = canvas;
@@ -635,10 +617,6 @@ export class CareerGameEngine {
     this.props = JSON.parse(JSON.stringify(INITIAL_PROPS));
     this.interiors = JSON.parse(JSON.stringify(BUILDING_INTERIORS));
     this.powerUps = JSON.parse(JSON.stringify(INITIAL_POWERUPS));
-
-    INITIAL_ACHIEVEMENTS.forEach(a => {
-      this.achievements[a.id] = { ...a };
-    });
 
     assetManager.loadAll();
     this.resize();
@@ -700,10 +678,6 @@ export class CareerGameEngine {
     return this.powerUps;
   }
 
-  public getAchievements(): Achievement[] {
-    return Object.values(this.achievements);
-  }
-
   public triggerScreenShake(duration: number, intensity: number) {
     this.screenShakeTimer = duration;
     this.screenShakeIntensity = intensity;
@@ -724,31 +698,12 @@ export class CareerGameEngine {
     });
   }
 
-  public unlockAchievement(id: string) {
-    const ach = this.achievements[id];
-    if (ach && !ach.unlocked) {
-      ach.unlocked = true;
-      this.stats.achievements[id] = true;
-      const reward = ach.xpReward || 150;
-      this.addXp(reward);
-      retroAudio.playVictory();
-      this.spawnFloatingText(this.player.x, this.player.y - 48, `🏆 ${ach.title}! +${reward} XP`, '#FACC15');
-      if (this.onAchievementUnlocked) {
-        this.onAchievementUnlocked(ach);
-      }
-      if (this.onStatsUpdate) {
-        this.onStatsUpdate({ ...this.stats });
-      }
-    }
-  }
-
   public openTerminalForCurrentRoom() {
     if (this.view === 'interior' && this.currentInterior && this.currentInterior.terminalProjects) {
       if (this.onTerminalOpen) {
         this.onTerminalOpen(this.currentInterior.terminalProjects, this.currentInterior.name);
         retroAudio.playTerminalOpen();
         this.stats.terminalsAccessed[this.currentInterior.buildingId] = true;
-        this.unlockAchievement('terminal_hacker');
         if (this.onStatsUpdate) {
           this.onStatsUpdate({ ...this.stats });
         }
@@ -787,9 +742,6 @@ export class CareerGameEngine {
       retroAudio.playLevelUp();
       this.createSparkles(this.player.x, this.player.y - 30, 25, ['#FACC15', '#F59E0B', '#38BDF8', '#FFFFFF']);
       this.spawnFloatingText(this.player.x, this.player.y - 45, '⭐ LEVEL UP! ⭐', '#FACC15');
-      if (newLevel >= 6) {
-        this.unlockAchievement('supreme_architect');
-      }
       if (this.onLevelUp) {
         this.onLevelUp(newLevel, newTitle);
       }
@@ -829,12 +781,6 @@ export class CareerGameEngine {
 
         this.stats.visitedBuildings[buildingId] = true;
         this.addXp(20);
-
-        // Checar conquista de todos os prédios visitados
-        const allVisited = MILESTONES.every(m => this.stats.visitedBuildings[m.id]);
-        if (allVisited) {
-          this.unlockAchievement('time_traveler');
-        }
 
         // Toca trilha chiptune interior lo-fi
         retroAudio.startBGM('interior');
@@ -1039,7 +985,6 @@ export class CareerGameEngine {
       this.stats.dashCount = (this.stats.dashCount || 0) + 1;
       retroAudio.playDash();
       this.spawnFloatingText(this.player.x, this.player.y - 36, 'DASH! ⚡', '#38BDF8');
-      this.unlockAchievement('dash_master');
       this.createDust(this.player.x, this.groundY, 8);
     }
 
@@ -1121,7 +1066,6 @@ export class CareerGameEngine {
             this.player.hasDoubleJumped = false;
             retroAudio.playJump();
             this.createDust(this.player.x, this.groundY, 6);
-            this.unlockAchievement('first_jump');
           } else if (!this.player.hasDoubleJumped && this.player.vy > -240) {
             // Salto Duplo no Ar
             this.player.vy = jumpVelocity * 0.88;
@@ -1129,7 +1073,6 @@ export class CareerGameEngine {
             retroAudio.playJump();
             this.spawnFloatingText(this.player.x, this.player.y - 30, 'DOUBLE JUMP! 🚀', '#34D399');
             this.createSparkles(this.player.x, this.player.y + 8, 8, ['#34D399', '#38BDF8', '#FFFFFF']);
-            this.unlockAchievement('double_jump');
           }
         }
       }
@@ -1192,9 +1135,6 @@ export class CareerGameEngine {
         obs.dodged = true;
         this.stats.dodgeCombo++;
         this.addXp(40);
-        if (this.stats.dodgeCombo >= 3) {
-          this.unlockAchievement('perfect_dodge');
-        }
         this.spawnFloatingText(obs.x + (obs.width / 2), this.groundY - 32, `+40 XP (x${this.stats.dodgeCombo})`, '#FACC15');
         if (this.onComboDodge) {
           this.onComboDodge(this.stats.dodgeCombo);
@@ -1220,7 +1160,6 @@ export class CareerGameEngine {
           this.triggerScreenShake(0.25, 6);
           retroAudio.playShieldBreak();
           this.spawnFloatingText(this.player.x, this.player.y - 38, 'ESCUDO BLOQUEOU! 🛡️', '#38BDF8');
-          this.unlockAchievement('shield_hero');
           this.createSparkles(this.player.x, this.player.y - 18, 14, ['#38BDF8', '#FFFFFF', '#00F0FF']);
           break;
         }
@@ -1250,15 +1189,12 @@ export class CareerGameEngine {
           if (pu.type === 'overclock') {
             this.player.overclockTimer = 7.0; // 7 segundos de turbo
             this.spawnFloatingText(pu.x, pu.y - 25, 'OVERCLOCK ATIVADO! ⚡', '#FACC15');
-            this.unlockAchievement('overclock_speed');
           } else if (pu.type === 'shield') {
             this.player.shieldActive = true;
             this.spawnFloatingText(pu.x, pu.y - 25, 'ESCUDO ATIVO! 🛡️', '#38BDF8');
-            this.unlockAchievement('shield_hero');
           } else if (pu.type === 'magnet') {
             this.player.magnetTimer = 8.0; // 8 segundos de atração magnética
             this.spawnFloatingText(pu.x, pu.y - 25, 'ÍMÃ ATIVADO! 🧲', '#D946EF');
-            this.unlockAchievement('magnetic_pull');
           }
 
           this.addXp(50);
@@ -1323,10 +1259,6 @@ export class CareerGameEngine {
           retroAudio.playCollect();
           this.spawnFloatingText(orb.x, orb.y - 18, '+60 XP', '#38BDF8');
           this.createSparkles(orb.x, orb.y, 12, ['#38BDF8', '#FACC15', '#34D399', '#A78BFA']);
-
-          if (this.stats.totalOrbsCollected >= this.techOrbs.length) {
-            this.unlockAchievement('tech_collector');
-          }
 
           if (this.onOrbsUpdate) {
             this.onOrbsUpdate(this.collectedCount, this.techOrbs.length);

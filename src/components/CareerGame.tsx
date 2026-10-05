@@ -2,8 +2,8 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useTheme } from 'next-themes';
-import { CareerGameEngine, INITIAL_TECH_ORBS, MILESTONES, BUILDING_INTERIORS, INITIAL_ACHIEVEMENTS } from '@/game/engine';
-import { Achievement, BuildingInterior, GameView, InteriorSkillItem, Milestone, PlayerCareerStats, TechOrb, TerminalProject } from '@/game/types';
+import { CareerGameEngine, INITIAL_TECH_ORBS, MILESTONES, BUILDING_INTERIORS } from '@/game/engine';
+import { BuildingInterior, GameView, InteriorSkillItem, Milestone, PlayerCareerStats, TechOrb, TerminalProject } from '@/game/types';
 import { retroAudio } from '@/game/audio';
 import {
   Volume2,
@@ -32,7 +32,6 @@ import {
   HelpCircle,
   Terminal,
   ExternalLink,
-  Trophy,
   Shield,
   Activity,
 } from 'lucide-react';
@@ -73,10 +72,9 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
     terminalsAccessed: {},
     visitedBuildings: {},
     completedBuildings: {},
-    achievements: {},
   });
   const [isTechDexOpen, setIsTechDexOpen] = useState(false);
-  const [techDexTab, setTechDexTab] = useState<'skills' | 'stack' | 'achievements' | 'profile'>('skills');
+  const [techDexTab, setTechDexTab] = useState<'skills' | 'stack' | 'profile'>('skills');
   const [terminalData, setTerminalData] = useState<{ projects: TerminalProject[]; buildingName: string } | null>(null);
 
   // Notificações e Diálogos
@@ -84,7 +82,6 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
   const [skillToast, setSkillToast] = useState<{ skill: InteriorSkillItem; buildingName: string } | null>(null);
   const [levelUpToast, setLevelUpToast] = useState<{ level: number; title: string } | null>(null);
   const [comboToast, setComboToast] = useState<{ combo: number } | null>(null);
-  const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -135,11 +132,6 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
 
     engine.onTerminalOpen = (projects, buildingName) => {
       setTerminalData({ projects, buildingName });
-    };
-
-    engine.onAchievementUnlocked = (ach) => {
-      setAchievementToast(ach);
-      setTimeout(() => setAchievementToast(null), 4500);
     };
 
     engine.start();
@@ -612,27 +604,6 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
         </div>
       )}
 
-      {/* Achievement Unlocked Toast */}
-      {achievementToast && (
-        <div className="absolute top-40 left-1/2 -translate-x-1/2 z-30 animate-fade-in-up">
-          <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-mono shadow-[0_0_35px_rgba(245,158,11,0.7)] border-2 border-white flex items-center gap-3.5">
-            <span className="text-3xl animate-bounce">{achievementToast.icon}</span>
-            <div>
-              <p className="text-[10px] uppercase font-black tracking-widest text-slate-900 flex items-center gap-1.5">
-                <Trophy className="w-3.5 h-3.5 fill-slate-950 inline" />
-                CONQUISTA DESBLOQUEADA! +{achievementToast.xpReward || 150} XP
-              </p>
-              <h4 className="text-sm font-black text-slate-950">
-                {achievementToast.title}
-              </h4>
-              <p className="text-[11px] text-slate-900 font-medium font-sans">
-                {achievementToast.description}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Dialog Box com Mentor da Sala — Estilo JRPG Clássico */}
       {gameView === 'interior' && dialog && (
         <div className="absolute bottom-20 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-2xl z-20 animate-fade-in-up">
@@ -750,22 +721,6 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
               >
                 <UserCheck className="w-4 h-4" />
                 <span>Trainer Card</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  retroAudio.playMenuSelect();
-                  setTechDexTab('achievements');
-                }}
-                className={cn(
-                  "flex-1 py-3 px-4 flex items-center justify-center gap-2 border-b-2 font-bold transition-all",
-                  techDexTab === 'achievements'
-                    ? "border-amber-400 text-amber-300 bg-amber-500/10"
-                    : "border-transparent text-slate-400 hover:text-white"
-                )}
-              >
-                <Trophy className="w-4 h-4" />
-                <span>Troféus ({Object.values(stats.achievements).filter(Boolean).length}/11)</span>
               </button>
             </div>
 
@@ -921,80 +876,6 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
                     <p>
                       Proficiência em desenvolvimento assistido por agentes autônomos utilizando Claude Code, Google Antigravity e OpenAI Codex com Model Context Protocol (MCP). Foco em governança de inteligência artificial, conformidade e arquiteturas corporativas de alta disponibilidade.
                     </p>
-                  </div>
-                </div>
-              )}
-
-              {/* ABA 4: CONQUISTAS & TROFÉUS ARCADE */}
-              {techDexTab === 'achievements' && (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-slate-900/60 border border-amber-400/30 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-bold text-amber-300 font-mono text-sm flex items-center gap-2">
-                        <Trophy className="w-4 h-4" />
-                        Sala de Troféus &amp; Conquistas
-                      </h4>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Conquistas desbloqueadas durante a exploração, saltos, dashes e descobertas da carreira.
-                      </p>
-                    </div>
-                    <div className="text-right font-mono">
-                      <span className="text-xs text-slate-400 block">DESBLOQUEADOS</span>
-                      <strong className="text-base text-amber-400">
-                        {Object.values(stats.achievements).filter(Boolean).length} / {INITIAL_ACHIEVEMENTS.length}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    {INITIAL_ACHIEVEMENTS.map((ach) => {
-                      const isUnlocked = stats.achievements[ach.id];
-                      return (
-                        <div
-                          key={ach.id}
-                          className={cn(
-                            "p-3.5 rounded-xl border flex items-start gap-3 transition-all",
-                            isUnlocked
-                              ? "bg-slate-900/90 border-amber-400/80 text-white shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-                              : "bg-slate-950/40 border-white/5 text-slate-500 opacity-60"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 border",
-                              isUnlocked
-                                ? "bg-amber-500/20 border-amber-400/40 shadow-inner"
-                                : "bg-slate-800/60 border-white/5 text-slate-600 grayscale"
-                            )}
-                          >
-                            {ach.icon}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <h5 className={cn("font-bold font-mono text-xs truncate", isUnlocked ? "text-amber-300" : "text-slate-400")}>
-                                {ach.title}
-                              </h5>
-                              <span className={cn(
-                                "text-[9px] font-mono px-1.5 py-0.2 rounded font-bold shrink-0",
-                                isUnlocked ? "bg-amber-400/20 text-amber-300 border border-amber-400/30" : "bg-slate-800 text-slate-500"
-                              )}>
-                                +{ach.xpReward || 150} XP
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-300 mt-1 line-clamp-2 font-sans">
-                              {ach.description}
-                            </p>
-                            <span className={cn(
-                              "inline-block mt-2 text-[9px] font-mono font-bold uppercase",
-                              isUnlocked ? "text-emerald-400" : "text-slate-600"
-                            )}>
-                              {isUnlocked ? "✓ CONQUISTADO" : "🔒 BLOQUEADO"}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 </div>
               )}

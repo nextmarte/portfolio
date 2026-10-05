@@ -213,16 +213,6 @@ export interface BuildingInterior {
   terminalProjects?: TerminalProject[];
 }
 
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
-  progress?: string;
-  xpReward?: number;
-}
-
 export interface PlayerCareerStats {
   level: number;
   title: string;
@@ -235,7 +225,6 @@ export interface PlayerCareerStats {
   terminalsAccessed: Record<string, boolean>;
   visitedBuildings: Record<string, boolean>;
   completedBuildings: Record<string, boolean>;
-  achievements: Record<string, boolean>;
 }
 
 export interface EraBadge {
