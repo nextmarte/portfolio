@@ -881,3 +881,533 @@ export function drawPixelTree(
 
   ctx.restore();
 }
+
+/**
+ * =========================================================================
+ * TOP-DOWN POKÉMON-STYLE INTERIOR SPRITES
+ * =========================================================================
+ */
+
+import { BuildingInterior, FurnitureItem, InteriorSkillItem, TopDownDirection } from './types';
+
+/**
+ * Desenha o personagem em visão Top-Down (Estilo Pokémon GBA)
+ */
+export function drawTopDownCharacter(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  direction: TopDownDirection,
+  frame: number,
+  outfit: EraOutfit
+) {
+  const p = PALETTES[outfit] || PALETTES.baxijen;
+  const S = 2; // Pixel scale
+
+  ctx.save();
+  ctx.translate(Math.floor(x), Math.floor(y));
+
+  // Sombra suave sob os pés
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 4, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const stepOffset = frame % 2 === 1 ? (Math.sin(frame * Math.PI) > 0 ? 2 : -2) : 0;
+
+  if (direction === 'down') {
+    // 1. VISÃO DE FRENTE (Andando para baixo)
+    // Cabelo
+    ctx.fillStyle = p.hair;
+    ctx.fillRect(-6 * S, -15 * S, 12 * S, 5 * S);
+    ctx.fillRect(-7 * S, -14 * S, 14 * S, 4 * S);
+    ctx.fillStyle = p.hairHighlight;
+    ctx.fillRect(-4 * S, -15 * S, 6 * S, 1 * S);
+
+    // Rosto
+    ctx.fillStyle = p.skin;
+    ctx.fillRect(-5 * S, -10 * S, 10 * S, 6 * S);
+
+    // Olhos verdes brilhantes
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(-3 * S, -8 * S, 2 * S, 2 * S);
+    ctx.fillRect(1 * S, -8 * S, 2 * S, 2 * S);
+    ctx.fillStyle = p.eyes;
+    ctx.fillRect(-2 * S, -8 * S, 1 * S, 2 * S);
+    ctx.fillRect(2 * S, -8 * S, 1 * S, 2 * S);
+
+    // Camisa / Tronco
+    ctx.fillStyle = p.shirt;
+    ctx.fillRect(-4 * S, -4 * S, 8 * S, 6 * S);
+    ctx.fillStyle = p.shirtHighlight;
+    ctx.fillRect(-4 * S, -4 * S, 2 * S, 5 * S);
+
+    // Detalhe / Acessório
+    if (p.accessory) {
+      ctx.fillStyle = p.accessory;
+      ctx.fillRect(-1 * S, -2 * S, 2 * S, 2 * S);
+    }
+
+    // Braços
+    ctx.fillStyle = p.skin;
+    ctx.fillRect(-6 * S, -3 * S + stepOffset, 2 * S, 4 * S);
+    ctx.fillRect(4 * S, -3 * S - stepOffset, 2 * S, 4 * S);
+
+    // Pernas & Sapatos (Passos alternados)
+    ctx.fillStyle = p.pants;
+    ctx.fillRect(-4 * S, 2 * S, 3 * S, 2 * S);
+    ctx.fillRect(1 * S, 2 * S, 3 * S, 2 * S);
+
+    ctx.fillStyle = p.shoes;
+    ctx.fillRect(-4 * S, 4 * S + stepOffset, 3 * S, 2 * S);
+    ctx.fillRect(1 * S, 4 * S - stepOffset, 3 * S, 2 * S);
+  } else if (direction === 'up') {
+    // 2. VISÃO DE COSTAS (Andando para cima)
+    // Cabelo de costas
+    ctx.fillStyle = p.hair;
+    ctx.fillRect(-6 * S, -15 * S, 12 * S, 8 * S);
+    ctx.fillRect(-7 * S, -14 * S, 14 * S, 6 * S);
+    ctx.fillStyle = p.hairShadow;
+    ctx.fillRect(-5 * S, -8 * S, 10 * S, 2 * S);
+
+    // Camisa de costas / Mochila
+    ctx.fillStyle = p.shirt;
+    ctx.fillRect(-4 * S, -5 * S, 8 * S, 6 * S);
+    if (p.backpack) {
+      ctx.fillStyle = p.backpack;
+      ctx.fillRect(-3 * S, -5 * S, 6 * S, 5 * S);
+    }
+
+    // Braços
+    ctx.fillStyle = p.shirtShadow;
+    ctx.fillRect(-6 * S, -4 * S - stepOffset, 2 * S, 4 * S);
+    ctx.fillRect(4 * S, -4 * S + stepOffset, 2 * S, 4 * S);
+
+    // Pernas
+    ctx.fillStyle = p.pants;
+    ctx.fillRect(-4 * S, 1 * S, 3 * S, 3 * S);
+    ctx.fillRect(1 * S, 1 * S, 3 * S, 3 * S);
+
+    ctx.fillStyle = p.shoes;
+    ctx.fillRect(-4 * S, 4 * S - stepOffset, 3 * S, 2 * S);
+    ctx.fillRect(1 * S, 4 * S + stepOffset, 3 * S, 2 * S);
+  } else {
+    // 3. VISÃO LATERAL (Esquerda / Direita)
+    if (direction === 'left') {
+      ctx.scale(-1, 1);
+    }
+
+    // Cabelo perfil
+    ctx.fillStyle = p.hair;
+    ctx.fillRect(-4 * S, -15 * S, 9 * S, 6 * S);
+    ctx.fillRect(-5 * S, -13 * S, 10 * S, 4 * S);
+
+    // Rosto perfil
+    ctx.fillStyle = p.skin;
+    ctx.fillRect(-3 * S, -10 * S, 7 * S, 5 * S);
+    ctx.fillRect(4 * S, -9 * S, 2 * S, 2 * S); // Nariz/queixo
+
+    // Olho perfil
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(1 * S, -9 * S, 2 * S, 2 * S);
+    ctx.fillStyle = p.eyes;
+    ctx.fillRect(2 * S, -9 * S, 1 * S, 2 * S);
+
+    // Tronco
+    ctx.fillStyle = p.shirt;
+    ctx.fillRect(-3 * S, -5 * S, 6 * S, 6 * S);
+
+    // Braço balançando
+    ctx.fillStyle = p.skin;
+    ctx.fillRect(-1 * S + stepOffset, -3 * S, 2 * S, 4 * S);
+
+    // Pernas
+    ctx.fillStyle = p.pants;
+    ctx.fillRect(-2 * S, 1 * S, 4 * S, 3 * S);
+
+    ctx.fillStyle = p.shoes;
+    ctx.fillRect(-3 * S + stepOffset, 4 * S, 4 * S, 2 * S);
+    ctx.fillRect(0 * S - stepOffset, 4 * S, 4 * S, 2 * S);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Desenha a Sala Top-Down (Chão, Paredes e Tapete de Saída)
+ */
+export function drawTopDownRoom(
+  ctx: CanvasRenderingContext2D,
+  interior: BuildingInterior,
+  canvasW: number,
+  canvasH: number,
+  time: number
+) {
+  const roomW = interior.roomWidth;
+  const roomH = interior.roomHeight;
+  const originX = Math.floor((canvasW - roomW) / 2);
+  const originY = Math.floor((canvasH - roomH) / 2);
+
+  ctx.save();
+
+  // 1. Fundo externo à sala (Bordas pretas de RPG)
+  ctx.fillStyle = '#020617';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // 2. Chão da Sala
+  ctx.fillStyle = interior.floorColor;
+  ctx.fillRect(originX, originY, roomW, roomH);
+
+  // Textura quadriculada / tábuas de madeira no chão
+  ctx.fillStyle = interior.floorTileColor;
+  for (let ty = originY + 36; ty < originY + roomH - 10; ty += 24) {
+    for (let tx = originX + 16; tx < originX + roomW - 16; tx += 24) {
+      if ((Math.floor((tx - originX) / 24) + Math.floor((ty - originY) / 24)) % 2 === 0) {
+        ctx.fillRect(tx, ty, 24, 24);
+      }
+    }
+  }
+
+  // 3. Paredes Superiores e Laterais com Sombra
+  // Parede superior (Back wall)
+  ctx.fillStyle = interior.wallColor;
+  ctx.fillRect(originX, originY, roomW, 36);
+
+  // Rodapé da parede
+  ctx.fillStyle = interior.wallBorderColor;
+  ctx.fillRect(originX, originY + 32, roomW, 4);
+
+  // Moldura do teto
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fillRect(originX, originY, roomW, 4);
+
+  // Paredes laterais (bordas)
+  ctx.fillStyle = interior.wallColor;
+  ctx.fillRect(originX, originY, 14, roomH);
+  ctx.fillRect(originX + roomW - 14, originY, 14, roomH);
+
+  ctx.fillStyle = interior.wallBorderColor;
+  ctx.fillRect(originX + 12, originY, 2, roomH);
+  ctx.fillRect(originX + roomW - 14, originY, 2, roomH);
+
+  // Parede inferior (com vão da porta)
+  const doorW = 44;
+  const doorLeft = originX + (roomW / 2) - (doorW / 2);
+
+  ctx.fillStyle = interior.wallColor;
+  ctx.fillRect(originX, originY + roomH - 12, doorLeft - originX, 12);
+  ctx.fillRect(doorLeft + doorW, originY + roomH - 12, originX + roomW - (doorLeft + doorW), 12);
+
+  // 4. Tapete de Saída estilo Pokémon (Vermelho com setinha indicando saída)
+  ctx.fillStyle = '#DC2626';
+  ctx.fillRect(doorLeft, originY + roomH - 24, doorW, 20);
+  ctx.strokeStyle = '#FEE2E2';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(doorLeft, originY + roomH - 24, doorW, 20);
+
+  // Setinha piscante para baixo
+  const arrowBlink = Math.sin(time * 6) > 0;
+  ctx.fillStyle = arrowBlink ? '#FEF08A' : '#FFFFFF';
+  ctx.font = 'bold 9px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('▼ SAIR', doorLeft + (doorW / 2), originY + roomH - 11);
+
+  // 5. Placa com Nome da Sala no Topo
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(originX + (roomW / 2) - 100, originY + 4, 200, 22);
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(originX + (roomW / 2) - 100, originY + 4, 200, 22);
+
+  ctx.fillStyle = '#38BDF8';
+  ctx.font = 'bold 10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(interior.name, originX + (roomW / 2), originY + 15);
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '8px monospace';
+  ctx.fillText(interior.subtitle, originX + (roomW / 2), originY + 23);
+
+  ctx.restore();
+}
+
+/**
+ * Desenha Mobília Top-Down
+ */
+export function drawFurniture(
+  ctx: CanvasRenderingContext2D,
+  item: FurnitureItem,
+  originX: number,
+  originY: number,
+  time: number
+) {
+  const fX = originX + item.x;
+  const fY = originY + item.y;
+  const W = item.width;
+  const H = item.height;
+
+  ctx.save();
+
+  // Sombra sob o móvel
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+  ctx.fillRect(fX + 2, fY + 2, W, H);
+
+  if (item.type === 'desk_computer') {
+    // Mesa de trabalho de madeira com monitor
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(fX, fY, W, H);
+    ctx.fillStyle = '#92400E';
+    ctx.fillRect(fX, fY, W, 3);
+
+    // Teclado
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(fX + (W / 2) - 10, fY + H - 10, 20, 6);
+
+    // Monitor
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(fX + (W / 2) - 12, fY + 4, 24, 14);
+    // Tela iluminada (código / terminal verde)
+    const screenGlow = Math.sin(time * 4) > 0 ? '#22C55E' : '#10B981';
+    ctx.fillStyle = screenGlow;
+    ctx.fillRect(fX + (W / 2) - 10, fY + 6, 20, 10);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(fX + (W / 2) - 8, fY + 8, 4, 1);
+    ctx.fillRect(fX + (W / 2) - 8, fY + 11, 8, 1);
+  } else if (item.type === 'bookshelf') {
+    // Estante de livros
+    ctx.fillStyle = '#451A03';
+    ctx.fillRect(fX, fY, W, H);
+
+    // Prateleiras com livros coloridos
+    const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
+    for (let sy = fY + 4; sy < fY + H - 6; sy += 12) {
+      ctx.fillStyle = '#78350F';
+      ctx.fillRect(fX + 2, sy + 8, W - 4, 2);
+      for (let bx = fX + 4; bx < fX + W - 6; bx += 6) {
+        ctx.fillStyle = colors[(bx + sy) % colors.length];
+        ctx.fillRect(bx, sy, 5, 8);
+      }
+    }
+  } else if (item.type === 'server_cabinet') {
+    // Rack de Servidores de IA / TI
+    ctx.fillStyle = '#090D16';
+    ctx.fillRect(fX, fY, W, H);
+    ctx.strokeStyle = '#0284C7';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(fX, fY, W, H);
+
+    // Luzes piscantes
+    for (let ly = fY + 6; ly < fY + H - 6; ly += 8) {
+      const led1 = Math.sin(time * 8 + ly) > 0;
+      const led2 = Math.cos(time * 6 + ly) > 0;
+      ctx.fillStyle = led1 ? '#22C55E' : '#14532D';
+      ctx.fillRect(fX + 4, ly, 3, 3);
+      ctx.fillStyle = led2 ? '#38BDF8' : '#0369A1';
+      ctx.fillRect(fX + 10, ly, 3, 3);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(fX + 16, ly, W - 20, 2);
+    }
+  } else if (item.type === 'whiteboard') {
+    // Quadro branco com diagramas de arquitetura
+    ctx.fillStyle = '#F8FAFC';
+    ctx.fillRect(fX, fY, W, H);
+    ctx.strokeStyle = '#94A3B8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(fX, fY, W, H);
+
+    // Desenho de flowchart / código
+    ctx.fillStyle = '#2563EB';
+    ctx.fillRect(fX + 6, fY + 6, 12, 8);
+    ctx.fillRect(fX + W - 18, fY + 6, 12, 8);
+    ctx.strokeStyle = '#EF4444';
+    ctx.beginPath();
+    ctx.moveTo(fX + 18, fY + 10);
+    ctx.lineTo(fX + W - 18, fY + 10);
+    ctx.stroke();
+  } else if (item.type === 'plant') {
+    // Vaso de planta no canto
+    ctx.fillStyle = '#B45309';
+    ctx.fillRect(fX + (W / 2) - 6, fY + H - 10, 12, 10);
+
+    ctx.fillStyle = '#16A34A';
+    ctx.beginPath();
+    ctx.arc(fX + (W / 2), fY + 8, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#22C55E';
+    ctx.beginPath();
+    ctx.arc(fX + (W / 2) - 2, fY + 6, 5, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (item.type === 'ai_holo') {
+    // Holo-emblema de IA flutuante
+    const floatY = fY + Math.sin(time * 3) * 4;
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.beginPath();
+    ctx.arc(fX + (W / 2), floatY + (H / 2), 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#38BDF8';
+    ctx.beginPath();
+    ctx.arc(fX + (W / 2), floatY + (H / 2), 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(fX + (W / 2), floatY + (H / 2), 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Desenha Item de Skill Colecionável na Sala Top-Down
+ */
+export function drawInteriorSkillItem(
+  ctx: CanvasRenderingContext2D,
+  skill: InteriorSkillItem,
+  originX: number,
+  originY: number,
+  time: number
+) {
+  const sX = originX + skill.x;
+  const sY = originY + skill.y;
+
+  ctx.save();
+
+  if (skill.collected) {
+    // Já coletado: pedestal transparente
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(sX, sY, 10, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#64748B';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('✓ ' + skill.name, sX, sY + 12);
+    ctx.restore();
+    return;
+  }
+
+  // Não coletado: Cristal / Pokébola de Skill Flutuante
+  const floatY = sY + Math.sin(time * 4) * 4;
+
+  // Sombra pulsante no chão
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(sX, sY + 8, 12, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Halo reluzente
+  const glow = 14 + Math.sin(time * 6) * 3;
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+  ctx.beginPath();
+  ctx.arc(sX, floatY, glow, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Estilo Pokébola Tech (Metade Superior Vermelha, Inferior Branca, Botão Central Ciano)
+  ctx.fillStyle = '#EF4444';
+  ctx.beginPath();
+  ctx.arc(sX, floatY, 9, Math.PI, 0);
+  ctx.fill();
+
+  ctx.fillStyle = '#F8FAFC';
+  ctx.beginPath();
+  ctx.arc(sX, floatY, 9, 0, Math.PI);
+  ctx.fill();
+
+  // Faixa preta divisória
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(sX - 9, floatY - 1, 18, 2);
+
+  // Botão central iluminado
+  ctx.fillStyle = '#38BDF8';
+  ctx.beginPath();
+  ctx.arc(sX, floatY, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(sX, floatY, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Balão de texto retrô com o nome da Skill
+  ctx.fillStyle = '#0F172A';
+  const textW = ctx.measureText(skill.name).width + 12;
+  ctx.fillRect(sX - (textW / 2), floatY - 20, textW, 12);
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(sX - (textW / 2), floatY - 20, textW, 12);
+
+  ctx.fillStyle = '#FEF08A';
+  ctx.font = 'bold 8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(skill.name, sX, floatY - 11);
+
+  ctx.restore();
+}
+
+/**
+ * Desenha o Mentor / NPC da Sala Top-Down
+ */
+export function drawNPC(
+  ctx: CanvasRenderingContext2D,
+  npc: { name: string; role: string; x: number; y: number; direction: TopDownDirection },
+  originX: number,
+  originY: number
+) {
+  const nX = originX + npc.x;
+  const nY = originY + npc.y;
+  const S = 2;
+
+  ctx.save();
+  ctx.translate(Math.floor(nX), Math.floor(nY));
+
+  // Sombra
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 4, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cabelo grisalho / sábio
+  ctx.fillStyle = '#64748B';
+  ctx.fillRect(-6 * S, -15 * S, 12 * S, 5 * S);
+  ctx.fillRect(-7 * S, -14 * S, 14 * S, 4 * S);
+
+  // Rosto
+  ctx.fillStyle = '#F5D0A9';
+  ctx.fillRect(-5 * S, -10 * S, 10 * S, 6 * S);
+
+  // Olhos
+  ctx.fillStyle = '#1E293B';
+  ctx.fillRect(-3 * S, -8 * S, 2 * S, 2 * S);
+  ctx.fillRect(1 * S, -8 * S, 2 * S, 2 * S);
+
+  // Jaleco branco de professor / orientador
+  ctx.fillStyle = '#F8FAFC';
+  ctx.fillRect(-4 * S, -4 * S, 8 * S, 7 * S);
+  ctx.fillStyle = '#2563EB'; // Gravata
+  ctx.fillRect(-1 * S, -4 * S, 2 * S, 4 * S);
+
+  // Calça social
+  ctx.fillStyle = '#334155';
+  ctx.fillRect(-4 * S, 3 * S, 3 * S, 2 * S);
+  ctx.fillRect(1 * S, 3 * S, 3 * S, 2 * S);
+
+  // Sapatos
+  ctx.fillStyle = '#1E293B';
+  ctx.fillRect(-4 * S, 5 * S, 3 * S, 2 * S);
+  ctx.fillRect(1 * S, 5 * S, 3 * S, 2 * S);
+
+  // Etiqueta com Nome e Cargo
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(-35, -28 * S, 70, 11);
+  ctx.strokeStyle = '#F59E0B';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(-35, -28 * S, 70, 11);
+
+  ctx.fillStyle = '#F59E0B';
+  ctx.font = 'bold 7px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(npc.role, 0, -28 * S + 8);
+
+  ctx.restore();
+}
+

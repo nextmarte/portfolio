@@ -26,6 +26,7 @@ const socialLinks = [
 export function Hero() {
   const fullText = "Marcus Ramalho";
   const [displayedText, setDisplayedText] = useState("");
+  const [gameView, setGameView] = useState<'overworld' | 'interior'>('overworld');
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -52,12 +53,22 @@ export function Hero() {
       className="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden"
     >
       {/* 2D Retro Pixel-Art Career Game */}
-      <CareerGame />
+      <CareerGame onViewChange={setGameView} />
 
       {/* Readability overlay — covers the text area while allowing the game world & runner to shine through */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-transparent dark:from-slate-950/85 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5]" />
+      <div
+        className={cn(
+          "absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-transparent dark:from-slate-950/85 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5] transition-opacity duration-500",
+          gameView === 'interior' && "opacity-0"
+        )}
+      />
 
-      <div className="container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56">
+      <div
+        className={cn(
+          "container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56 transition-all duration-500",
+          gameView === 'interior' && "opacity-0 pointer-events-none scale-95"
+        )}
+      >
         <div className="animate-fade-in-up mb-6">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-sm">
             {/* Full name always present in server HTML for SEO and screen readers */}

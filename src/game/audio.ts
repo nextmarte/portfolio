@@ -58,7 +58,7 @@ class RetroAudio {
       osc.start(now);
       osc.stop(now + 0.12);
     } catch {
-      // Audio playback silently fails if autoplay restricted
+      // Silently fail
     }
   }
 
@@ -69,8 +69,6 @@ class RetroAudio {
 
     try {
       const now = this.ctx.currentTime;
-
-      // Two-note coin sound (B5 -> E6)
       const osc1 = this.ctx.createOscillator();
       const gain1 = this.ctx.createGain();
       osc1.type = 'square';
@@ -93,7 +91,7 @@ class RetroAudio {
       osc2.start(now + 0.08);
       osc2.stop(now + 0.25);
     } catch {
-      // Audio playback silently fails
+      // Silently fail
     }
   }
 
@@ -120,7 +118,7 @@ class RetroAudio {
       osc.start(now);
       osc.stop(now + 0.15);
     } catch {
-      // Audio playback silently fails
+      // Silently fail
     }
   }
 
@@ -146,7 +144,72 @@ class RetroAudio {
         osc.stop(start + 0.15);
       });
     } catch {
-      // Audio playback silently fails
+      // Silently fail
+    }
+  }
+
+  // Pokémon style "Item / Skill Acquired!" Fanfare
+  public playSkillFanfare() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      // Classic GBA / Pokémon fanfare: C5, D5, E5, G5, C6 (sustain)
+      const notes = [523.25, 587.33, 659.25, 783.99, 1046.5];
+      const durations = [0.08, 0.08, 0.08, 0.12, 0.35];
+      let currentT = now;
+
+      notes.forEach((freq, i) => {
+        const osc = this.ctx!.createOscillator();
+        const gain = this.ctx!.createGain();
+        const dur = durations[i];
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, currentT);
+
+        gain.gain.setValueAtTime(0.09, currentT);
+        gain.gain.exponentialRampToValueAtTime(0.001, currentT + dur);
+
+        osc.connect(gain);
+        gain.connect(this.ctx!.destination);
+
+        osc.start(currentT);
+        osc.stop(currentT + dur);
+
+        currentT += dur * 0.9;
+      });
+    } catch {
+      // Silently fail
+    }
+  }
+
+  // Transição de porta Pokémon
+  public playDoor() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.18);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } catch {
+      // Silently fail
     }
   }
 
@@ -157,7 +220,7 @@ class RetroAudio {
 
     try {
       const now = this.ctx.currentTime;
-      const arpeggio = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98]; // C5, E5, G5, C6, E6, G6
+      const arpeggio = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
       arpeggio.forEach((freq, i) => {
         const osc = this.ctx!.createOscillator();
         const gain = this.ctx!.createGain();

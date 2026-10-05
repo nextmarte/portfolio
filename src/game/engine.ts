@@ -1,6 +1,9 @@
 import {
+  BuildingInterior,
   EraOutfit,
   GameInput,
+  GameView,
+  InteriorSkillItem,
   Milestone,
   Obstacle,
   Particle,
@@ -8,14 +11,21 @@ import {
   PlayerState,
   SceneryProp,
   TechOrb,
+  TopDownDirection,
+  TopDownPlayerState,
 } from './types';
 import {
   drawCharacter,
   drawDetailedBuilding,
+  drawFurniture,
+  drawInteriorSkillItem,
+  drawNPC,
   drawObstacle,
   drawPlatform,
   drawSceneryProps,
   drawTechOrb,
+  drawTopDownCharacter,
+  drawTopDownRoom,
   drawPixelTree,
 } from './sprites';
 import { retroAudio } from './audio';
@@ -125,6 +135,207 @@ export const MILESTONES: Milestone[] = [
   },
 ];
 
+export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
+  cefet: {
+    buildingId: 'cefet',
+    name: 'CEFET/RJ — Laboratório de Mecânica',
+    subtitle: 'Ano 2008 • O Início Técnico',
+    theme: 'workshop',
+    floorColor: '#451A03',
+    floorTileColor: '#78350F',
+    wallColor: '#271206',
+    wallBorderColor: '#B45309',
+    roomWidth: 460,
+    roomHeight: 320,
+    doorX: 230,
+    doorY: 300,
+    furniture: [
+      { id: 'f-1', x: 40, y: 50, width: 90, height: 45, type: 'desk_computer', solid: true },
+      { id: 'f-2', x: 330, y: 50, width: 80, height: 60, type: 'bookshelf', solid: true },
+      { id: 'f-3', x: 170, y: 40, width: 120, height: 35, type: 'whiteboard', solid: true },
+      { id: 'f-4', x: 390, y: 240, width: 30, height: 30, type: 'plant', solid: true },
+    ],
+    skills: [
+      { id: 'sk-cefet-1', name: 'Desenho Técnico', category: 'Engenharia', description: 'Visão espacial e rigor metodológico para projetos de engenharia.', x: 80, y: 130, collected: false, icon: 'terminal' },
+      { id: 'sk-cefet-2', name: 'Lógica & Automação', category: 'Software', description: 'Fundamentos de algoritmos, lógica booleana e controle.', x: 230, y: 120, collected: false, icon: 'python' },
+      { id: 'sk-cefet-3', name: 'Termodinâmica', category: 'Ciências', description: 'Modelagem de sistemas térmicos e fluidos com bases matemáticas.', x: 360, y: 140, collected: false, icon: 'terminal' },
+    ],
+    npc: {
+      name: 'Prof. Silva',
+      role: 'Mestre em Engenharia',
+      x: 180,
+      y: 95,
+      direction: 'down',
+      dialog: 'Marcus, sua precisão técnica e base matemática começaram aqui no CEFET. Leve esse rigor para o software!',
+    },
+  },
+  chemtech: {
+    buildingId: 'chemtech',
+    name: 'Chemtech / Siemens — Engenharia de Sistemas',
+    subtitle: 'Ano 2011 • Automação & Indústria 4.0',
+    theme: 'industrial_office',
+    floorColor: '#082F49',
+    floorTileColor: '#0369A1',
+    wallColor: '#021827',
+    wallBorderColor: '#38BDF8',
+    roomWidth: 480,
+    roomHeight: 330,
+    doorX: 240,
+    doorY: 310,
+    furniture: [
+      { id: 'f-1', x: 40, y: 50, width: 85, height: 65, type: 'server_cabinet', solid: true },
+      { id: 'f-2', x: 350, y: 50, width: 90, height: 45, type: 'desk_computer', solid: true },
+      { id: 'f-3', x: 180, y: 42, width: 120, height: 35, type: 'whiteboard', solid: true },
+      { id: 'f-4', x: 40, y: 230, width: 30, height: 30, type: 'plant', solid: true },
+    ],
+    skills: [
+      { id: 'sk-chem-1', name: 'Sistemas SCADA', category: 'Automação', description: 'Supervisão e controle em tempo real de infraestruturas industriais críticas.', x: 95, y: 140, collected: false, icon: 'docker' },
+      { id: 'sk-chem-2', name: 'Gestão de Projetos', category: 'Engenharia', description: 'Coordenação técnica de projetos corporativos de grande porte na Siemens.', x: 240, y: 125, collected: false, icon: 'terminal' },
+      { id: 'sk-chem-3', name: 'Integração HW/SW', category: 'Sistemas', description: 'Ponte direta entre sensores físicos de telemetria e sistemas digitais.', x: 380, y: 135, collected: false, icon: 'mcp' },
+    ],
+    npc: {
+      name: 'Eng. Roberto',
+      role: 'Líder de Automação Siemens',
+      x: 320,
+      y: 95,
+      direction: 'down',
+      dialog: 'Em sistemas industriais, confiabilidade e tolerância a falhas são vitais. Esse mindset faz a diferença na sua arquitetura!',
+    },
+  },
+  uff: {
+    buildingId: 'uff',
+    name: 'UFF — Campus Gragoatá / Sala de Mestrado',
+    subtitle: 'Anos 2016-2023 • Administração & Métodos Quantitativos',
+    theme: 'university_lab',
+    floorColor: '#172554',
+    floorTileColor: '#1E3A8A',
+    wallColor: '#0F172A',
+    wallBorderColor: '#60A5FA',
+    roomWidth: 500,
+    roomHeight: 330,
+    doorX: 250,
+    doorY: 310,
+    furniture: [
+      { id: 'f-1', x: 35, y: 45, width: 95, height: 75, type: 'bookshelf', solid: true },
+      { id: 'f-2', x: 360, y: 45, width: 95, height: 75, type: 'bookshelf', solid: true },
+      { id: 'f-3', x: 180, y: 50, width: 140, height: 45, type: 'desk_computer', solid: true },
+      { id: 'f-4', x: 420, y: 230, width: 30, height: 30, type: 'plant', solid: true },
+    ],
+    skills: [
+      { id: 'sk-uff-1', name: 'Modelagem em R', category: 'Data Science', description: 'Estatística inferencial, análise multivariada e econometria em R.', x: 100, y: 155, collected: false, icon: 'terminal' },
+      { id: 'sk-uff-2', name: 'Governança & Gestão', category: 'Estratégia', description: 'Visão holística de negócios, governança institucional e liderança.', x: 250, y: 135, collected: false, icon: 'react' },
+      { id: 'sk-uff-3', name: 'Metodologia Científica', category: 'Pesquisa', description: 'Rigor científico para testar hipóteses e validar produtos analíticos.', x: 400, y: 155, collected: false, icon: 'terminal' },
+    ],
+    npc: {
+      name: 'Dra. Helena',
+      role: 'Orientadora Acadêmica',
+      x: 190,
+      y: 110,
+      direction: 'down',
+      dialog: 'A ciência nos ensina a não aceitar palpites: qualquer modelo ou hipótese deve ser provada com rigor de dados.',
+    },
+  },
+  cid: {
+    buildingId: 'cid',
+    name: 'CID-UFF — Laboratório de Ciência de Dados',
+    subtitle: 'Ano 2024 • Projeto Laguna & Big Data',
+    theme: 'data_center',
+    floorColor: '#022C22',
+    floorTileColor: '#065F46',
+    wallColor: '#064E3B',
+    wallBorderColor: '#34D399',
+    roomWidth: 490,
+    roomHeight: 330,
+    doorX: 245,
+    doorY: 310,
+    furniture: [
+      { id: 'f-1', x: 35, y: 50, width: 90, height: 70, type: 'server_cabinet', solid: true },
+      { id: 'f-2', x: 360, y: 50, width: 90, height: 48, type: 'desk_computer', solid: true },
+      { id: 'f-3', x: 180, y: 40, width: 130, height: 35, type: 'whiteboard', solid: true },
+      { id: 'f-4', x: 45, y: 230, width: 30, height: 30, type: 'plant', solid: true },
+    ],
+    skills: [
+      { id: 'sk-cid-1', name: 'Python & ETL', category: 'Data Eng', description: 'Construção de pipelines resilientes de ingestão e transformação de dados.', x: 110, y: 150, collected: false, icon: 'python' },
+      { id: 'sk-cid-2', name: 'Dashboards Analíticos', category: 'Analytics', description: 'Interfaces interativas com Streamlit, FastAPI e visualizações avançadas.', x: 245, y: 130, collected: false, icon: 'react' },
+      { id: 'sk-cid-3', name: 'IoT & Telemetria', category: 'IoT', description: 'Sistema LAGUNA para monitoramento ambiental em tempo real.', x: 390, y: 145, collected: false, icon: 'mcp' },
+    ],
+    npc: {
+      name: 'Dr. Lucas',
+      role: 'Coordenador do Projeto Laguna',
+      x: 320,
+      y: 95,
+      direction: 'down',
+      dialog: 'O Projeto LAGUNA gerou impacto real para o meio ambiente graças aos dashboards e à modelagem dos seus dados.',
+    },
+  },
+  coppead: {
+    buildingId: 'coppead',
+    name: 'COPPEAD / UFRJ — Sala de Pesquisa de Doutorado',
+    subtitle: 'Ano 2025 • Governança & IA Avançada',
+    theme: 'research_dome',
+    floorColor: '#4A044E',
+    floorTileColor: '#701A75',
+    wallColor: '#2E0854',
+    wallBorderColor: '#F472B6',
+    roomWidth: 500,
+    roomHeight: 330,
+    doorX: 250,
+    doorY: 310,
+    furniture: [
+      { id: 'f-1', x: 40, y: 50, width: 95, height: 75, type: 'bookshelf', solid: true },
+      { id: 'f-2', x: 360, y: 50, width: 90, height: 65, type: 'server_cabinet', solid: true },
+      { id: 'f-3', x: 180, y: 48, width: 140, height: 46, type: 'desk_computer', solid: true },
+      { id: 'f-4', x: 420, y: 230, width: 30, height: 30, type: 'plant', solid: true },
+    ],
+    skills: [
+      { id: 'sk-cop-1', name: 'Governança de IA', category: 'Pesquisa', description: 'Frameworks estratégicos de conformidade, riscos e governança algorítmica.', x: 110, y: 155, collected: false, icon: 'agent' },
+      { id: 'sk-cop-2', name: 'Cultura Data-Driven', category: 'Inovação', description: 'Transformação cultural e adoção de IA no setor público e corporativo.', x: 250, y: 135, collected: false, icon: 'langgraph' },
+      { id: 'sk-cop-3', name: 'IA Responsável', category: 'Ética', description: 'Mitigação de viés, interpretabilidade e segurança em modelos de linguagem.', x: 395, y: 155, collected: false, icon: 'claude' },
+    ],
+    npc: {
+      name: 'Prof. Fontes',
+      role: 'Catedrático COPPEAD',
+      x: 195,
+      y: 110,
+      direction: 'down',
+      dialog: 'A inteligência artificial exige governança de ponta. Desenvolver agentes autônomos requer profunda responsabilidade.',
+    },
+  },
+  baxijen: {
+    buildingId: 'baxijen',
+    name: 'BaXiJen — Central de Arquitetura de IA & Agentes',
+    subtitle: 'Ano 2026+ • Orquestração Cognitiva Autônoma',
+    theme: 'cyber_headquarters',
+    floorColor: '#020617',
+    floorTileColor: '#0B1528',
+    wallColor: '#090D16',
+    wallBorderColor: '#00F0FF',
+    roomWidth: 520,
+    roomHeight: 340,
+    doorX: 260,
+    doorY: 320,
+    furniture: [
+      { id: 'f-1', x: 40, y: 50, width: 100, height: 75, type: 'server_cabinet', solid: true },
+      { id: 'f-2', x: 370, y: 50, width: 100, height: 75, type: 'server_cabinet', solid: true },
+      { id: 'f-3', x: 210, y: 55, width: 100, height: 50, type: 'ai_holo', solid: false },
+      { id: 'f-4', x: 440, y: 240, width: 30, height: 30, type: 'plant', solid: true },
+    ],
+    skills: [
+      { id: 'sk-bax-1', name: 'Agentes Autônomos', category: 'AI Architecture', description: 'Orquestração multiagente assíncrona, LangGraph, tool-calling e memória vetorial.', x: 120, y: 160, collected: false, icon: 'agent' },
+      { id: 'sk-bax-2', name: 'MCP (Model Context Protocol)', category: 'Protocolos', description: 'Integrações padronizadas com ferramentas locais, bancos de dados e APIs externas.', x: 260, y: 140, collected: false, icon: 'mcp' },
+      { id: 'sk-bax-3', name: 'Dev Assistido por IA', category: 'Engenharia', description: 'Engenharia acelerada com Claude Code, Google Antigravity e OpenAI Codex.', x: 410, y: 160, collected: false, icon: 'claude' },
+    ],
+    npc: {
+      name: 'Marcus AI Core',
+      role: 'Agente Sintético BaXiJen',
+      x: 230,
+      y: 110,
+      direction: 'down',
+      dialog: 'Você dominou todas as eras! Na BaXiJen, unimos arquitetura de software sólida ao poder dos agentes autônomos.',
+    },
+  },
+};
+
 export const INITIAL_TECH_ORBS: TechOrb[] = [
   { id: 'orb-1', name: 'Python', x: 750, y: 0, iconType: 'python', collected: false, floatOffset: 0 },
   { id: 'orb-2', name: 'Docker', x: 1250, y: 0, iconType: 'docker', collected: false, floatOffset: 1 },
@@ -140,29 +351,19 @@ export const INITIAL_TECH_ORBS: TechOrb[] = [
 ];
 
 export const INITIAL_OBSTACLES: Obstacle[] = [
-  // Zona 1: CEFET -> Chemtech
   { id: 'obs-1', x: 880, y: 0, width: 20, height: 24, type: 'hazard_cone', label: 'Cone' },
   { id: 'obs-2', x: 1250, y: 0, width: 24, height: 20, type: 'glitch_bug', label: 'Bug' },
-
-  // Zona 2: Chemtech -> UFF
   { id: 'obs-3', x: 2150, y: 0, width: 22, height: 32, type: 'server_rack', label: 'Legacy Server' },
   { id: 'obs-4', x: 2550, y: 0, width: 24, height: 20, type: 'glitch_bug', label: 'Syntax Error' },
-
-  // Zona 3: UFF -> CID-UFF
   { id: 'obs-5', x: 3450, y: 0, width: 20, height: 24, type: 'hazard_cone', label: 'Prazo' },
   { id: 'obs-6', x: 3900, y: 0, width: 24, height: 20, type: 'glitch_bug', label: 'NullPointer' },
-
-  // Zona 4: CID-UFF -> COPPEAD
   { id: 'obs-7', x: 4850, y: 0, width: 14, height: 36, type: 'firewall', label: 'Firewall' },
   { id: 'obs-8', x: 5300, y: 0, width: 24, height: 20, type: 'glitch_bug', label: 'Data Drift' },
-
-  // Zona 5: COPPEAD -> BaXiJen
   { id: 'obs-9', x: 6200, y: 0, width: 14, height: 38, type: 'firewall', label: 'Security Gateway' },
   { id: 'obs-10', x: 6650, y: 0, width: 24, height: 20, type: 'glitch_bug', label: 'AI Hallucination' },
 ];
 
 export const INITIAL_PLATFORMS: Platform[] = [
-  // Plataformas suspensas com orbes ou rota alternativa sobre obstáculos
   { id: 'plat-1', x: 820, y: 0, width: 120, height: 12, type: 'metal' },
   { id: 'plat-2', x: 1200, y: 0, width: 110, height: 12, type: 'brick' },
   { id: 'plat-3', x: 2100, y: 0, width: 130, height: 12, type: 'metal' },
@@ -202,7 +403,13 @@ export class CareerGameEngine {
   private width: number = 800;
   private height: number = 400;
 
-  // Estados do jogo
+  // View atual ('overworld' = rua lateral; 'interior' = RPG top-down)
+  private view: GameView = 'overworld';
+  private currentInterior: BuildingInterior | null = null;
+  private fadeAlpha: number = 0;
+  private isTransitioning: boolean = false;
+
+  // Estados do Overworld (Runner)
   private mode: 'auto' | 'playable' = 'auto';
   private player: PlayerState;
   private cameraX: number = 0;
@@ -214,15 +421,25 @@ export class CareerGameEngine {
   private particles: Particle[] = [];
   private collectedCount: number = 0;
   private activeMilestone: Milestone | null = null;
-  private input: GameInput = { left: false, right: false, jump: false, interact: false };
-  private lastTime: number = 0;
-  private animId: number | null = null;
   private worldLength: number = 7800;
 
-  // Callbacks
+  // Estados do Interior (Top-Down Pokémon)
+  private topDownPlayer: TopDownPlayerState;
+  private interiors: Record<string, BuildingInterior>;
+  private acquiredSkillsTotal: number = 0;
+
+  // Input & Loop
+  private input: GameInput = { left: false, right: false, up: false, down: false, jump: false, interact: false };
+  private lastTime: number = 0;
+  private animId: number | null = null;
+
+  // Callbacks para UI
   public onMilestoneNear: ((milestone: Milestone | null) => void) | null = null;
   public onOrbsUpdate: ((collected: number, total: number) => void) | null = null;
   public onYearUpdate: ((year: number) => void) | null = null;
+  public onViewChange: ((view: GameView, interior: BuildingInterior | null) => void) | null = null;
+  public onSkillAcquired: ((skill: InteriorSkillItem, building: BuildingInterior) => void) | null = null;
+  public onDialog: ((dialog: { speaker: string; role: string; text: string } | null) => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, isDark: boolean) {
     this.canvas = canvas;
@@ -244,10 +461,22 @@ export class CareerGameEngine {
       invulnerableTimer: 0,
     };
 
+    this.topDownPlayer = {
+      x: 230,
+      y: 280,
+      vx: 0,
+      vy: 0,
+      direction: 'up',
+      frame: 0,
+      animTimer: 0,
+      outfit: 'cefet',
+    };
+
     this.techOrbs = JSON.parse(JSON.stringify(INITIAL_TECH_ORBS));
     this.obstacles = JSON.parse(JSON.stringify(INITIAL_OBSTACLES));
     this.platforms = JSON.parse(JSON.stringify(INITIAL_PLATFORMS));
     this.props = JSON.parse(JSON.stringify(INITIAL_PROPS));
+    this.interiors = JSON.parse(JSON.stringify(BUILDING_INTERIORS));
 
     this.resize();
   }
@@ -263,12 +492,102 @@ export class CareerGameEngine {
     return this.mode;
   }
 
+  public getView(): GameView {
+    return this.view;
+  }
+
+  public getCurrentInterior(): BuildingInterior | null {
+    return this.currentInterior;
+  }
+
   public setDark(isDark: boolean) {
     this.isDark = isDark;
   }
 
   public setInput(newInput: Partial<GameInput>) {
     this.input = { ...this.input, ...newInput };
+  }
+
+  /**
+   * Entra no prédio com transição clássica de RPG
+   */
+  public enterBuilding(buildingId: string) {
+    if (this.isTransitioning) return;
+    const interior = this.interiors[buildingId];
+    if (!interior) return;
+
+    this.isTransitioning = true;
+    retroAudio.playDoor();
+
+    // Fade to black
+    const fadeInterval = setInterval(() => {
+      this.fadeAlpha += 0.15;
+      if (this.fadeAlpha >= 1) {
+        clearInterval(fadeInterval);
+        this.fadeAlpha = 1;
+
+        // Troca de cena para Interior Top-Down
+        this.view = 'interior';
+        this.currentInterior = interior;
+        this.topDownPlayer.x = interior.doorX;
+        this.topDownPlayer.y = interior.doorY - 25;
+        this.topDownPlayer.direction = 'up';
+        this.topDownPlayer.outfit = this.player.outfit;
+
+        if (this.onViewChange) {
+          this.onViewChange('interior', interior);
+        }
+
+        // Fade from black
+        const fadeIn = setInterval(() => {
+          this.fadeAlpha -= 0.15;
+          if (this.fadeAlpha <= 0) {
+            clearInterval(fadeIn);
+            this.fadeAlpha = 0;
+            this.isTransitioning = false;
+          }
+        }, 25);
+      }
+    }, 25);
+  }
+
+  /**
+   * Sai do prédio e retorna para a rua (Overworld)
+   */
+  public exitBuilding() {
+    if (this.isTransitioning || this.view !== 'interior') return;
+    this.isTransitioning = true;
+    retroAudio.playDoor();
+
+    // Limpa diálogo se houver
+    if (this.onDialog) {
+      this.onDialog(null);
+    }
+
+    const fadeInterval = setInterval(() => {
+      this.fadeAlpha += 0.15;
+      if (this.fadeAlpha >= 1) {
+        clearInterval(fadeInterval);
+        this.fadeAlpha = 1;
+
+        // Retorna para o Overworld
+        this.view = 'overworld';
+        this.currentInterior = null;
+
+        if (this.onViewChange) {
+          this.onViewChange('overworld', null);
+        }
+
+        const fadeIn = setInterval(() => {
+          this.fadeAlpha -= 0.15;
+          if (this.fadeAlpha <= 0) {
+            clearInterval(fadeIn);
+            this.fadeAlpha = 0;
+            this.isTransitioning = false;
+          }
+        }, 25);
+      }
+    }, 25);
   }
 
   public resize() {
@@ -286,11 +605,9 @@ export class CareerGameEngine {
     this.ctx.scale(dpr, dpr);
     this.ctx.imageSmoothingEnabled = false;
 
-    // Ground position relative to canvas height
     this.groundY = this.height - 40;
     this.player.y = this.groundY;
 
-    // Ajusta posições Y dos obstáculos, plataformas e orbes
     this.obstacles.forEach(obs => {
       obs.y = this.groundY - obs.height;
     });
@@ -300,7 +617,6 @@ export class CareerGameEngine {
     });
 
     this.techOrbs.forEach(orb => {
-      // Posiciona orbes sobre plataformas ou no ar
       const hasPlatform = this.platforms.find(p => Math.abs(p.x + (p.width / 2) - orb.x) < 40);
       if (hasPlatform) {
         orb.y = hasPlatform.y - 25;
@@ -313,7 +629,7 @@ export class CareerGameEngine {
   public start() {
     this.lastTime = performance.now();
     const loop = (time: number) => {
-      const dt = Math.min((time - this.lastTime) / 1000, 0.05); // Cap delta time
+      const dt = Math.min((time - this.lastTime) / 1000, 0.05);
       this.lastTime = time;
 
       this.update(dt);
@@ -332,11 +648,32 @@ export class CareerGameEngine {
   }
 
   private update(dt: number) {
+    if (this.view === 'overworld') {
+      this.updateOverworld(dt);
+    } else {
+      this.updateInterior(dt);
+    }
+
+    // Atualizar partículas universais
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx * dt * 60;
+      p.y += p.vy * dt * 60;
+      p.life -= dt;
+      if (p.life <= 0) {
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+
+  // =========================================================================
+  // OVERWORLD UPDATE (RUNNER 2D)
+  // =========================================================================
+  private updateOverworld(dt: number) {
     const gravity = 26;
     const runSpeed = 230;
     const jumpVelocity = -430;
 
-    // Timers de tropeço e invulnerabilidade
     if (this.player.stumbleTimer > 0) {
       this.player.stumbleTimer = Math.max(0, this.player.stumbleTimer - dt);
     }
@@ -344,12 +681,12 @@ export class CareerGameEngine {
       this.player.invulnerableTimer = Math.max(0, this.player.invulnerableTimer - dt);
     }
 
-    // 1. INPUT & VELOCIDADE HORIZONTAL
+    // Input & Movimento
     if (this.mode === 'auto') {
-      this.player.vx = 150; // Auto-run fluído
+      this.player.vx = 150;
       this.player.facing = 'right';
 
-      // Auto-jump inteligente: salta sobre obstáculos antes de encostar!
+      // Auto-jump inteligente
       if (this.player.isGrounded) {
         const nextObstacle = this.obstacles.find(
           obs => obs.x > this.player.x && obs.x - this.player.x < 75
@@ -363,16 +700,14 @@ export class CareerGameEngine {
         }
       }
 
-      // Loop do mundo
+      // Loop do mapa
       if (this.player.x > this.worldLength) {
         this.player.x = 80;
         this.cameraX = 0;
         retroAudio.playVictory();
       }
     } else {
-      // Modo jogável
       if (this.player.stumbleTimer > 0) {
-        // Empurrão de recuo durante o tropeço
         this.player.vx = -70;
       } else {
         if (this.input.left) {
@@ -385,7 +720,6 @@ export class CareerGameEngine {
           this.player.vx = 0;
         }
 
-        // Pulo manual
         if (this.input.jump && this.player.isGrounded) {
           this.player.vy = jumpVelocity;
           this.player.isGrounded = false;
@@ -396,12 +730,12 @@ export class CareerGameEngine {
       }
     }
 
-    // 2. FÍSICA VERTICAL (Gravidade & Movimento)
+    // Gravidade e Física
     this.player.vy += gravity;
     this.player.x += this.player.vx * dt;
     this.player.y += this.player.vy * dt;
 
-    // Colisão com plataformas elevadas (one-way platforms)
+    // Colisão com plataformas suspensas
     let onPlatform = false;
     for (const plat of this.platforms) {
       if (
@@ -420,7 +754,7 @@ export class CareerGameEngine {
       }
     }
 
-    // Colisão com o solo principal
+    // Colisão com solo
     if (!onPlatform) {
       if (this.player.y >= this.groundY) {
         if (!this.player.isGrounded && this.player.vy > 120) {
@@ -435,10 +769,9 @@ export class CareerGameEngine {
       }
     }
 
-    // Limites de mundo
     this.player.x = Math.max(30, this.player.x);
 
-    // 3. COLISÃO COM OBSTÁCULOS
+    // Colisão com obstáculos
     if (this.player.invulnerableTimer <= 0) {
       for (const obs of this.obstacles) {
         const playerFootY = this.player.y;
@@ -446,14 +779,12 @@ export class CareerGameEngine {
         const obsTopY = obs.y;
         const obsBottomY = this.groundY;
 
-        // Bounding box overlap
         if (
           this.player.x + 12 >= obs.x &&
           this.player.x - 12 <= obs.x + obs.width &&
           playerFootY > obsTopY + 4 &&
           playerTopY < obsBottomY
         ) {
-          // Atingiu obstáculo: tropeço
           this.player.stumbleTimer = 0.35;
           this.player.invulnerableTimer = 1.2;
           retroAudio.playHurt();
@@ -463,7 +794,7 @@ export class CareerGameEngine {
       }
     }
 
-    // 4. ANIMAÇÃO DE CORRIDA & POEIRA
+    // Ciclo de corrida
     if (Math.abs(this.player.vx) > 10 && this.player.stumbleTimer <= 0) {
       this.player.animTimer += dt;
       if (this.player.animTimer > 0.11) {
@@ -477,20 +808,20 @@ export class CareerGameEngine {
       this.player.frame = 0;
     }
 
-    // 5. ATUALIZAÇÃO DO TRAJE & ANO CONFORME X
+    // Traje & Ano
     this.player.outfit = this.determineOutfit(this.player.x);
     const currentYear = this.determineYear(this.player.x);
     if (this.onYearUpdate) {
       this.onYearUpdate(currentYear);
     }
 
-    // 6. CÂMERA (Segue o jogador suavemente com antecipação)
+    // Câmera
     const lookAhead = this.player.facing === 'right' ? 80 : -80;
     const targetCameraX = this.player.x - (this.width * 0.35) + lookAhead;
     this.cameraX += (targetCameraX - this.cameraX) * 0.08;
     this.cameraX = Math.max(0, this.cameraX);
 
-    // 7. COLETA DE TECH ORBS
+    // Coleta de Orbes na Rua
     this.techOrbs.forEach(orb => {
       if (!orb.collected) {
         const dx = this.player.x - orb.x;
@@ -509,7 +840,7 @@ export class CareerGameEngine {
       }
     });
 
-    // 8. CHECKPOINT / INSPEÇÃO DE MARCOS
+    // Checkpoint de Marcos
     let nearM: Milestone | null = null;
     for (const m of MILESTONES) {
       const doorX = m.x + (m.width / 2);
@@ -528,15 +859,155 @@ export class CareerGameEngine {
         retroAudio.playInspect();
       }
     }
+  }
 
-    // 9. ATUALIZAR PARTÍCULAS
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.x += p.vx * dt * 60;
-      p.y += p.vy * dt * 60;
-      p.life -= dt;
-      if (p.life <= 0) {
-        this.particles.splice(i, 1);
+  // =========================================================================
+  // INTERIOR UPDATE (TOP-DOWN POKÉMON RPG)
+  // =========================================================================
+  private updateInterior(dt: number) {
+    if (!this.currentInterior) return;
+    const interior = this.currentInterior;
+    const speed = 150; // pixels / segundo
+
+    let vx = 0;
+    let vy = 0;
+
+    // 4 Direções
+    if (this.input.left) {
+      vx -= speed;
+      this.topDownPlayer.direction = 'left';
+    } else if (this.input.right) {
+      vx += speed;
+      this.topDownPlayer.direction = 'right';
+    }
+
+    if (this.input.up) {
+      vy -= speed;
+      this.topDownPlayer.direction = 'up';
+    } else if (this.input.down) {
+      vy += speed;
+      this.topDownPlayer.direction = 'down';
+    }
+
+    // Normalizar velocidade diagonal
+    if (vx !== 0 && vy !== 0) {
+      vx *= 0.7071;
+      vy *= 0.7071;
+    }
+
+    const nextX = this.topDownPlayer.x + vx * dt;
+    const nextY = this.topDownPlayer.y + vy * dt;
+
+    // 1. Limites das Paredes da Sala
+    const minX = 26;
+    const maxX = interior.roomWidth - 26;
+    const minY = 46;
+    const maxY = interior.roomHeight - 20;
+
+    // 2. Colisão com Móveis Sólidos
+    let collideX = false;
+    let collideY = false;
+
+    interior.furniture.forEach(item => {
+      if (!item.solid) return;
+      const buffer = 10;
+      // Checa colisão em X
+      if (
+        nextX >= item.x - buffer &&
+        nextX <= item.x + item.width + buffer &&
+        this.topDownPlayer.y >= item.y - buffer &&
+        this.topDownPlayer.y <= item.y + item.height + buffer
+      ) {
+        collideX = true;
+      }
+      // Checa colisão em Y
+      if (
+        this.topDownPlayer.x >= item.x - buffer &&
+        this.topDownPlayer.x <= item.x + item.width + buffer &&
+        nextY >= item.y - buffer &&
+        nextY <= item.y + item.height + buffer
+      ) {
+        collideY = true;
+      }
+    });
+
+    if (!collideX && nextX >= minX && nextX <= maxX) {
+      this.topDownPlayer.x = nextX;
+    }
+    if (!collideY && nextY >= minY && nextY <= maxY) {
+      this.topDownPlayer.y = nextY;
+    }
+
+    // Animação de caminhada top-down
+    if (vx !== 0 || vy !== 0) {
+      this.topDownPlayer.animTimer += dt;
+      if (this.topDownPlayer.animTimer > 0.14) {
+        this.topDownPlayer.animTimer = 0;
+        this.topDownPlayer.frame = (this.topDownPlayer.frame + 1) % 4;
+      }
+    } else {
+      this.topDownPlayer.frame = 0;
+    }
+
+    // 3. Checagem de Saída pela Porta (Tapete Vermelho)
+    const doorDist = Math.hypot(
+      this.topDownPlayer.x - interior.doorX,
+      this.topDownPlayer.y - interior.doorY
+    );
+    if (doorDist < 25 || this.topDownPlayer.y > interior.roomHeight - 16) {
+      this.exitBuilding();
+      return;
+    }
+
+    // 4. Coleta de Skills Top-Down (Pokébolas / Cristais)
+    interior.skills.forEach(skill => {
+      if (!skill.collected) {
+        const dist = Math.hypot(
+          this.topDownPlayer.x - skill.x,
+          this.topDownPlayer.y - skill.y
+        );
+
+        if (dist < 26) {
+          skill.collected = true;
+          this.acquiredSkillsTotal++;
+          retroAudio.playSkillFanfare();
+
+          // Cria partículas de celebração ao redor da skill
+          const originX = Math.floor((this.width - interior.roomWidth) / 2);
+          const originY = Math.floor((this.height - interior.roomHeight) / 2);
+          this.createSparkles(
+            originX + skill.x,
+            originY + skill.y,
+            16,
+            ['#38BDF8', '#FACC15', '#34D399', '#F43F5E']
+          );
+
+          if (this.onSkillAcquired) {
+            this.onSkillAcquired(skill, interior);
+          }
+        }
+      }
+    });
+
+    // 5. Interação com o NPC da Sala
+    if (interior.npc) {
+      const npcDist = Math.hypot(
+        this.topDownPlayer.x - interior.npc.x,
+        this.topDownPlayer.y - interior.npc.y
+      );
+
+      if (npcDist < 45) {
+        if (this.onDialog) {
+          this.onDialog({
+            speaker: interior.npc.name,
+            role: interior.npc.role,
+            text: interior.npc.dialog,
+          });
+        }
+      } else {
+        if (this.onDialog) {
+          this.onDialog(null);
+        }
       }
     }
   }
@@ -592,10 +1063,28 @@ export class CareerGameEngine {
     const ctx = this.ctx;
     const W = this.width;
     const H = this.height;
-    const isDark = this.isDark;
     const now = performance.now() / 1000;
 
-    // 1. CÉU EM GRADIENTE (Pixel Art Sky)
+    if (this.view === 'overworld') {
+      this.renderOverworld(now);
+    } else {
+      this.renderInterior(now);
+    }
+
+    // Efeito de transição de fade to black / fade in
+    if (this.fadeAlpha > 0) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(1, Math.max(0, this.fadeAlpha))})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  private renderOverworld(now: number) {
+    const ctx = this.ctx;
+    const W = this.width;
+    const H = this.height;
+    const isDark = this.isDark;
+
+    // Céu
     const skyGrad = ctx.createLinearGradient(0, 0, 0, this.groundY);
     if (isDark) {
       skyGrad.addColorStop(0, '#020617');
@@ -609,7 +1098,7 @@ export class CareerGameEngine {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Estrelas / Lua (Modo Noite)
+    // Estrelas / Lua ou Sol
     if (isDark) {
       ctx.fillStyle = '#FFFFFF';
       for (let i = 0; i < 35; i++) {
@@ -618,14 +1107,12 @@ export class CareerGameEngine {
         const sy = 20 + (i * 17) % (this.groundY - 140);
         ctx.fillRect(Math.floor(realSx), sy, 2, 2);
       }
-      // Lua pixelada
       const moonX = W - 120;
       ctx.fillStyle = '#FEF08A';
       ctx.fillRect(moonX, 30, 20, 20);
       ctx.fillStyle = '#FDE047';
       ctx.fillRect(moonX + 4, 34, 5, 5);
     } else {
-      // Sol pixelado
       const sunX = W - 110;
       ctx.fillStyle = '#FBBF24';
       ctx.fillRect(sunX, 30, 22, 22);
@@ -633,7 +1120,7 @@ export class CareerGameEngine {
       ctx.fillRect(sunX + 4, 34, 14, 14);
     }
 
-    // 2. PARALLAX CAMADA 1: NUVENS (Velocidade 0.06x)
+    // Nuvens
     const cloudColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.7)';
     ctx.fillStyle = cloudColor;
     for (let c = 0; c < 12; c++) {
@@ -644,7 +1131,7 @@ export class CareerGameEngine {
       ctx.fillRect(cx - 68, cy - 14, 22, 8);
     }
 
-    // 3. PARALLAX CAMADA 2: MONTANHAS / SKYLINE DISTANTE (Velocidade 0.22x)
+    // Skyline distante
     const mountainColor = isDark ? '#0F172A' : '#94A3B8';
     ctx.fillStyle = mountainColor;
     ctx.beginPath();
@@ -658,47 +1145,40 @@ export class CareerGameEngine {
     ctx.closePath();
     ctx.fill();
 
-    // 4. MUNDO PRINCIPAL (Camada com Câmera 1.0x)
+    // Mundo com Câmera
     ctx.save();
     ctx.translate(-Math.floor(this.cameraX), 0);
 
-    // Árvores no cenário distribuídas espaçadamente
     for (let tx = 150; tx < this.worldLength; tx += 320) {
       drawPixelTree(ctx, tx, this.groundY, isDark, Math.floor(tx / 320));
     }
 
-    // Elementos de Cenário (Postes com Cone de Luz, Bancos, Flores)
     this.props.forEach(prop => {
       drawSceneryProps(ctx, prop, this.groundY, isDark);
     });
 
-    // Prédios dos Marcos da Carreira
     MILESTONES.forEach(m => {
       drawDetailedBuilding(ctx, m, this.groundY, isDark, now);
     });
 
-    // Plataformas Suspensas
     this.platforms.forEach(plat => {
       drawPlatform(ctx, plat, isDark);
     });
 
-    // Obstáculos (Bugs de software, cones, racks, firewalls)
     this.obstacles.forEach(obs => {
       drawObstacle(ctx, obs, this.groundY, isDark, now);
     });
 
-    // Tech Orbs colecionáveis
     this.techOrbs.forEach(orb => {
       drawTechOrb(ctx, orb, now);
     });
 
-    // Partículas
     this.particles.forEach(p => {
       ctx.fillStyle = p.color;
       ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
     });
 
-    // 5. O PERSONAGEM (Marcus em Pixel Art)
+    // Personagem na rua
     drawCharacter(
       ctx,
       this.player.x,
@@ -714,21 +1194,60 @@ export class CareerGameEngine {
 
     ctx.restore();
 
-    // 6. CHÃO & PISTA (Primeiro Plano)
-    // Faixa de grama superior
+    // Chão
     ctx.fillStyle = isDark ? '#166534' : '#22C55E';
     ctx.fillRect(0, this.groundY, W, 4);
 
-    // Subsolo de terra/pedra em pixel art
     ctx.fillStyle = isDark ? '#1E293B' : '#64748B';
     ctx.fillRect(0, this.groundY + 4, W, H - (this.groundY + 4));
 
-    // Textura de pedras e lajotas no subsolo com movimento sincronizado
     ctx.fillStyle = isDark ? '#334155' : '#475569';
     for (let px = 0; px < W + 30; px += 24) {
       const offsetX = (px - (Math.floor(this.cameraX) % 24));
       ctx.fillRect(offsetX, this.groundY + 10, 4, 3);
       ctx.fillRect(offsetX + 10, this.groundY + 20, 5, 2);
     }
+  }
+
+  private renderInterior(now: number) {
+    if (!this.currentInterior) return;
+    const ctx = this.ctx;
+    const interior = this.currentInterior;
+    const originX = Math.floor((this.width - interior.roomWidth) / 2);
+    const originY = Math.floor((this.height - interior.roomHeight) / 2);
+
+    // 1. Sala (Piso, Paredes, Porta)
+    drawTopDownRoom(ctx, interior, this.width, this.height, now);
+
+    // 2. Móveis
+    interior.furniture.forEach(item => {
+      drawFurniture(ctx, item, originX, originY, now);
+    });
+
+    // 3. NPC / Mentor
+    if (interior.npc) {
+      drawNPC(ctx, interior.npc, originX, originY);
+    }
+
+    // 4. Skills Colecionáveis na Sala
+    interior.skills.forEach(skill => {
+      drawInteriorSkillItem(ctx, skill, originX, originY, now);
+    });
+
+    // 5. Partículas na Sala
+    this.particles.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+    });
+
+    // 6. Personagem Top-Down
+    drawTopDownCharacter(
+      ctx,
+      originX + this.topDownPlayer.x,
+      originY + this.topDownPlayer.y,
+      this.topDownPlayer.direction,
+      this.topDownPlayer.frame,
+      this.topDownPlayer.outfit
+    );
   }
 }

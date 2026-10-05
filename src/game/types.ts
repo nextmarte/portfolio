@@ -1,5 +1,9 @@
 export type EraOutfit = 'cefet' | 'chemtech' | 'uff' | 'cid' | 'baxijen';
 
+export type GameView = 'overworld' | 'interior';
+
+export type TopDownDirection = 'down' | 'up' | 'left' | 'right';
+
 export interface Milestone {
   id: string;
   year: number;
@@ -85,9 +89,79 @@ export interface PlayerState {
   invulnerableTimer: number;
 }
 
+export interface TopDownPlayerState {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  direction: TopDownDirection;
+  frame: number;
+  animTimer: number;
+  outfit: EraOutfit;
+}
+
+export type FurnitureType =
+  | 'desk_computer'
+  | 'bookshelf'
+  | 'server_cabinet'
+  | 'whiteboard'
+  | 'plant'
+  | 'rug'
+  | 'water_tank'
+  | 'ai_holo';
+
+export interface FurnitureItem {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: FurnitureType;
+  solid: boolean;
+  label?: string;
+}
+
+export interface InteriorSkillItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  x: number;
+  y: number;
+  collected: boolean;
+  icon: TechIconType;
+}
+
+export interface BuildingInterior {
+  buildingId: string;
+  name: string;
+  subtitle: string;
+  theme: 'workshop' | 'industrial_office' | 'university_lab' | 'data_center' | 'research_dome' | 'cyber_headquarters';
+  floorColor: string;
+  floorTileColor: string;
+  wallColor: string;
+  wallBorderColor: string;
+  roomWidth: number;
+  roomHeight: number;
+  doorX: number;
+  doorY: number;
+  furniture: FurnitureItem[];
+  skills: InteriorSkillItem[];
+  npc?: {
+    name: string;
+    role: string;
+    x: number;
+    y: number;
+    direction: TopDownDirection;
+    dialog: string;
+  };
+}
+
 export interface GameInput {
   left: boolean;
   right: boolean;
+  up: boolean;
+  down: boolean;
   jump: boolean;
   interact: boolean;
 }
