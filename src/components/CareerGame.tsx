@@ -2,8 +2,8 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useTheme } from 'next-themes';
-import { CareerGameEngine, INITIAL_TECH_ORBS, MILESTONES, BUILDING_INTERIORS } from '@/game/engine';
-import { BuildingInterior, GameView, InteriorSkillItem, Milestone, PlayerCareerStats, TechOrb } from '@/game/types';
+import { CareerGameEngine, INITIAL_TECH_ORBS, MILESTONES, BUILDING_INTERIORS, INITIAL_ACHIEVEMENTS } from '@/game/engine';
+import { Achievement, BuildingInterior, GameView, InteriorSkillItem, Milestone, PlayerCareerStats, TechOrb, TerminalProject } from '@/game/types';
 import { retroAudio } from '@/game/audio';
 import {
   Volume2,
@@ -30,6 +30,11 @@ import {
   Layers,
   ChevronRight,
   HelpCircle,
+  Terminal,
+  ExternalLink,
+  Trophy,
+  Shield,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -55,7 +60,7 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
 
-  // Estados RPG & TechDex
+  // Estados RPG, TechDex & Terminal
   const [stats, setStats] = useState<PlayerCareerStats>({
     level: 1,
     title: 'Estudante Técnico (2008)',
@@ -64,17 +69,22 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
     totalSkillsCollected: 0,
     totalOrbsCollected: 0,
     dodgeCombo: 0,
+    dashCount: 0,
+    terminalsAccessed: {},
     visitedBuildings: {},
     completedBuildings: {},
+    achievements: {},
   });
   const [isTechDexOpen, setIsTechDexOpen] = useState(false);
-  const [techDexTab, setTechDexTab] = useState<'skills' | 'stack' | 'profile'>('skills');
+  const [techDexTab, setTechDexTab] = useState<'skills' | 'stack' | 'achievements' | 'profile'>('skills');
+  const [terminalData, setTerminalData] = useState<{ projects: TerminalProject[]; buildingName: string } | null>(null);
 
   // Notificações e Diálogos
   const [dialog, setDialog] = useState<{ speaker: string; role: string; text: string } | null>(null);
   const [skillToast, setSkillToast] = useState<{ skill: InteriorSkillItem; buildingName: string } | null>(null);
   const [levelUpToast, setLevelUpToast] = useState<{ level: number; title: string } | null>(null);
   const [comboToast, setComboToast] = useState<{ combo: number } | null>(null);
+  const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -106,7 +116,6 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
     };
 
     engine.onDialog = (d) => setDialog(d);
-
     engine.onStatsUpdate = (s) => setStats(s);
 
     engine.onSkillAcquired = (skill, building) => {
@@ -122,6 +131,15 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
     engine.onComboDodge = (combo) => {
       setComboToast({ combo });
       setTimeout(() => setComboToast(null), 1800);
+    };
+
+    engine.onTerminalOpen = (projects, buildingName) => {
+      setTerminalData({ projects, buildingName });
+    };
+
+    engine.onAchievementUnlocked = (ach) => {
+      setAchievementToast(ach);
+      setTimeout(() => setAchievementToast(null), 4500);
     };
 
     engine.start();
@@ -156,6 +174,10 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
       }
 
       if (e.code === 'Escape') {
+        if (terminalData) {
+          setTerminalData(null);
+          return;
+        }
         if (isTechDexOpen) {
           setIsTechDexOpen(false);
           return;
@@ -190,6 +212,14 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
       } else if (['ArrowDown', 'KeyS'].includes(e.code)) {
         e.preventDefault();
         engineRef.current.setInput({ down: true });
+      } else if (['ShiftLeft', 'ShiftRight', 'KeyC', 'KeyJ'].includes(e.code)) {
+        // Dash / Slide de Alta Velocidade
+        e.preventDefault();
+        if (mode === 'auto') {
+          setMode('playable');
+          engineRef.current.setMode('playable');
+        }
+        engineRef.current.setInput({ dash: true });
       } else if (e.code === 'Space') {
         e.preventDefault();
         if (mode === 'auto') {
@@ -201,7 +231,7 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
         if (gameView === 'overworld' && nearMilestone) {
           engineRef.current.enterBuilding(nearMilestone.id);
         } else if (gameView === 'interior') {
-          engineRef.current.exitBuilding();
+          engineRef.current.openTerminalForCurrentRoom();
         }
       }
     };
@@ -217,6 +247,8 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
         engineRef.current.setInput({ up: false, jump: false });
       } else if (['ArrowDown', 'KeyS'].includes(e.code)) {
         engineRef.current.setInput({ down: false });
+      } else if (['ShiftLeft', 'ShiftRight', 'KeyC', 'KeyJ'].includes(e.code)) {
+        engineRef.current.setInput({ dash: false });
       } else if (e.code === 'Space') {
         engineRef.current.setInput({ jump: false });
       }
@@ -229,7 +261,7 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [mode, gameView, nearMilestone, isTechDexOpen, inspectedMilestone]);
+  }, [mode, gameView, nearMilestone, isTechDexOpen, inspectedMilestone, terminalData]);
 
   const toggleMode = useCallback(() => {
     const next = mode === 'auto' ? 'playable' : 'auto';
@@ -263,7 +295,7 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
     }
   }, []);
 
-  const handleTouchControl = useCallback((key: 'left' | 'right' | 'up' | 'down' | 'jump', active: boolean, e?: React.TouchEvent | React.MouseEvent) => {
+  const handleTouchControl = useCallback((key: 'left' | 'right' | 'up' | 'down' | 'jump' | 'dash' | 'interact', active: boolean, e?: React.TouchEvent | React.MouseEvent) => {
     if (e && 'cancelable' in e && e.cancelable) {
       e.preventDefault();
     }
@@ -505,13 +537,27 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
       {/* HUD DO MODO INTERIOR RPG (DENTRO DO PRÉDIO) */}
       {/* ========================================================================= */}
       {gameView === 'interior' && activeInterior && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex items-center gap-3">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex items-center gap-2.5 sm:gap-3 flex-wrap justify-center pointer-events-auto">
+          {activeInterior.terminalProjects && (
+            <button
+              onClick={() => {
+                if (engineRef.current) {
+                  engineRef.current.openTerminalForCurrentRoom();
+                }
+              }}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 hover:from-emerald-400 hover:to-teal-300 text-slate-950 text-xs font-black font-mono flex items-center gap-2 shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all hover:scale-105 border-2 border-white"
+            >
+              <Terminal className="w-4 h-4 text-slate-950" />
+              <span>TERMINAL DE PROJETOS [E]</span>
+            </button>
+          )}
+
           <button
             onClick={handleExitBuilding}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-600 via-red-500 to-rose-600 hover:from-rose-500 hover:to-rose-400 text-white text-xs font-extrabold font-mono flex items-center gap-2.5 shadow-[0_0_30px_rgba(244,63,94,0.4)] transition-all hover:scale-105 border-2 border-white"
+            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 via-red-500 to-rose-600 hover:from-rose-500 hover:to-rose-400 text-white text-xs font-black font-mono flex items-center gap-2 shadow-[0_0_25px_rgba(244,63,94,0.4)] transition-all hover:scale-105 border-2 border-white"
           >
             <LogOut className="w-4 h-4" />
-            <span>RETORNAR PARA A AVENIDA [E]</span>
+            <span>SAIR DO PRÉDIO</span>
           </button>
         </div>
       )}
@@ -562,6 +608,27 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
           <div className="px-5 py-2 rounded-full bg-slate-950/95 border-2 border-amber-400 text-amber-300 font-mono text-xs font-black shadow-[0_0_25px_rgba(245,158,11,0.5)] flex items-center gap-2 animate-bounce">
             <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
             <span>ESQUIVA PERFEITA! +40 XP (Combo x{comboToast.combo})</span>
+          </div>
+        </div>
+      )}
+
+      {/* Achievement Unlocked Toast */}
+      {achievementToast && (
+        <div className="absolute top-40 left-1/2 -translate-x-1/2 z-30 animate-fade-in-up">
+          <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-mono shadow-[0_0_35px_rgba(245,158,11,0.7)] border-2 border-white flex items-center gap-3.5">
+            <span className="text-3xl animate-bounce">{achievementToast.icon}</span>
+            <div>
+              <p className="text-[10px] uppercase font-black tracking-widest text-slate-900 flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 fill-slate-950 inline" />
+                CONQUISTA DESBLOQUEADA! +{achievementToast.xpReward || 150} XP
+              </p>
+              <h4 className="text-sm font-black text-slate-950">
+                {achievementToast.title}
+              </h4>
+              <p className="text-[11px] text-slate-900 font-medium font-sans">
+                {achievementToast.description}
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -683,6 +750,22 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
               >
                 <UserCheck className="w-4 h-4" />
                 <span>Trainer Card</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  retroAudio.playMenuSelect();
+                  setTechDexTab('achievements');
+                }}
+                className={cn(
+                  "flex-1 py-3 px-4 flex items-center justify-center gap-2 border-b-2 font-bold transition-all",
+                  techDexTab === 'achievements'
+                    ? "border-amber-400 text-amber-300 bg-amber-500/10"
+                    : "border-transparent text-slate-400 hover:text-white"
+                )}
+              >
+                <Trophy className="w-4 h-4" />
+                <span>Troféus ({Object.values(stats.achievements).filter(Boolean).length}/11)</span>
               </button>
             </div>
 
@@ -841,6 +924,80 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
                   </div>
                 </div>
               )}
+
+              {/* ABA 4: CONQUISTAS & TROFÉUS ARCADE */}
+              {techDexTab === 'achievements' && (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-xl bg-slate-900/60 border border-amber-400/30 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-amber-300 font-mono text-sm flex items-center gap-2">
+                        <Trophy className="w-4 h-4" />
+                        Sala de Troféus &amp; Conquistas
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Conquistas desbloqueadas durante a exploração, saltos, dashes e descobertas da carreira.
+                      </p>
+                    </div>
+                    <div className="text-right font-mono">
+                      <span className="text-xs text-slate-400 block">DESBLOQUEADOS</span>
+                      <strong className="text-base text-amber-400">
+                        {Object.values(stats.achievements).filter(Boolean).length} / {INITIAL_ACHIEVEMENTS.length}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {INITIAL_ACHIEVEMENTS.map((ach) => {
+                      const isUnlocked = stats.achievements[ach.id];
+                      return (
+                        <div
+                          key={ach.id}
+                          className={cn(
+                            "p-3.5 rounded-xl border flex items-start gap-3 transition-all",
+                            isUnlocked
+                              ? "bg-slate-900/90 border-amber-400/80 text-white shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                              : "bg-slate-950/40 border-white/5 text-slate-500 opacity-60"
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 border",
+                              isUnlocked
+                                ? "bg-amber-500/20 border-amber-400/40 shadow-inner"
+                                : "bg-slate-800/60 border-white/5 text-slate-600 grayscale"
+                            )}
+                          >
+                            {ach.icon}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <h5 className={cn("font-bold font-mono text-xs truncate", isUnlocked ? "text-amber-300" : "text-slate-400")}>
+                                {ach.title}
+                              </h5>
+                              <span className={cn(
+                                "text-[9px] font-mono px-1.5 py-0.2 rounded font-bold shrink-0",
+                                isUnlocked ? "bg-amber-400/20 text-amber-300 border border-amber-400/30" : "bg-slate-800 text-slate-500"
+                              )}>
+                                +{ach.xpReward || 150} XP
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-300 mt-1 line-clamp-2 font-sans">
+                              {ach.description}
+                            </p>
+                            <span className={cn(
+                              "inline-block mt-2 text-[9px] font-mono font-bold uppercase",
+                              isUnlocked ? "text-emerald-400" : "text-slate-600"
+                            )}>
+                              {isUnlocked ? "✓ CONQUISTADO" : "🔒 BLOQUEADO"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Rodapé do TechDex */}
@@ -851,6 +1008,133 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
                 className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all"
               >
                 Continuar Jogo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* RETRO CRT HACKER TERMINAL (PROJETOS REAIS DA CARREIRA) */}
+      {/* ========================================================================= */}
+      {terminalData && (
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-35 flex items-center justify-center p-3 sm:p-5">
+          <div className="w-full max-w-3xl bg-slate-950 border-2 border-emerald-500 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.35)] overflow-hidden flex flex-col max-h-[90vh] font-mono relative">
+            {/* Linhas de Varredura CRT (Scanlines effect) */}
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] opacity-40 z-10" />
+
+            {/* Cabeçalho do Terminal estilo Unix / CRT */}
+            <div className="p-4 bg-slate-900 border-b border-emerald-500/40 flex items-center justify-between text-emerald-400 z-20">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                </div>
+                <div className="flex items-center gap-2 pl-2 border-l border-white/10 text-xs">
+                  <Terminal className="w-4 h-4 text-emerald-400 animate-pulse" />
+                  <span className="font-bold text-white tracking-wide">
+                    TERMINAL DE PROJETOS // {terminalData.buildingName.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setTerminalData(null)}
+                className="p-1.5 rounded-lg text-emerald-400/70 hover:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                aria-label="Fechar Terminal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Corpo com Projetos do Laboratório / Empresa */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 z-20 text-slate-200">
+              <div className="flex items-center gap-2 text-xs text-emerald-400 pb-2 border-b border-emerald-500/20">
+                <span className="animate-pulse">❯</span>
+                <span>cat projects_archive.log --verbose</span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5">
+                {terminalData.projects.map((proj, idx) => (
+                  <div
+                    key={idx}
+                    className="p-5 rounded-xl bg-slate-900/80 border border-emerald-500/40 shadow-inner hover:border-emerald-400 transition-all space-y-3.5"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                            {proj.year}
+                          </span>
+                          <span className="text-xs text-slate-400">[{proj.category}]</span>
+                        </div>
+                        <h4 className="text-base font-bold text-white mt-1">
+                          {proj.title}
+                        </h4>
+                      </div>
+
+                      {proj.metrics && (
+                        <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs self-start sm:self-auto font-sans">
+                          📊 {proj.metrics}
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                      {proj.description}
+                    </p>
+
+                    {/* Tech Stack Tags */}
+                    <div>
+                      <span className="text-[10px] text-emerald-400 uppercase tracking-wider block mb-1.5 font-mono">
+                        Tech Stack:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {proj.techStack.map((tech, tIdx) => (
+                          <span
+                            key={tIdx}
+                            className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-white/10 text-[11px]"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Links Oficiais / Artigos / GitHub */}
+                    {proj.links && proj.links.length > 0 && (
+                      <div className="pt-2 flex flex-wrap gap-2.5">
+                        {proj.links.map((link, lIdx) => (
+                          <a
+                            key={lIdx}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold border border-emerald-500/40 transition-colors"
+                          >
+                            <span>{link.label}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rodapé do Terminal */}
+            <div className="px-5 py-3 bg-slate-900 border-t border-emerald-500/30 flex items-center justify-between text-xs text-slate-400 z-20">
+              <span className="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
+                SISTEMA OPERACIONAL RETRO CRT // STATUS: ONLINE
+              </span>
+              <button
+                onClick={() => setTerminalData(null)}
+                className="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all"
+              >
+                Fechar [ESC]
               </button>
             </div>
           </div>
@@ -942,7 +1226,7 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
                 </button>
               </div>
 
-              {/* Botões de Ação Overworld (Entrar / Pular) */}
+              {/* Botões de Ação Overworld (Entrar / Dash / Pular) */}
               <div className="flex items-center gap-2 touch-none">
                 {nearMilestone && (
                   <button
@@ -954,6 +1238,17 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
                     <span className="text-[8px] font-mono font-black">ENTRAR</span>
                   </button>
                 )}
+                <button
+                  onTouchStart={(e) => handleTouchControl('dash', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('dash', false, e)}
+                  onMouseDown={(e) => handleTouchControl('dash', true, e)}
+                  onMouseUp={(e) => handleTouchControl('dash', false, e)}
+                  className="w-14 h-14 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 active:from-amber-400 active:to-yellow-300 text-slate-950 flex flex-col items-center justify-center shadow-[0_0_25px_rgba(245,158,11,0.5)] border-2 border-white font-bold active:scale-95 transition-transform touch-none"
+                  aria-label="Dash / Slide"
+                >
+                  <Zap className="w-6 h-6 text-slate-950" />
+                  <span className="text-[8px] font-mono font-black">DASH</span>
+                </button>
                 <button
                   onTouchStart={(e) => handleTouchControl('jump', true, e)}
                   onTouchEnd={(e) => handleTouchControl('jump', false, e)}
@@ -1008,13 +1303,26 @@ export default function CareerGame({ onViewChange: externalOnViewChange, onModeC
                 <div />
               </div>
 
-              <button
-                onClick={handleExitBuilding}
-                className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 active:from-rose-500 active:to-red-400 text-white font-mono text-xs font-black shadow-[0_0_20px_rgba(244,63,94,0.5)] border-2 border-white flex items-center gap-2 active:scale-95 transition-transform"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>SAIR [E]</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (engineRef.current) {
+                      engineRef.current.openTerminalForCurrentRoom();
+                    }
+                  }}
+                  className="px-3.5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 active:from-emerald-400 active:to-teal-300 text-slate-950 font-mono text-xs font-black shadow-[0_0_20px_rgba(16,185,129,0.5)] border-2 border-white flex items-center gap-1.5 active:scale-95 transition-transform"
+                >
+                  <Terminal className="w-4 h-4 text-slate-950" />
+                  <span>TERMINAL [E]</span>
+                </button>
+                <button
+                  onClick={handleExitBuilding}
+                  className="px-3.5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 active:from-rose-500 active:to-red-400 text-white font-mono text-xs font-black shadow-[0_0_20px_rgba(244,63,94,0.5)] border-2 border-white flex items-center gap-1.5 active:scale-95 transition-transform"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>SAIR [E]</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

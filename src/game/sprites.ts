@@ -1,11 +1,14 @@
 import {
   BuildingInterior,
   EraOutfit,
+  FloatingText,
   FurnitureItem,
+  GhostTrail,
   InteriorSkillItem,
   Milestone,
   Obstacle,
   Platform,
+  PowerUpItem,
   SceneryProp,
   TechOrb,
   TopDownDirection,
@@ -2024,6 +2027,18 @@ export function drawFurniture(
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.fillRect(fX + 10, fY + 12 + steamY, 1, 2);
 
+    // Holograma Flutuante Interativo de Terminal de Projetos
+    const beaconPulse = Math.sin(time * 5) * 2.5;
+    const badgeY = fY - 14 + beaconPulse;
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(fX + (W / 2) - 34, badgeY, 68, 12);
+    ctx.strokeStyle = '#38BDF8';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(fX + (W / 2) - 34, badgeY, 68, 12);
+    ctx.fillStyle = '#38BDF8';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('💻 [E] PROJETOS', fX + (W / 2), badgeY + 9);
   } else if (item.type === 'bookshelf') {
     // ── 2. Estante de Livros Clássica: Madeira Maciça, Lombadas Coloridas & Troféu ──
     ctx.fillStyle = '#271206';
@@ -2244,6 +2259,19 @@ export function drawFurniture(
       ctx.fillStyle = sp % 2 === 0 ? '#00F0FF' : '#FEF08A';
       ctx.fillRect(spX, spY, 2, 2);
     }
+
+    // Holograma Flutuante Interativo de Projetos IA
+    const beaconPulse = Math.sin(time * 5) * 2.5;
+    const badgeY = fY - 14 + beaconPulse;
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(centerX - 36, badgeY, 72, 12);
+    ctx.strokeStyle = '#00F0FF';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(centerX - 36, badgeY, 72, 12);
+    ctx.fillStyle = '#00F0FF';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚡ [E] AI PROJETOS', centerX, badgeY + 9);
   }
 
   ctx.restore();
@@ -2415,6 +2443,219 @@ export function drawNPC(
   ctx.font = 'bold 8px monospace';
   ctx.textAlign = 'center';
   ctx.fillText(npc.role, 0, -26 * S + 9);
+
+  ctx.restore();
+}
+
+// =========================================================================
+// 8. EFEITOS ESPECIAIS: RASTROS FANTASMA, TEXTOS FLUTUANTES & POWER-UPS
+// =========================================================================
+
+export function drawGhostTrails(
+  ctx: CanvasRenderingContext2D,
+  trails: GhostTrail[]
+) {
+  trails.forEach((trail) => {
+    if (trail.alpha <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, Math.max(0, trail.alpha * 0.65));
+
+    const S = 2;
+    const pX = Math.floor(trail.x);
+    const pY = Math.floor(trail.y);
+
+    ctx.translate(pX, pY);
+    if (trail.facing === 'left') {
+      ctx.scale(-1, 1);
+    }
+
+    ctx.fillStyle = trail.color;
+
+    if (trail.isDashing) {
+      // Silhueta inclinada / deslizando (pose de slide rasante)
+      ctx.fillRect(-12 * S, -12 * S, 24 * S, 10 * S);
+      ctx.fillRect(-16 * S, -8 * S, 32 * S, 7 * S);
+      // Fagulhas e linha de velocidade
+      ctx.fillRect(-22 * S, -5 * S, 6 * S, 2 * S);
+      ctx.fillRect(-26 * S, -3 * S, 4 * S, 2 * S);
+    } else {
+      // Silhueta normal de salto ou corrida
+      ctx.fillRect(-5 * S, -19 * S, 10 * S, 6 * S); // Cabeça
+      ctx.fillRect(-4 * S, -13 * S, 8 * S, 8 * S);  // Tronco
+      ctx.fillRect(-5 * S, -5 * S, 4 * S, 5 * S);   // Pernas
+      ctx.fillRect(1 * S, -5 * S, 4 * S, 5 * S);
+    }
+
+    ctx.restore();
+  });
+}
+
+export function drawFloatingTexts(
+  ctx: CanvasRenderingContext2D,
+  texts: FloatingText[]
+) {
+  texts.forEach((ft) => {
+    if (ft.alpha <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, Math.max(0, ft.alpha));
+
+    const fX = Math.floor(ft.x);
+    const fY = Math.floor(ft.y);
+
+    ctx.font = '900 11px monospace';
+    ctx.textAlign = 'center';
+
+    // Borda preta clássica de arcade
+    ctx.strokeStyle = '#020617';
+    ctx.lineWidth = 3;
+    ctx.strokeText(ft.text, fX, fY);
+
+    // Texto com cor vibrante
+    ctx.fillStyle = ft.color;
+    ctx.fillText(ft.text, fX, fY);
+
+    ctx.restore();
+  });
+}
+
+export function drawPowerUps(
+  ctx: CanvasRenderingContext2D,
+  powerUps: PowerUpItem[],
+  time: number
+) {
+  powerUps.forEach((pu) => {
+    if (pu.collected) return;
+
+    ctx.save();
+    const floatY = pu.y + Math.sin(time * 4 + pu.floatOffset) * 4;
+    const pX = Math.floor(pu.x);
+    const pY = Math.floor(floatY);
+
+    // Sombra oval no chão
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(pX, pu.y + 18, 12, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Halo giratório
+    ctx.save();
+    ctx.translate(pX, pY);
+    ctx.rotate(time * 2);
+    ctx.strokeStyle =
+      pu.type === 'overclock'
+        ? 'rgba(250, 204, 21, 0.6)'
+        : pu.type === 'shield'
+        ? 'rgba(56, 189, 248, 0.6)'
+        : 'rgba(217, 70, 239, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-12, -12, 24, 24);
+    ctx.restore();
+
+    // Cápsula / Chip de 16-bit
+    const mainColor =
+      pu.type === 'overclock' ? '#F59E0B' : pu.type === 'shield' ? '#0284C7' : '#A855F7';
+    const accentColor =
+      pu.type === 'overclock' ? '#FEF08A' : pu.type === 'shield' ? '#38BDF8' : '#F472B6';
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(pX - 11, pY - 11, 22, 22);
+
+    ctx.fillStyle = mainColor;
+    ctx.fillRect(pX - 9, pY - 9, 18, 18);
+
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(pX - 7, pY - 7, 14, 14);
+
+    // Ícone interno
+    ctx.fillStyle = '#FFFFFF';
+    if (pu.type === 'overclock') {
+      // Raio / Turbo
+      ctx.beginPath();
+      ctx.moveTo(pX, pY - 6);
+      ctx.lineTo(pX - 4, pY);
+      ctx.lineTo(pX - 1, pY);
+      ctx.lineTo(pX - 3, pY + 6);
+      ctx.lineTo(pX + 4, pY - 1);
+      ctx.lineTo(pX + 1, pY - 1);
+      ctx.closePath();
+      ctx.fill();
+    } else if (pu.type === 'shield') {
+      // Escudo
+      ctx.beginPath();
+      ctx.moveTo(pX, pY - 5);
+      ctx.lineTo(pX + 5, pY - 3);
+      ctx.lineTo(pX + 4, pY + 3);
+      ctx.lineTo(pX, pY + 6);
+      ctx.lineTo(pX - 4, pY + 3);
+      ctx.lineTo(pX - 5, pY - 3);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      // Ímã
+      ctx.fillRect(pX - 5, pY - 5, 3, 9);
+      ctx.fillRect(pX + 2, pY - 5, 3, 9);
+      ctx.fillRect(pX - 5, pY + 2, 10, 3);
+      ctx.fillStyle = '#EF4444';
+      ctx.fillRect(pX - 5, pY - 5, 3, 3);
+      ctx.fillRect(pX + 2, pY - 5, 3, 3);
+    }
+
+    // Etiqueta abaixo do item
+    ctx.fillStyle = '#020617';
+    const labelW = ctx.measureText(pu.label).width + 12;
+    ctx.fillRect(pX - labelW / 2, pY + 14, labelW, 11);
+    ctx.strokeStyle = mainColor;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pX - labelW / 2, pY + 14, labelW, 11);
+
+    ctx.fillStyle = accentColor;
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(pu.label, pX, pY + 22);
+
+    ctx.restore();
+  });
+}
+
+export function drawShieldAura(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  time: number
+) {
+  ctx.save();
+  const radius = 24 + Math.sin(time * 6) * 2;
+  const pX = Math.floor(x);
+  const pY = Math.floor(y - 16);
+
+  // Bolha de energia translúcida
+  const grad = ctx.createRadialGradient(pX, pY, 10, pX, pY, radius);
+  grad.addColorStop(0, 'rgba(56, 189, 248, 0.05)');
+  grad.addColorStop(0.7, 'rgba(56, 189, 248, 0.25)');
+  grad.addColorStop(1, 'rgba(0, 240, 255, 0.6)');
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(pX, pY, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Borda hexagonal ou anel rotativo de contenção
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(pX, pY, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Anel orbital de partículas defensivas
+  for (let i = 0; i < 3; i++) {
+    const angle = time * 3 + (i * Math.PI * 2) / 3;
+    const ox = pX + Math.cos(angle) * radius;
+    const oy = pY + Math.sin(angle) * (radius * 0.65);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(ox - 2, oy - 2, 4, 4);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(ox - 1, oy - 1, 2, 2);
+  }
 
   ctx.restore();
 }

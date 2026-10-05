@@ -82,12 +82,65 @@ export interface PlayerState {
   vy: number;
   isGrounded: boolean;
   isJumping: boolean;
+  hasDoubleJumped?: boolean;
+  isDashing?: boolean;
+  dashTimer?: number;
+  dashCooldown?: number;
+  shieldActive?: boolean;
+  overclockTimer?: number;
+  magnetTimer?: number;
   facing: 'right' | 'left';
   frame: number;
   animTimer: number;
   outfit: EraOutfit;
   stumbleTimer: number;
   invulnerableTimer: number;
+}
+
+export interface GhostTrail {
+  x: number;
+  y: number;
+  frame: number;
+  facing: 'right' | 'left';
+  outfit: EraOutfit;
+  color: string;
+  alpha: number;
+  isDashing?: boolean;
+}
+
+export interface FloatingText {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+  color: string;
+  scale: number;
+  alpha: number;
+  life: number;
+  maxLife: number;
+  vy: number;
+}
+
+export type PowerUpType = 'overclock' | 'shield' | 'magnet';
+
+export interface PowerUpItem {
+  id: string;
+  x: number;
+  y: number;
+  type: PowerUpType;
+  label: string;
+  collected: boolean;
+  floatOffset: number;
+}
+
+export interface TerminalProject {
+  title: string;
+  category: string;
+  year: string;
+  description: string;
+  techStack: string[];
+  metrics?: string;
+  links: { label: string; url: string; icon?: string }[];
 }
 
 export interface TopDownPlayerState {
@@ -157,6 +210,17 @@ export interface BuildingInterior {
     dialog: string;
     avatar?: string;
   };
+  terminalProjects?: TerminalProject[];
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  progress?: string;
+  xpReward?: number;
 }
 
 export interface PlayerCareerStats {
@@ -167,8 +231,11 @@ export interface PlayerCareerStats {
   totalSkillsCollected: number;
   totalOrbsCollected: number;
   dodgeCombo: number;
+  dashCount: number;
+  terminalsAccessed: Record<string, boolean>;
   visitedBuildings: Record<string, boolean>;
   completedBuildings: Record<string, boolean>;
+  achievements: Record<string, boolean>;
 }
 
 export interface EraBadge {
@@ -189,5 +256,6 @@ export interface GameInput {
   up: boolean;
   down: boolean;
   jump: boolean;
+  dash: boolean;
   interact: boolean;
 }

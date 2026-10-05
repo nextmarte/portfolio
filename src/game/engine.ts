@@ -1,16 +1,22 @@
 import {
+  Achievement,
   BuildingInterior,
   EraOutfit,
+  FloatingText,
   GameInput,
   GameView,
+  GhostTrail,
   InteriorSkillItem,
   Milestone,
   Obstacle,
   Particle,
   Platform,
+  PlayerCareerStats,
   PlayerState,
+  PowerUpItem,
   SceneryProp,
   TechOrb,
+  TerminalProject,
   TopDownDirection,
   TopDownPlayerState,
 } from './types';
@@ -18,12 +24,16 @@ import {
   drawArtisticGround,
   drawCharacter,
   drawDetailedBuilding,
+  drawFloatingTexts,
   drawFurniture,
+  drawGhostTrails,
   drawInteriorSkillItem,
   drawNPC,
   drawObstacle,
   drawPlatform,
+  drawPowerUps,
   drawSceneryProps,
+  drawShieldAura,
   drawTechOrb,
   drawTopDownCharacter,
   drawTopDownRoom,
@@ -170,6 +180,20 @@ export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
       direction: 'down',
       dialog: 'Marcus, sua precisão técnica e base matemática começaram aqui no CEFET. Leve esse rigor para o software!',
     },
+    terminalProjects: [
+      {
+        title: 'Bancada Didática de Controle Pneumático & CLP',
+        category: 'Automação & Hardware',
+        year: '2008',
+        description: 'Dimensionamento de atuadores pneumáticos, eletroválvulas de controle proporcional e programação ladder de CLPs para esteiras fabris.',
+        techStack: ['CLP Siemens', 'Lógica Ladder', 'Pneumática Industrial', 'AutoCAD Mecânico', 'Eletrotécnica'],
+        metrics: 'Tempo de ciclo reduzido em 35% com chaveamento lógico',
+        links: [
+          { label: 'CEFET/RJ Portal', url: 'https://www.cefet-rj.br/' },
+          { label: 'Lattes Marcus', url: 'http://lattes.cnpq.br/4388835848574345' },
+        ],
+      },
+    ],
   },
   chemtech: {
     buildingId: 'chemtech',
@@ -203,6 +227,20 @@ export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
       direction: 'down',
       dialog: 'Em sistemas industriais, confiabilidade e tolerância a falhas são vitais. Esse mindset faz a diferença na sua arquitetura!',
     },
+    terminalProjects: [
+      {
+        title: 'Sistemas SCADA & Otimização em Tempo Real (RTO)',
+        category: 'Engenharia de Automação',
+        year: '2011 - 2016',
+        description: 'Arquitetura de sistemas supervisórios distribuídos para unidades petroquímicas e mineração, integrando malhas PID e telemetria Modbus/Profibus.',
+        techStack: ['Siemens PCS7', 'SCADA WinCC', 'Profibus-DP', 'Controle P&ID', 'Matlab / Simulink'],
+        metrics: '+10.000 variáveis monitoradas com latência inferior a 100ms',
+        links: [
+          { label: 'Siemens Brasil', url: 'https://www.siemens.com/br/pt.html' },
+          { label: 'LinkedIn Marcus', url: 'https://linkedin.com/in/marcusramalho' },
+        ],
+      },
+    ],
   },
   uff: {
     buildingId: 'uff',
@@ -236,6 +274,20 @@ export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
       direction: 'down',
       dialog: 'A ciência nos ensina a não aceitar palpites: qualquer modelo ou hipótese deve ser provada com rigor de dados.',
     },
+    terminalProjects: [
+      {
+        title: 'Dissertação de Mestrado: Modelagem Quantitativa & Governança',
+        category: 'Data Science & Econometria',
+        year: '2016 - 2023',
+        description: 'Pesquisa empírica com regressão multivariada, PLS-SEM e análise exploratória de dados sobre transparência pública e eficiência de gestão.',
+        techStack: ['R Language', 'RStudio', 'tidyverse', 'ggplot2', 'SmartPLS', 'LaTeX'],
+        metrics: 'Dataset com +50.000 registros e poder explicativo R² = 0.68',
+        links: [
+          { label: 'Currículo Lattes', url: 'http://lattes.cnpq.br/4388835848574345' },
+          { label: 'UFF PPGAd', url: 'http://www.adme.uff.br/' },
+        ],
+      },
+    ],
   },
   cid: {
     buildingId: 'cid',
@@ -269,6 +321,20 @@ export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
       direction: 'down',
       dialog: 'O Projeto LAGUNA gerou impacto real para o meio ambiente graças aos dashboards e à modelagem dos seus dados.',
     },
+    terminalProjects: [
+      {
+        title: 'Sistema LAGUNA — Telemetria IoT & Monitoramento Costeiro',
+        category: 'Data Engineering & Analytics',
+        year: '2024',
+        description: 'Plataforma integrada de sensoriamento aquático em tempo real, agregando telemetria físico-química em data lakehouse e visualizações analíticas em Streamlit.',
+        techStack: ['Python', 'FastAPI', 'Streamlit', 'PostgreSQL', 'Docker', 'Pandas', 'Plotly'],
+        metrics: 'Atualização a cada 15s de 8 sensores multiparamétricos',
+        links: [
+          { label: 'CID-UFF Portal', url: 'https://cid.uff.br' },
+          { label: 'GitHub Marcus', url: 'https://github.com/marcusramalho' },
+        ],
+      },
+    ],
   },
   coppead: {
     buildingId: 'coppead',
@@ -302,6 +368,20 @@ export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
       direction: 'down',
       dialog: 'A inteligência artificial exige governança de ponta. Desenvolver agentes autônomos requer profunda responsabilidade.',
     },
+    terminalProjects: [
+      {
+        title: 'Tese de Doutorado: Governança de Inteligência Artificial no Brasil',
+        category: 'Pesquisa Acadêmica & Regulação',
+        year: '2025',
+        description: 'Framework abrangente para avaliação de conformidade, auditoria algorítmica e adoção de agentes autônomos baseado no NIST AI RMF e EU AI Act.',
+        techStack: ['NIST AI RMF', 'ISO 42001', 'LLM Red-Teaming', 'Governança Algorítmica', 'Python'],
+        metrics: 'Submissão aceita em periódicos e seminários da ANPAD',
+        links: [
+          { label: 'COPPEAD / UFRJ', url: 'https://www.coppead.ufrj.br/' },
+          { label: 'Currículo Lattes', url: 'http://lattes.cnpq.br/4388835848574345' },
+        ],
+      },
+    ],
   },
   baxijen: {
     buildingId: 'baxijen',
@@ -335,8 +415,44 @@ export const BUILDING_INTERIORS: Record<string, BuildingInterior> = {
       direction: 'down',
       dialog: 'Você dominou todas as eras! Na BaXiJen, unimos arquitetura de software sólida ao poder dos agentes autônomos.',
     },
+    terminalProjects: [
+      {
+        title: 'Agentes Autônomos de Código & MCP Gateway',
+        category: 'AI Architecture & Automação',
+        year: '2026',
+        description: 'Orquestração autônoma de desenvolvimento com agentes especializados (Research, Architecture, Coding, QA) comunicando via Model Context Protocol.',
+        techStack: ['MCP Protocol', 'LangGraph', 'Claude Code', 'Google Antigravity', 'FastAPI', 'Next.js 15'],
+        metrics: '99.4% de assertividade na execução automatizada de pipelines',
+        links: [
+          { label: 'GitHub BaXiJen', url: 'https://github.com/marcusramalho' },
+          { label: 'LinkedIn Marcus', url: 'https://linkedin.com/in/marcusramalho' },
+        ],
+      },
+    ],
   },
 };
+
+export const INITIAL_POWERUPS: PowerUpItem[] = [
+  { id: 'pu-1', x: 1020, y: 0, type: 'overclock', label: 'OVERCLOCK', collected: false, floatOffset: 0 },
+  { id: 'pu-2', x: 2360, y: 0, type: 'shield', label: 'ESCUDO', collected: false, floatOffset: 1 },
+  { id: 'pu-3', x: 3750, y: 0, type: 'magnet', label: 'ÍMÃ', collected: false, floatOffset: 2 },
+  { id: 'pu-4', x: 5100, y: 0, type: 'overclock', label: 'OVERCLOCK', collected: false, floatOffset: 3 },
+  { id: 'pu-5', x: 6520, y: 0, type: 'shield', label: 'ESCUDO', collected: false, floatOffset: 4 },
+];
+
+export const INITIAL_ACHIEVEMENTS: Achievement[] = [
+  { id: 'first_jump', title: 'Primeiro Salto', description: 'Executou um salto sobre a avenida.', icon: '🦘', unlocked: false, xpReward: 100 },
+  { id: 'dash_master', title: 'Mestre do Slide', description: 'Executou um Dash/Slide rasante.', icon: '⚡', unlocked: false, xpReward: 120 },
+  { id: 'double_jump', title: 'Propulsão Dupla', description: 'Realizou um salto duplo no ar.', icon: '🚀', unlocked: false, xpReward: 150 },
+  { id: 'perfect_dodge', title: 'Reflexos de Aço', description: 'Acumulou combo de esquivas consecutivas.', icon: '🔥', unlocked: false, xpReward: 200 },
+  { id: 'terminal_hacker', title: 'Terminal Hacker', description: 'Acessou o terminal de projetos de um laboratório.', icon: '💻', unlocked: false, xpReward: 250 },
+  { id: 'shield_hero', title: 'Defesa Quântica', description: 'Ativou um Escudo e absorveu um impacto.', icon: '🛡️', unlocked: false, xpReward: 150 },
+  { id: 'overclock_speed', title: 'Overclocked', description: 'Pegou o acelerador de velocidade Overclock.', icon: '⏱️', unlocked: false, xpReward: 150 },
+  { id: 'magnetic_pull', title: 'Atração Magnética', description: 'Atraiu Tech Orbs usando o Ímã.', icon: '🧲', unlocked: false, xpReward: 150 },
+  { id: 'time_traveler', title: 'Viajante do Tempo', description: 'Visitou todos os marcos históricos (2008-2026).', icon: '⏳', unlocked: false, xpReward: 300 },
+  { id: 'tech_collector', title: 'Tech Hoarder', description: 'Coletou todos os Tech Orbs disponíveis.', icon: '💎', unlocked: false, xpReward: 400 },
+  { id: 'supreme_architect', title: 'AI Architect Supremo', description: 'Atingiu o nível máximo na BaXiJen.', icon: '👑', unlocked: false, xpReward: 500 },
+];
 
 export const INITIAL_TECH_ORBS: TechOrb[] = [
   { id: 'orb-1', name: 'Python', x: 750, y: 0, iconType: 'python', collected: false, floatOffset: 0 },
@@ -431,22 +547,23 @@ export class CareerGameEngine {
   private acquiredSkillsTotal: number = 0;
 
   // Input & Loop
-  private input: GameInput = { left: false, right: false, up: false, down: false, jump: false, interact: false };
+  private input: GameInput = { left: false, right: false, up: false, down: false, jump: false, dash: false, interact: false };
+  private wasJumpPressed: boolean = false;
   private lastTime: number = 0;
   private animId: number | null = null;
 
+  // Estados Avançados de Gameplay & Game Feel (Juice)
+  private powerUps: PowerUpItem[] = [];
+  private floatingTexts: FloatingText[] = [];
+  private ghostTrails: GhostTrail[] = [];
+  private achievements: Record<string, Achievement> = {};
+  private screenShakeTimer: number = 0;
+  private screenShakeIntensity: number = 0;
+  private dashCooldown: number = 0;
+  private trailTimer: number = 0;
+
   // Estatísticas & RPG Progression
-  private stats: {
-    level: number;
-    title: string;
-    currentXp: number;
-    nextLevelXp: number;
-    totalSkillsCollected: number;
-    totalOrbsCollected: number;
-    dodgeCombo: number;
-    visitedBuildings: Record<string, boolean>;
-    completedBuildings: Record<string, boolean>;
-  } = {
+  private stats: PlayerCareerStats = {
     level: 1,
     title: 'Estudante Técnico (2008)',
     currentXp: 0,
@@ -454,8 +571,11 @@ export class CareerGameEngine {
     totalSkillsCollected: 0,
     totalOrbsCollected: 0,
     dodgeCombo: 0,
+    dashCount: 0,
+    terminalsAccessed: {},
     visitedBuildings: {},
     completedBuildings: {},
+    achievements: {},
   };
 
   // Callbacks para UI
@@ -465,9 +585,11 @@ export class CareerGameEngine {
   public onViewChange: ((view: GameView, interior: BuildingInterior | null) => void) | null = null;
   public onSkillAcquired: ((skill: InteriorSkillItem, building: BuildingInterior) => void) | null = null;
   public onDialog: ((dialog: { speaker: string; role: string; text: string } | null) => void) | null = null;
-  public onStatsUpdate: ((stats: any) => void) | null = null;
+  public onStatsUpdate: ((stats: PlayerCareerStats) => void) | null = null;
   public onLevelUp: ((level: number, title: string) => void) | null = null;
   public onComboDodge: ((combo: number) => void) | null = null;
+  public onTerminalOpen: ((projects: TerminalProject[], buildingName: string) => void) | null = null;
+  public onAchievementUnlocked: ((achievement: Achievement) => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, isDark: boolean) {
     this.canvas = canvas;
@@ -481,6 +603,13 @@ export class CareerGameEngine {
       vy: 0,
       isGrounded: true,
       isJumping: false,
+      hasDoubleJumped: false,
+      isDashing: false,
+      dashTimer: 0,
+      dashCooldown: 0,
+      shieldActive: false,
+      overclockTimer: 0,
+      magnetTimer: 0,
       facing: 'right',
       frame: 0,
       animTimer: 0,
@@ -505,6 +634,11 @@ export class CareerGameEngine {
     this.platforms = JSON.parse(JSON.stringify(INITIAL_PLATFORMS));
     this.props = JSON.parse(JSON.stringify(INITIAL_PROPS));
     this.interiors = JSON.parse(JSON.stringify(BUILDING_INTERIORS));
+    this.powerUps = JSON.parse(JSON.stringify(INITIAL_POWERUPS));
+
+    INITIAL_ACHIEVEMENTS.forEach(a => {
+      this.achievements[a.id] = { ...a };
+    });
 
     assetManager.loadAll();
     this.resize();
@@ -514,6 +648,7 @@ export class CareerGameEngine {
     this.mode = mode;
     if (mode === 'playable') {
       this.player.vx = 0;
+      retroAudio.startBGM(this.view === 'interior' ? 'interior' : 'overworld');
     }
   }
 
@@ -561,6 +696,66 @@ export class CareerGameEngine {
     return this.worldLength;
   }
 
+  public getPowerUps(): PowerUpItem[] {
+    return this.powerUps;
+  }
+
+  public getAchievements(): Achievement[] {
+    return Object.values(this.achievements);
+  }
+
+  public triggerScreenShake(duration: number, intensity: number) {
+    this.screenShakeTimer = duration;
+    this.screenShakeIntensity = intensity;
+  }
+
+  public spawnFloatingText(x: number, y: number, text: string, color: string = '#FACC15') {
+    this.floatingTexts.push({
+      id: 'ft-' + Math.random().toString(36).substring(2, 9),
+      text,
+      x,
+      y,
+      color,
+      scale: 1,
+      alpha: 1,
+      life: 0.9,
+      maxLife: 0.9,
+      vy: -55,
+    });
+  }
+
+  public unlockAchievement(id: string) {
+    const ach = this.achievements[id];
+    if (ach && !ach.unlocked) {
+      ach.unlocked = true;
+      this.stats.achievements[id] = true;
+      const reward = ach.xpReward || 150;
+      this.addXp(reward);
+      retroAudio.playVictory();
+      this.spawnFloatingText(this.player.x, this.player.y - 48, `🏆 ${ach.title}! +${reward} XP`, '#FACC15');
+      if (this.onAchievementUnlocked) {
+        this.onAchievementUnlocked(ach);
+      }
+      if (this.onStatsUpdate) {
+        this.onStatsUpdate({ ...this.stats });
+      }
+    }
+  }
+
+  public openTerminalForCurrentRoom() {
+    if (this.view === 'interior' && this.currentInterior && this.currentInterior.terminalProjects) {
+      if (this.onTerminalOpen) {
+        this.onTerminalOpen(this.currentInterior.terminalProjects, this.currentInterior.name);
+        retroAudio.playTerminalOpen();
+        this.stats.terminalsAccessed[this.currentInterior.buildingId] = true;
+        this.unlockAchievement('terminal_hacker');
+        if (this.onStatsUpdate) {
+          this.onStatsUpdate({ ...this.stats });
+        }
+      }
+    }
+  }
+
   public addXp(amount: number) {
     this.stats.currentXp += amount;
 
@@ -591,6 +786,10 @@ export class CareerGameEngine {
       this.stats.title = newTitle;
       retroAudio.playLevelUp();
       this.createSparkles(this.player.x, this.player.y - 30, 25, ['#FACC15', '#F59E0B', '#38BDF8', '#FFFFFF']);
+      this.spawnFloatingText(this.player.x, this.player.y - 45, '⭐ LEVEL UP! ⭐', '#FACC15');
+      if (newLevel >= 6) {
+        this.unlockAchievement('supreme_architect');
+      }
       if (this.onLevelUp) {
         this.onLevelUp(newLevel, newTitle);
       }
@@ -631,6 +830,15 @@ export class CareerGameEngine {
         this.stats.visitedBuildings[buildingId] = true;
         this.addXp(20);
 
+        // Checar conquista de todos os prédios visitados
+        const allVisited = MILESTONES.every(m => this.stats.visitedBuildings[m.id]);
+        if (allVisited) {
+          this.unlockAchievement('time_traveler');
+        }
+
+        // Toca trilha chiptune interior lo-fi
+        retroAudio.startBGM('interior');
+
         if (this.onViewChange) {
           this.onViewChange('interior', interior);
         }
@@ -670,6 +878,9 @@ export class CareerGameEngine {
         // Retorna para o Overworld
         this.view = 'overworld';
         this.currentInterior = null;
+
+        // Retorna para trilha chiptune da rua
+        retroAudio.startBGM('overworld');
 
         if (this.onViewChange) {
           this.onViewChange('overworld', null);
@@ -753,6 +964,34 @@ export class CareerGameEngine {
       this.updateInterior(dt);
     }
 
+    // Atualizar Screen Shake
+    if (this.screenShakeTimer > 0) {
+      this.screenShakeTimer -= dt;
+      if (this.screenShakeTimer <= 0) {
+        this.screenShakeIntensity = 0;
+      }
+    }
+
+    // Atualizar Floating Texts (XP, DASH!, etc.)
+    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+      const ft = this.floatingTexts[i];
+      ft.y += ft.vy * dt;
+      ft.life -= dt;
+      ft.alpha = ft.life / ft.maxLife;
+      if (ft.life <= 0) {
+        this.floatingTexts.splice(i, 1);
+      }
+    }
+
+    // Atualizar Ghost Trails
+    for (let i = this.ghostTrails.length - 1; i >= 0; i--) {
+      const gt = this.ghostTrails[i];
+      gt.alpha -= dt * 3.6;
+      if (gt.alpha <= 0) {
+        this.ghostTrails.splice(i, 1);
+      }
+    }
+
     // Atualizar partículas universais
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
@@ -766,23 +1005,74 @@ export class CareerGameEngine {
   }
 
   // =========================================================================
-  // OVERWORLD UPDATE (RUNNER 2D)
+  // OVERWORLD UPDATE (RUNNER 2D COM DASH, DOUBLE JUMP & POWER-UPS)
   // =========================================================================
   private updateOverworld(dt: number) {
     const gravity = 26;
-    const runSpeed = 230;
+    const isOverclocked = (this.player.overclockTimer || 0) > 0;
+    const runSpeed = isOverclocked ? 320 : 230;
     const jumpVelocity = -430;
 
+    // Timers de status
     if (this.player.stumbleTimer > 0) {
       this.player.stumbleTimer = Math.max(0, this.player.stumbleTimer - dt);
     }
     if (this.player.invulnerableTimer > 0) {
       this.player.invulnerableTimer = Math.max(0, this.player.invulnerableTimer - dt);
     }
+    if (this.dashCooldown > 0) {
+      this.dashCooldown = Math.max(0, this.dashCooldown - dt);
+    }
+    if (this.player.overclockTimer && this.player.overclockTimer > 0) {
+      this.player.overclockTimer = Math.max(0, this.player.overclockTimer - dt);
+    }
+    if (this.player.magnetTimer && this.player.magnetTimer > 0) {
+      this.player.magnetTimer = Math.max(0, this.player.magnetTimer - dt);
+    }
 
-    // Input & Movimento
+    // Disparo de Dash / Slide (Tecla S / Shift / Down / Dash input)
+    const wantsDash = this.input.dash || (this.input.down && Math.abs(this.player.vx) > 40);
+    if (wantsDash && this.dashCooldown <= 0 && !this.player.isDashing && this.player.stumbleTimer <= 0) {
+      this.player.isDashing = true;
+      this.player.dashTimer = 0.28;
+      this.dashCooldown = 0.5;
+      this.stats.dashCount = (this.stats.dashCount || 0) + 1;
+      retroAudio.playDash();
+      this.spawnFloatingText(this.player.x, this.player.y - 36, 'DASH! ⚡', '#38BDF8');
+      this.unlockAchievement('dash_master');
+      this.createDust(this.player.x, this.groundY, 8);
+    }
+
+    // Lógica do Dash Ativo
+    if (this.player.isDashing) {
+      this.player.dashTimer = (this.player.dashTimer || 0) - dt;
+      const dashSpeed = isOverclocked ? 530 : 440;
+      this.player.vx = (this.player.facing === 'right' ? 1 : -1) * dashSpeed;
+
+      // Emissão de rastro fantasma de velocidade
+      this.trailTimer += dt;
+      if (this.trailTimer > 0.04) {
+        this.trailTimer = 0;
+        this.ghostTrails.push({
+          x: this.player.x,
+          y: this.player.y,
+          frame: this.player.frame,
+          facing: this.player.facing,
+          outfit: this.player.outfit,
+          color: isOverclocked ? '#FACC15' : '#38BDF8',
+          alpha: 1.0,
+          isDashing: true,
+        });
+      }
+
+      if (this.player.dashTimer <= 0) {
+        this.player.isDashing = false;
+      }
+    }
+
+    // Input & Movimento Normal
     if (this.mode === 'auto') {
-      this.player.vx = 150;
+      this.player.vx = isOverclocked ? 240 : 150;
       this.player.facing = 'right';
 
       // Auto-jump inteligente
@@ -794,6 +1084,7 @@ export class CareerGameEngine {
           this.player.vy = jumpVelocity;
           this.player.isGrounded = false;
           this.player.isJumping = true;
+          this.player.hasDoubleJumped = false;
           retroAudio.playJump();
           this.createDust(this.player.x, this.groundY, 5);
         }
@@ -808,7 +1099,7 @@ export class CareerGameEngine {
     } else {
       if (this.player.stumbleTimer > 0) {
         this.player.vx = -70;
-      } else {
+      } else if (!this.player.isDashing) {
         if (this.input.left) {
           this.player.vx = -runSpeed;
           this.player.facing = 'left';
@@ -819,15 +1110,32 @@ export class CareerGameEngine {
           this.player.vx = 0;
         }
 
-        if (this.input.jump && this.player.isGrounded) {
-          this.player.vy = jumpVelocity;
-          this.player.isGrounded = false;
-          this.player.isJumping = true;
-          retroAudio.playJump();
-          this.createDust(this.player.x, this.groundY, 6);
+        // Salto & Salto Duplo
+        const jumpJustPressed = this.input.jump && !this.wasJumpPressed;
+        if (jumpJustPressed) {
+          if (this.player.isGrounded) {
+            // Primeiro Salto
+            this.player.vy = jumpVelocity;
+            this.player.isGrounded = false;
+            this.player.isJumping = true;
+            this.player.hasDoubleJumped = false;
+            retroAudio.playJump();
+            this.createDust(this.player.x, this.groundY, 6);
+            this.unlockAchievement('first_jump');
+          } else if (!this.player.hasDoubleJumped && this.player.vy > -240) {
+            // Salto Duplo no Ar
+            this.player.vy = jumpVelocity * 0.88;
+            this.player.hasDoubleJumped = true;
+            retroAudio.playJump();
+            this.spawnFloatingText(this.player.x, this.player.y - 30, 'DOUBLE JUMP! 🚀', '#34D399');
+            this.createSparkles(this.player.x, this.player.y + 8, 8, ['#34D399', '#38BDF8', '#FFFFFF']);
+            this.unlockAchievement('double_jump');
+          }
         }
       }
     }
+
+    this.wasJumpPressed = this.input.jump;
 
     // Gravidade e Física
     this.player.vy += gravity;
@@ -848,6 +1156,7 @@ export class CareerGameEngine {
         this.player.vy = 0;
         this.player.isGrounded = true;
         this.player.isJumping = false;
+        this.player.hasDoubleJumped = false;
         onPlatform = true;
         break;
       }
@@ -863,6 +1172,7 @@ export class CareerGameEngine {
         this.player.vy = 0;
         this.player.isGrounded = true;
         this.player.isJumping = false;
+        this.player.hasDoubleJumped = false;
       } else {
         this.player.isGrounded = false;
       }
@@ -870,51 +1180,109 @@ export class CareerGameEngine {
 
     this.player.x = Math.max(30, this.player.x);
 
-    // Colisão com obstáculos e esquivas
+    // Colisão com obstáculos e esquivas dinâmicas
     for (const obs of this.obstacles) {
-      // Esquiva bem-sucedida (pulando sobre o obstáculo)
+      // Esquiva bem-sucedida (pulando ou dando slide por baixo)
       if (
         !obs.dodged &&
-        this.player.isJumping &&
+        (this.player.isJumping || this.player.isDashing) &&
         this.player.x > obs.x + obs.width &&
-        this.player.x - (obs.x + obs.width) < 55 &&
-        this.player.y < this.groundY - 15
+        this.player.x - (obs.x + obs.width) < 60
       ) {
         obs.dodged = true;
         this.stats.dodgeCombo++;
         this.addXp(40);
+        if (this.stats.dodgeCombo >= 3) {
+          this.unlockAchievement('perfect_dodge');
+        }
+        this.spawnFloatingText(obs.x + (obs.width / 2), this.groundY - 32, `+40 XP (x${this.stats.dodgeCombo})`, '#FACC15');
         if (this.onComboDodge) {
           this.onComboDodge(this.stats.dodgeCombo);
         }
         this.createSparkles(obs.x + (obs.width / 2), this.groundY - 20, 8, ['#FACC15', '#38BDF8']);
       }
 
-      if (this.player.invulnerableTimer <= 0) {
-        const playerFootY = this.player.y;
-        const playerTopY = this.player.y - 36;
-        const obsTopY = obs.y;
-        const obsBottomY = this.groundY;
+      // Hitbox adaptativa (se estiver dando slide, a altura é reduzida pela metade!)
+      const isDashing = this.player.isDashing;
+      const playerTopY = isDashing ? this.player.y - 18 : this.player.y - 36;
+      const playerFootY = this.player.y;
 
-        if (
-          this.player.x + 12 >= obs.x &&
-          this.player.x - 12 <= obs.x + obs.width &&
-          playerFootY > obsTopY + 4 &&
-          playerTopY < obsBottomY
-        ) {
+      if (
+        this.player.x + 12 >= obs.x &&
+        this.player.x - 12 <= obs.x + obs.width &&
+        playerFootY > obs.y + 4 &&
+        playerTopY < this.groundY
+      ) {
+        // Se o escudo estiver ativo, absorve o impacto sem tropeçar!
+        if (this.player.shieldActive) {
+          this.player.shieldActive = false;
+          this.player.invulnerableTimer = 1.0;
+          this.triggerScreenShake(0.25, 6);
+          retroAudio.playShieldBreak();
+          this.spawnFloatingText(this.player.x, this.player.y - 38, 'ESCUDO BLOQUEOU! 🛡️', '#38BDF8');
+          this.unlockAchievement('shield_hero');
+          this.createSparkles(this.player.x, this.player.y - 18, 14, ['#38BDF8', '#FFFFFF', '#00F0FF']);
+          break;
+        }
+
+        if (this.player.invulnerableTimer <= 0) {
           this.player.stumbleTimer = 0.35;
           this.player.invulnerableTimer = 1.2;
           this.stats.dodgeCombo = 0; // Perde o combo ao tropeçar
+          this.triggerScreenShake(0.3, 8);
           retroAudio.playHurt();
+          this.spawnFloatingText(this.player.x, this.player.y - 25, 'OUCH!', '#EF4444');
           this.createSparkles(this.player.x, this.player.y - 20, 8, ['#EF4444', '#F87171', '#FEF08A']);
           break;
         }
       }
     }
 
-    // Ciclo de corrida
+    // Coleta de Power-ups (Overclock, Escudo, Ímã)
+    this.powerUps.forEach(pu => {
+      if (!pu.collected) {
+        const dist = Math.hypot(this.player.x - pu.x, (this.player.y - 20) - pu.y);
+        if (dist < 32) {
+          pu.collected = true;
+          retroAudio.playPowerUp();
+          this.createSparkles(pu.x, pu.y, 16, ['#FACC15', '#38BDF8', '#A855F7', '#FFFFFF']);
+
+          if (pu.type === 'overclock') {
+            this.player.overclockTimer = 7.0; // 7 segundos de turbo
+            this.spawnFloatingText(pu.x, pu.y - 25, 'OVERCLOCK ATIVADO! ⚡', '#FACC15');
+            this.unlockAchievement('overclock_speed');
+          } else if (pu.type === 'shield') {
+            this.player.shieldActive = true;
+            this.spawnFloatingText(pu.x, pu.y - 25, 'ESCUDO ATIVO! 🛡️', '#38BDF8');
+            this.unlockAchievement('shield_hero');
+          } else if (pu.type === 'magnet') {
+            this.player.magnetTimer = 8.0; // 8 segundos de atração magnética
+            this.spawnFloatingText(pu.x, pu.y - 25, 'ÍMÃ ATIVADO! 🧲', '#D946EF');
+            this.unlockAchievement('magnetic_pull');
+          }
+
+          this.addXp(50);
+        }
+      }
+    });
+
+    // Efeito Magnético atraindo Tech Orbs
+    if ((this.player.magnetTimer || 0) > 0) {
+      for (const orb of this.techOrbs) {
+        if (!orb.collected) {
+          const dist = Math.hypot(this.player.x - orb.x, (this.player.y - 20) - orb.y);
+          if (dist < 220) {
+            orb.x += (this.player.x - orb.x) * 7 * dt;
+            orb.y += ((this.player.y - 20) - orb.y) * 7 * dt;
+          }
+        }
+      }
+    }
+
+    // Ciclo de corrida e partículas de pegada
     if (Math.abs(this.player.vx) > 10 && this.player.stumbleTimer <= 0) {
       this.player.animTimer += dt;
-      if (this.player.animTimer > 0.11) {
+      if (this.player.animTimer > (isOverclocked ? 0.07 : 0.11)) {
         this.player.animTimer = 0;
         this.player.frame = (this.player.frame + 1) % 4;
         if (this.player.isGrounded && Math.random() < 0.35) {
@@ -953,7 +1321,13 @@ export class CareerGameEngine {
           this.stats.totalOrbsCollected++;
           this.addXp(60);
           retroAudio.playCollect();
+          this.spawnFloatingText(orb.x, orb.y - 18, '+60 XP', '#38BDF8');
           this.createSparkles(orb.x, orb.y, 12, ['#38BDF8', '#FACC15', '#34D399', '#A78BFA']);
+
+          if (this.stats.totalOrbsCollected >= this.techOrbs.length) {
+            this.unlockAchievement('tech_collector');
+          }
+
           if (this.onOrbsUpdate) {
             this.onOrbsUpdate(this.collectedCount, this.techOrbs.length);
           }
@@ -1138,6 +1512,17 @@ export class CareerGameEngine {
         }
       }
     }
+
+    // 6. Detecção de Proximidade do Terminal de Trabalho (desk_computer ou ai_holo)
+    const workstation = interior.furniture.find(f => f.type === 'desk_computer' || f.type === 'ai_holo');
+    if (workstation) {
+      const wsCenterX = workstation.x + (workstation.width / 2);
+      const wsCenterY = workstation.y + (workstation.height / 2);
+      const wsDist = Math.hypot(this.topDownPlayer.x - wsCenterX, this.topDownPlayer.y - wsCenterY);
+      if (wsDist < 58 && this.input.interact) {
+        this.openTerminalForCurrentRoom();
+      }
+    }
   }
 
   private determineOutfit(x: number): EraOutfit {
@@ -1193,11 +1578,22 @@ export class CareerGameEngine {
     const H = this.height;
     const now = performance.now() / 1000;
 
+    ctx.save();
+
+    // Screen Shake dinâmico
+    if (this.screenShakeTimer > 0) {
+      const sx = (Math.random() - 0.5) * this.screenShakeIntensity;
+      const sy = (Math.random() - 0.5) * this.screenShakeIntensity;
+      ctx.translate(sx, sy);
+    }
+
     if (this.view === 'overworld') {
       this.renderOverworld(now);
     } else {
       this.renderInterior(now);
     }
+
+    ctx.restore();
 
     // Efeito de transição de fade to black / fade in
     if (this.fadeAlpha > 0) {
@@ -1212,17 +1608,46 @@ export class CareerGameEngine {
     const H = this.height;
     const isDark = this.isDark;
 
-    // Céu
+    // Transição Dinâmica Temporal de Iluminação do Céu (2008 Manhã -> Pôr do Sol Dourado -> Noite Cyberpunk)
+    const eraProgress = Math.min(1, Math.max(0, this.player.x / this.worldLength));
     const skyGrad = ctx.createLinearGradient(0, 0, 0, this.groundY);
+
     if (isDark) {
-      skyGrad.addColorStop(0, '#020617');
-      skyGrad.addColorStop(0.5, '#0B1528');
-      skyGrad.addColorStop(1, '#1E293B');
+      if (eraProgress < 0.28) {
+        // CEFET 2008 - Madrugada Técnica Azulada
+        skyGrad.addColorStop(0, '#020617');
+        skyGrad.addColorStop(0.5, '#0B1528');
+        skyGrad.addColorStop(1, '#1E293B');
+      } else if (eraProgress < 0.65) {
+        // Chemtech & UFF (2011-2016) - Crepúsculo Púrpura & Âmbar
+        skyGrad.addColorStop(0, '#1E1B4B');
+        skyGrad.addColorStop(0.5, '#312E81');
+        skyGrad.addColorStop(1, '#4C1D95');
+      } else {
+        // CID, COPPEAD & BaXiJen (2024-2026) - Noite Cyberpunk Elétrica com Glow Neon
+        skyGrad.addColorStop(0, '#030712');
+        skyGrad.addColorStop(0.5, '#082F49');
+        skyGrad.addColorStop(1, '#0C4A6E');
+      }
     } else {
-      skyGrad.addColorStop(0, '#38BDF8');
-      skyGrad.addColorStop(0.5, '#BAE6FD');
-      skyGrad.addColorStop(1, '#E0F2FE');
+      if (eraProgress < 0.28) {
+        // CEFET 2008 - Manhã ensolarada radiante
+        skyGrad.addColorStop(0, '#38BDF8');
+        skyGrad.addColorStop(0.5, '#BAE6FD');
+        skyGrad.addColorStop(1, '#E0F2FE');
+      } else if (eraProgress < 0.65) {
+        // Chemtech & UFF (2011-2016) - Golden Hour Pôr do Sol
+        skyGrad.addColorStop(0, '#F97316');
+        skyGrad.addColorStop(0.5, '#FB923C');
+        skyGrad.addColorStop(1, '#FED7AA');
+      } else {
+        // BaXiJen 2026 - Twilight Elétrico Neon
+        skyGrad.addColorStop(0, '#0F172A');
+        skyGrad.addColorStop(0.6, '#0284C7');
+        skyGrad.addColorStop(1, '#38BDF8');
+      }
     }
+
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, H);
 
@@ -1310,7 +1735,7 @@ export class CareerGameEngine {
     // Camada 2: Chão Artístico (Grama com tufos, Calçada de Pedras Portuguesas em ondas, Meio-fio com bueiros e Asfalto)
     drawArtisticGround(ctx, W, H, this.groundY, this.cameraX, isDark);
 
-    // Mundo com Câmera (Camada 3: Fiação elétrica, Postes, Plataformas, Obstáculos, Orbes, Jogador e Partículas)
+    // Mundo com Câmera (Camada 3: Fiação elétrica, Postes, Plataformas, Power-ups, Obstáculos, Orbes, Jogador, Rastros e Partículas)
     ctx.save();
     ctx.translate(-Math.floor(this.cameraX), 0);
 
@@ -1348,15 +1773,24 @@ export class CareerGameEngine {
       drawPlatform(ctx, plat, isDark);
     });
 
+    // Power-ups Flutuantes no Overworld (Overclock, Escudo, Ímã)
+    drawPowerUps(ctx, this.powerUps, now);
+
+    // Obstáculos com animação e neon
     this.obstacles.forEach(obs => {
       const obsSprite = assets.obstacles[obs.type];
       drawObstacle(ctx, obs, this.groundY, isDark, now, obsSprite);
     });
 
+    // Tech Orbs Colecionáveis
     this.techOrbs.forEach(orb => {
       drawTechOrb(ctx, orb, now);
     });
 
+    // Rastros Fantasma de Alta Velocidade (Dash / Slide / Overclock)
+    drawGhostTrails(ctx, this.ghostTrails);
+
+    // Partículas universais no mundo
     this.particles.forEach(p => {
       ctx.fillStyle = p.color;
       ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
@@ -1386,6 +1820,14 @@ export class CareerGameEngine {
       this.player.invulnerableTimer,
       playerSprite
     );
+
+    // Aura Protetora de Escudo Quântico
+    if (this.player.shieldActive) {
+      drawShieldAura(ctx, this.player.x, this.player.y, now);
+    }
+
+    // Textos Flutuantes Arcade (+60 XP, DASH!, DOUBLE JUMP!)
+    drawFloatingTexts(ctx, this.floatingTexts);
 
     ctx.restore();
   }
@@ -1456,6 +1898,9 @@ export class CareerGameEngine {
       this.topDownPlayer.outfit,
       tdSprite
     );
+
+    // 7. Textos Flutuantes dentro da sala (+180 XP, etc.)
+    drawFloatingTexts(ctx, this.floatingTexts);
 
     ctx.restore();
   }
