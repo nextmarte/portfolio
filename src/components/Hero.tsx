@@ -27,6 +27,7 @@ export function Hero() {
   const fullText = "Marcus Ramalho";
   const [displayedText, setDisplayedText] = useState("");
   const [gameView, setGameView] = useState<'overworld' | 'interior'>('overworld');
+  const [gameMode, setGameMode] = useState<'auto' | 'playable'>('auto');
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -47,26 +48,28 @@ export function Hero() {
     return () => clearInterval(interval);
   }, []);
 
+  const isPlayingOrInterior = gameView === 'interior' || gameMode === 'playable';
+
   return (
     <section
       id="hero"
       className="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden"
     >
       {/* 2D Retro Pixel-Art Career Game */}
-      <CareerGame onViewChange={setGameView} />
+      <CareerGame onViewChange={setGameView} onModeChange={setGameMode} />
 
       {/* Readability overlay — covers the text area while allowing the game world & runner to shine through */}
       <div
         className={cn(
           "absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-transparent dark:from-slate-950/85 dark:via-slate-900/50 dark:to-transparent pointer-events-none z-[5] transition-opacity duration-500",
-          gameView === 'interior' && "opacity-0"
+          isPlayingOrInterior && "opacity-0"
         )}
       />
 
       <div
         className={cn(
           "container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56 transition-all duration-500",
-          gameView === 'interior' && "opacity-0 pointer-events-none scale-95"
+          isPlayingOrInterior && "opacity-0 pointer-events-none scale-95"
         )}
       >
         <div className="animate-fade-in-up mb-6">

@@ -960,19 +960,35 @@ export function drawSceneryProps(
     ctx.fillRect(pX + 4, groundY - 14, 3, 14);
     ctx.fillRect(pX + 23, groundY - 14, 3, 14);
   } else if (prop.type === 'bush_flowers') {
-    // Arbusto frondoso com florzinhas
-    ctx.fillStyle = isDark ? '#064E3B' : '#15803D';
-    ctx.beginPath();
-    ctx.arc(pX + 10, groundY - 10, 12, 0, Math.PI * 2);
-    ctx.arc(pX + 22, groundY - 14, 15, 0, Math.PI * 2);
-    ctx.arc(pX + 32, groundY - 10, 11, 0, Math.PI * 2);
-    ctx.fill();
+    // Arbusto frondoso em autêntico Pixel Art 16-bit com tufos escalonados e flores
+    const bColors = isDark
+      ? { dark: '#064E3B', mid: '#047857', light: '#059669', high: '#10B981' }
+      : { dark: '#14532D', mid: '#16A34A', light: '#22C55E', high: '#4ADE80' };
 
-    ctx.fillStyle = '#FB7185';
-    ctx.fillRect(pX + 8, groundY - 15, 3, 3);
-    ctx.fillRect(pX + 24, groundY - 18, 3, 3);
-    ctx.fillStyle = '#FBBF24';
-    ctx.fillRect(pX + 16, groundY - 12, 3, 3);
+    // Sombra suave no chão
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(pX + 2, groundY - 2, 38, 3);
+
+    // Tufo Esquerdo
+    drawPixelFoliageCluster(ctx, pX + 9, groundY - 8, 18, 16, bColors.dark, bColors.mid, bColors.light, bColors.high);
+    // Tufo Direito
+    drawPixelFoliageCluster(ctx, pX + 31, groundY - 8, 18, 16, bColors.dark, bColors.mid, bColors.light, bColors.high);
+    // Tufo Central Elevado
+    drawPixelFoliageCluster(ctx, pX + 20, groundY - 12, 22, 20, bColors.dark, bColors.mid, bColors.light, bColors.high);
+
+    // Flores tropicais em pixel art (Hibisco Vermelho e Estame Amarelo)
+    const flowers = [
+      { x: pX + 8, y: groundY - 12 },
+      { x: pX + 22, y: groundY - 17 },
+      { x: pX + 32, y: groundY - 11 },
+    ];
+    flowers.forEach(fl => {
+      ctx.fillStyle = '#E11D48';
+      ctx.fillRect(fl.x - 1, fl.y, 3, 2);
+      ctx.fillRect(fl.x, fl.y - 1, 1, 4);
+      ctx.fillStyle = '#FEF08A';
+      ctx.fillRect(fl.x, fl.y, 1, 1);
+    });
   } else if (prop.type === 'hydrant') {
     // Hidrante com relevo e parafusos
     ctx.fillStyle = '#DC2626';
@@ -990,6 +1006,47 @@ export function drawSceneryProps(
 // 7. ÁRVORES ORGÂNICAS & FLORA BRASILEIRA (IPÊ AMARELO & QUARESMEIRA)
 // =========================================================================
 
+/**
+ * Desenha um tufo orgânico de folhagem em estilo 16-bit com 4 tons de cor,
+ * contornos escalonados pixel-a-pixel (sem círculos vetoriais lisos).
+ */
+export function drawPixelFoliageCluster(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  width: number,
+  height: number,
+  darkColor: string,
+  midColor: string,
+  lightColor: string,
+  highlightColor?: string
+) {
+  const hw = Math.floor(width / 2);
+  const hh = Math.floor(height / 2);
+
+  // 1. Base / Sombra Inferior
+  ctx.fillStyle = darkColor;
+  ctx.fillRect(cx - hw + 2, cy - hh + 2, width - 4, height - 2);
+  ctx.fillRect(cx - hw + 4, cy + hh - 3, width - 8, 4);
+
+  // 2. Miolo / Cor Média
+  ctx.fillStyle = midColor;
+  ctx.fillRect(cx - hw + 3, cy - hh + 1, width - 6, height - 4);
+  ctx.fillRect(cx - hw + 1, cy - hh + 3, width - 2, height - 7);
+
+  // 3. Meia-luz / Brilho Solar Superior-Esquerdo
+  ctx.fillStyle = lightColor;
+  ctx.fillRect(cx - hw + 4, cy - hh, width - 10, Math.floor(height * 0.45));
+  ctx.fillRect(cx - hw + 2, cy - hh + 2, Math.floor(width * 0.45), Math.floor(height * 0.4));
+
+  // 4. Destaque Especular / Folhas Iluminadas no topo
+  if (highlightColor) {
+    ctx.fillStyle = highlightColor;
+    ctx.fillRect(cx - hw + 6, cy - hh + 1, Math.floor(width * 0.28), 3);
+    ctx.fillRect(cx - hw + 8, cy - hh - 1, Math.floor(width * 0.18), 2);
+  }
+}
+
 export function drawPixelTree(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -1000,64 +1057,120 @@ export function drawPixelTree(
   const pX = Math.floor(x);
   ctx.save();
 
-  // Tronco com casca e galhos bifurcados
-  ctx.fillStyle = isDark ? '#271206' : '#451A03';
-  ctx.fillRect(pX + 9, groundY - 32, 8, 32);
-  ctx.fillRect(pX + 5, groundY - 22, 5, 4);
-  ctx.fillRect(pX + 16, groundY - 26, 6, 4);
+  // Sombra suave sob a copa
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.fillRect(pX - 4, groundY - 2, 46, 3);
+
+  // Tronco com raízes e textura de casca
+  const barkDark = isDark ? '#1C1008' : '#271206';
+  const barkMid = isDark ? '#2E190D' : '#451A03';
+  const barkLight = isDark ? '#4A2A17' : '#78350F';
+
+  // Raízes laterais estendidas no solo
+  ctx.fillStyle = barkDark;
+  ctx.fillRect(pX + 8, groundY - 6, 4, 6);
+  ctx.fillRect(pX + 22, groundY - 6, 5, 6);
+
+  // Fuste do tronco
+  ctx.fillStyle = barkMid;
+  ctx.fillRect(pX + 12, groundY - 42, 10, 42);
+
+  // Sombra da casca à direita
+  ctx.fillStyle = barkDark;
+  ctx.fillRect(pX + 19, groundY - 42, 3, 42);
+
+  // Iluminação da casca à esquerda
+  ctx.fillStyle = barkLight;
+  ctx.fillRect(pX + 12, groundY - 40, 2, 38);
+
+  // Galhos bifurcados para suportar a copa
+  ctx.fillStyle = barkMid;
+  ctx.fillRect(pX + 7, groundY - 46, 7, 5);
+  ctx.fillRect(pX + 20, groundY - 48, 8, 6);
 
   if (variant % 3 === 0) {
-    // Árvore frondosa clássica verde
-    const foliageDark = isDark ? '#064E3B' : '#15803D';
-    const foliageMid = isDark ? '#047857' : '#16A34A';
-    const foliageLight = isDark ? '#059669' : '#4ADE80';
+    // ── 1. Mata Atlântica Frondosa (Verde Tropical Luxuoso) ──
+    const d = isDark ? '#064E3B' : '#14532D';
+    const m = isDark ? '#047857' : '#16A34A';
+    const l = isDark ? '#059669' : '#22C55E';
+    const h = isDark ? '#10B981' : '#4ADE80';
 
-    ctx.fillStyle = foliageDark;
-    ctx.beginPath();
-    ctx.arc(pX + 13, groundY - 52, 24, 0, Math.PI * 2);
-    ctx.fill();
+    // Agrupamento de 6 tufos de folhas formando a copa
+    drawPixelFoliageCluster(ctx, pX + 5, groundY - 48, 22, 18, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 29, groundY - 50, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 17, groundY - 55, 30, 24, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 9, groundY - 65, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 25, groundY - 67, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 17, groundY - 76, 26, 22, d, m, l, h);
 
-    ctx.fillStyle = foliageMid;
-    ctx.beginPath();
-    ctx.arc(pX + 11, groundY - 56, 19, 0, Math.PI * 2);
-    ctx.fill();
+    // Folhinhas salientes nas bordas da copa para silhueta orgânica
+    ctx.fillStyle = h;
+    ctx.fillRect(pX + 12, groundY - 88, 3, 3);
+    ctx.fillRect(pX + 22, groundY - 86, 3, 2);
+    ctx.fillRect(pX - 4, groundY - 53, 3, 3);
+    ctx.fillRect(pX + 38, groundY - 55, 3, 3);
 
-    ctx.fillStyle = foliageLight;
-    ctx.beginPath();
-    ctx.arc(pX + 8, groundY - 62, 11, 0, Math.PI * 2);
-    ctx.fill();
   } else if (variant % 3 === 1) {
-    // Ipê Amarelo (árvore clássica da paisagem da UFF / Rio)
-    ctx.fillStyle = '#D97706';
-    ctx.beginPath();
-    ctx.arc(pX + 13, groundY - 54, 25, 0, Math.PI * 2);
-    ctx.fill();
+    // ── 2. Ipê Amarelo (Árvore Emblemática Fluminense) ──
+    const d = '#92400E';
+    const m = '#D97706';
+    const l = '#F59E0B';
+    const h = '#FDE047';
 
-    ctx.fillStyle = '#F59E0B';
-    ctx.beginPath();
-    ctx.arc(pX + 11, groundY - 58, 20, 0, Math.PI * 2);
-    ctx.fill();
+    // Agrupamento dourado da copa do Ipê
+    drawPixelFoliageCluster(ctx, pX + 4, groundY - 50, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 30, groundY - 52, 26, 22, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 17, groundY - 58, 32, 26, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 8, groundY - 68, 26, 22, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 26, groundY - 70, 26, 22, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 17, groundY - 80, 28, 24, d, m, l, h);
 
+    // Flores douradas salientes
+    ctx.fillStyle = '#FEF08A';
+    ctx.fillRect(pX + 14, groundY - 93, 4, 3);
+    ctx.fillRect(pX + 23, groundY - 90, 3, 3);
+    ctx.fillRect(pX - 5, groundY - 55, 3, 3);
+    ctx.fillRect(pX + 39, groundY - 58, 3, 3);
+
+    // Pétalas amarelas caindo suavemente ao vento
+    const wind = (performance.now() / 1000) * 16;
     ctx.fillStyle = '#FDE047';
-    ctx.beginPath();
-    ctx.arc(pX + 8, groundY - 64, 12, 0, Math.PI * 2);
-    ctx.fill();
+    for (let pt = 0; pt < 4; pt++) {
+      const pY = (groundY - 75 + ((wind * 1.5 + pt * 22) % 75));
+      const pXOff = Math.sin((pY * 0.08) + pt) * 12 + (pt * 8);
+      ctx.fillRect(pX + 10 + pXOff, pY, 2, 2);
+    }
+
   } else {
-    // Quaresmeira Roxa / Florada Fluminense
-    ctx.fillStyle = '#6B21A8';
-    ctx.beginPath();
-    ctx.arc(pX + 13, groundY - 52, 23, 0, Math.PI * 2);
-    ctx.fill();
+    // ── 3. Quaresmeira Roxa (Florada Radiante do Rio de Janeiro) ──
+    const d = '#4A044E';
+    const m = '#7E22CE';
+    const l = '#A855F7';
+    const h = '#E879F9';
 
-    ctx.fillStyle = '#9333EA';
-    ctx.beginPath();
-    ctx.arc(pX + 10, groundY - 56, 18, 0, Math.PI * 2);
-    ctx.fill();
+    // Agrupamento roxo da copa da Quaresmeira
+    drawPixelFoliageCluster(ctx, pX + 5, groundY - 48, 22, 18, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 29, groundY - 50, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 17, groundY - 56, 30, 24, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 9, groundY - 66, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 25, groundY - 68, 24, 20, d, m, l, h);
+    drawPixelFoliageCluster(ctx, pX + 17, groundY - 78, 26, 22, d, m, l, h);
 
-    ctx.fillStyle = '#C084FC';
-    ctx.beginPath();
-    ctx.arc(pX + 7, groundY - 62, 10, 0, Math.PI * 2);
-    ctx.fill();
+    // Pétalas lilases salientes
+    ctx.fillStyle = '#F5D0FE';
+    ctx.fillRect(pX + 13, groundY - 90, 3, 3);
+    ctx.fillRect(pX + 21, groundY - 88, 3, 2);
+    ctx.fillRect(pX - 4, groundY - 52, 3, 3);
+    ctx.fillRect(pX + 38, groundY - 56, 3, 3);
+
+    // Pétalas caindo suavemente
+    const wind = (performance.now() / 1000) * 16;
+    ctx.fillStyle = '#E879F9';
+    for (let pt = 0; pt < 4; pt++) {
+      const pY = (groundY - 75 + ((wind * 1.5 + pt * 22) % 75));
+      const pXOff = Math.sin((pY * 0.08) + pt) * 10 + (pt * 9);
+      ctx.fillRect(pX + 8 + pXOff, pY, 2, 2);
+    }
   }
 
   ctx.restore();
@@ -1222,36 +1335,179 @@ export function drawPlatform(
   ctx.save();
 
   if (plat.type === 'metal') {
+    // ── 1. Plataforma de Viga de Aço Industrial com Rebites e Chapa Xadrez ──
+    // Sombra projetada abaixo da viga
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.fillRect(pX, pY + H, W, 4);
+
+    // Corpo da viga I-Beam de aço
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(pX, pY, W, H);
     ctx.fillStyle = '#334155';
-    ctx.fillRect(pX, pY, W, H);
+    ctx.fillRect(pX + 1, pY + 2, W - 2, H - 4);
+
+    // Chapa Xadrez Antiderrapante no topo (Diamond Tread Plate 16-bit)
     ctx.fillStyle = '#64748B';
-    ctx.fillRect(pX, pY, W, 2.5);
-    ctx.fillStyle = '#CBD5E1';
-    for (let rx = pX + 6; rx < pX + W; rx += 14) {
-      ctx.fillRect(rx, pY + 4, 2, 2);
+    ctx.fillRect(pX, pY, W, 3);
+    ctx.fillStyle = '#94A3B8';
+    for (let tx = pX + 2; tx < pX + W - 2; tx += 6) {
+      ctx.fillRect(tx, pY, 2, 1);
+      ctx.fillRect(tx + 3, pY + 1, 2, 1);
     }
+
+    // Linha de reflexo metálico especular
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.fillRect(pX + 2, pY + 2, W - 4, 1);
+
+    // Rebites hexagonais industriais com relevo e sombra
+    for (let rx = pX + 8; rx < pX + W - 4; rx += 14) {
+      ctx.fillStyle = '#0F172A';
+      ctx.fillRect(rx + 1, pY + 5, 3, 3); // Sombra do rebite
+      ctx.fillStyle = '#CBD5E1';
+      ctx.fillRect(rx, pY + 4, 3, 3); // Cabeça do parafuso
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(rx, pY + 4, 1, 1); // Brilho especular
+    }
+
+    // Suportes / Mísulas de treliça angular nas pontas inferiores
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(pX + 2, pY + H, 6, 6);
+    ctx.fillRect(pX + 4, pY + H + 6, 4, 3);
+    ctx.fillRect(pX + W - 8, pY + H, 6, 6);
+    ctx.fillRect(pX + W - 8, pY + H + 6, 4, 3);
+
   } else if (plat.type === 'brick') {
-    ctx.fillStyle = '#B45309';
-    ctx.fillRect(pX, pY, W, H);
-    ctx.fillStyle = '#F59E0B';
-    ctx.fillRect(pX, pY, W, 2);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    for (let bx = pX + 16; bx < pX + W; bx += 16) {
-      ctx.fillRect(bx, pY + 2, 2, H - 2);
-    }
-  } else if (plat.type === 'wood') {
+    // ── 2. Plataforma de Alvenaria Histórica / Tijolos Artesanais Coloniais ──
+    // Sombra inferior
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.fillRect(pX, pY + H, W, 4);
+
+    // Peitoril / Capa superior de pedra arenito chanfrada
+    ctx.fillStyle = '#D97706';
+    ctx.fillRect(pX - 2, pY, W + 4, 3);
+    ctx.fillStyle = '#FBBF24';
+    ctx.fillRect(pX - 2, pY, W + 4, 1);
     ctx.fillStyle = '#78350F';
+    ctx.fillRect(pX - 2, pY + 3, W + 4, 1); // Linha de sombra do peitoril
+
+    // Argamassa base de assentamento
+    ctx.fillStyle = '#450A0A';
+    ctx.fillRect(pX, pY + 4, W, H - 4);
+
+    // Tijolos individuais com amarração intercalada
+    const brickH = 4;
+    for (let row = 0; row < 2; row++) {
+      const by = pY + 4 + (row * (brickH + 1));
+      const offset = (row % 2) * 8;
+      for (let bx = pX + offset; bx < pX + W; bx += 16) {
+        const bW = Math.min(14, pX + W - bx);
+        if (bW > 2) {
+          ctx.fillStyle = ((bx + row) % 3 === 0) ? '#DC2626' : ((bx + row) % 3 === 1) ? '#B91C1C' : '#991B1B';
+          ctx.fillRect(bx, by, bW, brickH);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.fillRect(bx, by, bW, 1); // Borda superior do tijolo
+        }
+      }
+    }
+
+    // Tufo de musgo rasteiro pendendo na borda inferior
+    ctx.fillStyle = '#15803D';
+    ctx.fillRect(pX + 12, pY + H, 5, 2);
+    ctx.fillRect(pX + 14, pY + H + 2, 2, 2);
+    ctx.fillRect(pX + W - 18, pY + H, 6, 2);
+    ctx.fillRect(pX + W - 16, pY + H + 2, 3, 2);
+
+  } else if (plat.type === 'wood') {
+    // ── 3. Viga de Madeira Maciça Nobre (Jacarandá / Peroba-Rosa) ──
+    // Sombra inferior
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.fillRect(pX, pY + H, W, 4);
+
+    // Corpo de madeira entalhada
+    ctx.fillStyle = '#451A03';
     ctx.fillRect(pX, pY, W, H);
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(pX + 1, pY + 2, W - 2, H - 3);
+
+    // Tampo superior lixado com veio dourado
     ctx.fillStyle = '#92400E';
     ctx.fillRect(pX, pY, W, 2);
-  } else if (plat.type === 'cyber') {
+    ctx.fillStyle = '#B45309';
+    ctx.fillRect(pX, pY, W, 1);
+
+    // Linhas de veio natural da madeira
+    ctx.fillStyle = '#451A03';
+    ctx.fillRect(pX + 10, pY + 4, W - 20, 1);
+    ctx.fillRect(pX + 22, pY + 7, W - 44, 1);
+    // Nó da madeira
+    ctx.fillRect(pX + Math.floor(W * 0.4), pY + 4, 4, 3);
+    ctx.fillStyle = '#271206';
+    ctx.fillRect(pX + Math.floor(W * 0.4) + 1, pY + 5, 2, 1);
+
+    // Braçadeiras de ferro forjado nas extremidades
     ctx.fillStyle = '#0F172A';
+    ctx.fillRect(pX + 3, pY, 4, H);
+    ctx.fillRect(pX + W - 7, pY, 4, H);
+    ctx.fillStyle = '#94A3B8';
+    ctx.fillRect(pX + 4, pY + 3, 2, 2); // Parafuso esquerdo
+    ctx.fillRect(pX + 4, pY + H - 4, 2, 2);
+    ctx.fillRect(pX + W - 6, pY + 3, 2, 2); // Parafuso direito
+    ctx.fillRect(pX + W - 6, pY + H - 4, 2, 2);
+
+  } else if (plat.type === 'cyber') {
+    // ── 4. Plataforma Flutuante Cyberpunk com Circuitos Neon & Efeitos de Propulsão ──
+    // Chassi de fibra de carbono escuro
+    ctx.fillStyle = '#020617';
     ctx.fillRect(pX, pY, W, H);
-    ctx.strokeStyle = '#00F0FF';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(pX, pY, W, H);
+    ctx.fillStyle = '#0B1528';
+    ctx.fillRect(pX + 1, pY + 1, W - 2, H - 2);
+
+    // Friso de neon ciano brilhante no topo
     ctx.fillStyle = '#00F0FF';
     ctx.fillRect(pX, pY, W, 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(pX + 4, pY, W - 8, 1); // Núcleo super-iluminado
+
+    // Moldura tech chanfrada
+    ctx.strokeStyle = '#0284C7';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pX, pY, W, H);
+
+    // Trilhas de circuito impresso com nós de energia pulsantes
+    const now = performance.now() / 1000;
+    const pulseNode = Math.floor((now * 8) % (W - 16));
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+    ctx.fillRect(pX + 8, pY + 5, W - 16, 2);
+
+    // Pacote de dados correndo na trilha
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(pX + 8 + pulseNode, pY + 4, 4, 4);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(pX + 9 + pulseNode, pY + 5, 2, 2);
+
+    // Ejetores de Íons de Levitação Antigravitacional embaixo
+    const ionGlow = Math.sin(now * 12) * 0.2 + 0.8;
+    ctx.fillStyle = '#0284C7';
+    ctx.fillRect(pX + 8, pY + H, 8, 3);
+    ctx.fillRect(pX + W - 16, pY + H, 8, 3);
+
+    // Cone de plasma antigravidade ciano translúcido
+    ctx.fillStyle = `rgba(0, 240, 255, ${0.4 * ionGlow})`;
+    ctx.beginPath();
+    ctx.moveTo(pX + 8, pY + H + 3);
+    ctx.lineTo(pX + 4, pY + H + 9);
+    ctx.lineTo(pX + 20, pY + H + 9);
+    ctx.lineTo(pX + 16, pY + H + 3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(pX + W - 16, pY + H + 3);
+    ctx.lineTo(pX + W - 20, pY + H + 9);
+    ctx.lineTo(pX + W - 4, pY + H + 9);
+    ctx.lineTo(pX + W - 8, pY + H + 3);
+    ctx.closePath();
+    ctx.fill();
   }
 
   ctx.restore();
@@ -1489,87 +1745,176 @@ export function drawTopDownCharacter(
 export function drawTopDownRoom(
   ctx: CanvasRenderingContext2D,
   interior: BuildingInterior,
-  canvasW: number,
-  canvasH: number,
+  roomW: number,
+  roomH: number,
   time: number
 ) {
-  const roomW = interior.roomWidth;
-  const roomH = interior.roomHeight;
-  const originX = Math.floor((canvasW - roomW) / 2);
-  const originY = Math.floor((canvasH - roomH) / 2);
+  const originX = 0;
+  const originY = 0;
 
   ctx.save();
 
-  // Fundo externo à sala
-  ctx.fillStyle = '#020617';
-  ctx.fillRect(0, 0, canvasW, canvasH);
-
-  // Chão da sala
+  // 1. Chão da sala com sombra de oclusão de ambiente
   ctx.fillStyle = interior.floorColor;
   ctx.fillRect(originX, originY, roomW, roomH);
 
-  // Textura quadriculada de tacos de madeira
+  // Textura quadriculada de tacos de madeira nobres / piso cerâmico chanfrado
   ctx.fillStyle = interior.floorTileColor;
-  for (let ty = originY + 36; ty < originY + roomH - 10; ty += 24) {
-    for (let tx = originX + 16; tx < originX + roomW - 16; tx += 24) {
-      if ((Math.floor((tx - originX) / 24) + Math.floor((ty - originY) / 24)) % 2 === 0) {
-        ctx.fillRect(tx, ty, 24, 24);
+  for (let ty = originY + 38; ty < originY + roomH - 12; ty += 20) {
+    for (let tx = originX + 14; tx < originX + roomW - 14; tx += 20) {
+      if ((Math.floor(tx / 20) + Math.floor(ty / 20)) % 2 === 0) {
+        ctx.fillRect(tx, ty, 20, 20);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.fillRect(tx, ty, 20, 1);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.fillRect(tx, ty + 19, 20, 1);
+        ctx.fillStyle = interior.floorTileColor;
       }
     }
   }
 
-  // Sombra superior da parede no chão (Ambience)
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-  ctx.fillRect(originX, originY + 36, roomW, 16);
+  // Sombra superior de oclusão ambiente da parede no chão
+  const wallShadowGrad = ctx.createLinearGradient(0, originY + 38, 0, originY + 58);
+  wallShadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+  wallShadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = wallShadowGrad;
+  ctx.fillRect(originX + 14, originY + 38, roomW - 28, 20);
 
-  // Parede de trás (Back wall)
+  // 2. Parede de trás (Back wall)
   ctx.fillStyle = interior.wallColor;
-  ctx.fillRect(originX, originY, roomW, 36);
-  ctx.fillStyle = interior.wallBorderColor;
-  ctx.fillRect(originX, originY + 32, roomW, 4);
+  ctx.fillRect(originX, originY, roomW, 38);
 
-  // Paredes laterais
+  // Moldura / Rodapé superior e friso de acabamento
+  ctx.fillStyle = interior.wallBorderColor;
+  ctx.fillRect(originX, originY + 34, roomW, 4);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.fillRect(originX, originY, roomW, 2);
+
+  // Decorações temáticas nas paredes da era
+  if (interior.buildingId === 'cefet') {
+    // Diploma técnico emoldurado com selo dourado
+    ctx.fillStyle = '#451A03';
+    ctx.fillRect(originX + 45, originY + 8, 24, 18);
+    ctx.fillStyle = '#FEF3C7';
+    ctx.fillRect(originX + 47, originY + 10, 20, 14);
+    ctx.fillStyle = '#D97706';
+    ctx.fillRect(originX + 55, originY + 18, 4, 4); // Selo
+  } else if (interior.buildingId === 'chemtech') {
+    // Fluxograma de processos industriais emoldurado
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(originX + 45, originY + 8, 28, 18);
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(originX + 47, originY + 10, 24, 14);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(originX + 50, originY + 15, 8, 2);
+    ctx.fillRect(originX + 60, originY + 13, 8, 2);
+  } else if (interior.buildingId === 'uff') {
+    // Certificado Neoclássico UFF com fita azul
+    ctx.fillStyle = '#1E3A8A';
+    ctx.fillRect(originX + 45, originY + 8, 26, 18);
+    ctx.fillStyle = '#F8FAFC';
+    ctx.fillRect(originX + 47, originY + 10, 22, 14);
+    ctx.fillStyle = '#3B82F6';
+    ctx.fillRect(originX + 56, originY + 18, 4, 5);
+  } else if (interior.buildingId === 'cid') {
+    // Monitor de telemetria LAGUNA IoT na parede
+    ctx.fillStyle = '#022C22';
+    ctx.fillRect(originX + 40, originY + 7, 34, 20);
+    ctx.strokeStyle = '#34D399';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(originX + 40, originY + 7, 34, 20);
+    ctx.strokeStyle = '#10B981';
+    ctx.beginPath();
+    for (let lx = 0; lx < 30; lx += 2) {
+      const ly = originY + 17 + Math.sin((lx * 0.3) + time * 6) * 4;
+      if (lx === 0) ctx.moveTo(originX + 42 + lx, ly);
+      else ctx.lineTo(originX + 42 + lx, ly);
+    }
+    ctx.stroke();
+  } else if (interior.buildingId === 'coppead') {
+    // Tese de Doutorado & Governança de IA
+    ctx.fillStyle = '#500724';
+    ctx.fillRect(originX + 45, originY + 7, 28, 20);
+    ctx.fillStyle = '#FFF1F2';
+    ctx.fillRect(originX + 47, originY + 9, 24, 16);
+    ctx.fillStyle = '#BE123C';
+    ctx.fillRect(originX + 57, originY + 19, 4, 4);
+  } else if (interior.buildingId === 'baxijen') {
+    // Dashboard Holográfico de Agentes IA na parede
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(originX + 35, originY + 6, 38, 22);
+    ctx.strokeStyle = '#00F0FF';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(originX + 35, originY + 6, 38, 22);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(originX + 38, originY + 10, 10, 4);
+    ctx.fillRect(originX + 52, originY + 10, 16, 4);
+    ctx.fillStyle = '#00F0FF';
+    ctx.fillRect(originX + 38, originY + 16, 30, 8);
+  }
+
+  // 3. Paredes laterais com rodapé
   ctx.fillStyle = interior.wallColor;
   ctx.fillRect(originX, originY, 14, roomH);
   ctx.fillRect(originX + roomW - 14, originY, 14, roomH);
-  ctx.fillStyle = interior.wallBorderColor;
-  ctx.fillRect(originX + 12, originY, 2, roomH);
-  ctx.fillRect(originX + roomW - 14, originY, 2, roomH);
 
-  // Parede inferior com porta
-  const doorW = 44;
+  ctx.fillStyle = interior.wallBorderColor;
+  ctx.fillRect(originX + 11, originY + 34, 3, roomH - 34);
+  ctx.fillRect(originX + roomW - 14, originY + 34, 3, roomH - 34);
+
+  // 4. Parede inferior com portal de saída
+  const doorW = 48;
   const doorLeft = originX + (roomW / 2) - (doorW / 2);
   ctx.fillStyle = interior.wallColor;
-  ctx.fillRect(originX, originY + roomH - 12, doorLeft - originX, 12);
-  ctx.fillRect(doorLeft + doorW, originY + roomH - 12, originX + roomW - (doorLeft + doorW), 12);
+  ctx.fillRect(originX, originY + roomH - 14, doorLeft - originX, 14);
+  ctx.fillRect(doorLeft + doorW, originY + roomH - 14, originX + roomW - (doorLeft + doorW), 14);
 
-  // Tapete vermelho de saída
-  ctx.fillStyle = '#DC2626';
-  ctx.fillRect(doorLeft, originY + roomH - 24, doorW, 20);
-  ctx.strokeStyle = '#FEE2E2';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(doorLeft, originY + roomH - 24, doorW, 20);
+  // Rodapé inferior
+  ctx.fillStyle = interior.wallBorderColor;
+  ctx.fillRect(originX, originY + roomH - 14, doorLeft - originX, 2);
+  ctx.fillRect(doorLeft + doorW, originY + roomH - 14, originX + roomW - (doorLeft + doorW), 2);
 
+  // Tapete vermelho nobre de saída com borda dourada
+  ctx.fillStyle = '#B91C1C';
+  ctx.fillRect(doorLeft - 2, originY + roomH - 28, doorW + 4, 26);
+  ctx.strokeStyle = '#F59E0B';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(doorLeft - 2, originY + roomH - 28, doorW + 4, 26);
+
+  // Seta pulsante de saída
   const arrowBlink = Math.sin(time * 6) > 0;
   ctx.fillStyle = arrowBlink ? '#FEF08A' : '#FFFFFF';
   ctx.font = 'bold 9px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('▼ SAIR', doorLeft + (doorW / 2), originY + roomH - 11);
+  ctx.fillText('▼ SAIR [E]', doorLeft + (doorW / 2), originY + roomH - 12);
 
-  // Placa institucional da sala
+  // 5. Placa Institucional da Sala (Centro da Parede Superior)
+  const plateW = 220;
+  const plateH = 24;
+  const plateX = originX + (roomW / 2) - (plateW / 2);
+  const plateY = originY + 6;
+
   ctx.fillStyle = '#0F172A';
-  ctx.fillRect(originX + (roomW / 2) - 110, originY + 4, 220, 22);
+  ctx.fillRect(plateX, plateY, plateW, plateH);
   ctx.strokeStyle = '#38BDF8';
   ctx.lineWidth = 1.5;
-  ctx.strokeRect(originX + (roomW / 2) - 110, originY + 4, 220, 22);
+  ctx.strokeRect(plateX, plateY, plateW, plateH);
+
+  // Rebites dourados nos 4 cantos da placa
+  ctx.fillStyle = '#F59E0B';
+  ctx.fillRect(plateX + 2, plateY + 2, 2, 2);
+  ctx.fillRect(plateX + plateW - 4, plateY + 2, 2, 2);
+  ctx.fillRect(plateX + 2, plateY + plateH - 4, 2, 2);
+  ctx.fillRect(plateX + plateW - 4, plateY + plateH - 4, 2, 2);
 
   ctx.fillStyle = '#38BDF8';
   ctx.font = 'bold 10px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(interior.name, originX + (roomW / 2), originY + 15);
-  ctx.fillStyle = '#94A3B8';
+  ctx.fillText(interior.name, originX + (roomW / 2), plateY + 14);
+
+  ctx.fillStyle = '#CBD5E1';
   ctx.font = '8px monospace';
-  ctx.fillText(interior.subtitle, originX + (roomW / 2), originY + 23);
+  ctx.fillText(interior.subtitle, originX + (roomW / 2), plateY + 22);
 
   ctx.restore();
 }
@@ -1588,80 +1933,317 @@ export function drawFurniture(
 
   ctx.save();
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-  ctx.fillRect(fX + 3, fY + 3, W, H);
+  // Sombra suave do móvel projetada no piso
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.fillRect(fX + 4, fY + 4, W, H);
 
   if (item.type === 'desk_computer') {
-    ctx.fillStyle = '#78350F';
-    ctx.fillRect(fX, fY, W, H);
-    ctx.fillStyle = '#92400E';
-    ctx.fillRect(fX, fY, W, 3);
-
-    ctx.fillStyle = '#0F172A';
-    ctx.fillRect(fX + (W / 2) - 12, fY + 4, 24, 14);
-
-    const screenGlow = Math.sin(time * 4) > 0 ? '#22C55E' : '#10B981';
-    ctx.fillStyle = screenGlow;
-    ctx.fillRect(fX + (W / 2) - 10, fY + 6, 20, 10);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(fX + (W / 2) - 8, fY + 8, 4, 1);
-    ctx.fillRect(fX + (W / 2) - 8, fY + 11, 8, 1);
-  } else if (item.type === 'bookshelf') {
+    // ── 1. Estação de Trabalho Dev: Mesa de Madeira, Monitores Duplos & PC Gamer ──
+    // Tampo da mesa em carvalho escuro com borda chanfrada
     ctx.fillStyle = '#451A03';
     ctx.fillRect(fX, fY, W, H);
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(fX + 1, fY + 1, W - 2, H - 2);
+    ctx.fillStyle = '#92400E';
+    ctx.fillRect(fX + 1, fY + 1, W - 2, 2); // Borda iluminada superior
 
-    const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
-    for (let sy = fY + 4; sy < fY + H - 6; sy += 12) {
-      ctx.fillStyle = '#78350F';
-      ctx.fillRect(fX + 2, sy + 8, W - 4, 2);
-      for (let bx = fX + 4; bx < fX + W - 6; bx += 6) {
-        ctx.fillStyle = colors[(bx + sy) % colors.length];
-        ctx.fillRect(bx, sy, 5, 8);
-      }
+    // Gaveteiro lateral direito
+    ctx.fillStyle = '#451A03';
+    ctx.fillRect(fX + W - 18, fY + 2, 16, H - 4);
+    ctx.fillStyle = '#CBD5E1';
+    ctx.fillRect(fX + W - 11, fY + 8, 4, 1); // Puxador da gaveta
+    ctx.fillRect(fX + W - 11, fY + 20, 4, 1);
+
+    // Mousepad estendido RGB
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(fX + 16, fY + 12, W - 42, H - 18);
+    ctx.strokeStyle = '#00F0FF';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(fX + 16, fY + 12, W - 42, H - 18);
+
+    // Teclado mecânico retroiluminado
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(fX + 22, fY + 18, 22, 10);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(fX + 24, fY + 20, 18, 2); // Teclas iluminadas
+    ctx.fillRect(fX + 26, fY + 24, 14, 2); // Barra de espaço
+
+    // Mouse gamer
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(fX + 48, fY + 20, 5, 7);
+
+    // Monitor Principal Widescreen (16:9) no centro
+    const monW = 28;
+    const monH = 14;
+    const monX = fX + 18;
+    const monY = fY + 2;
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(monX, monY, monW, monH);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(monX + (monW / 2) - 3, monY + monH, 6, 2); // Suporte do monitor
+
+    // Tela ligada exibindo código com syntax highlighting
+    ctx.fillStyle = '#0B1528';
+    ctx.fillRect(monX + 1, monY + 1, monW - 2, monH - 2);
+
+    // Linhas de código coloridas
+    ctx.fillStyle = '#38BDF8'; // Azul
+    ctx.fillRect(monX + 3, monY + 3, 6, 1.5);
+    ctx.fillStyle = '#FACC15'; // Amarelo
+    ctx.fillRect(monX + 10, monY + 3, 8, 1.5);
+    ctx.fillStyle = '#4ADE80'; // Verde
+    ctx.fillRect(monX + 3, monY + 6, 12, 1.5);
+    ctx.fillStyle = '#F472B6'; // Rosa
+    ctx.fillRect(monX + 5, monY + 9, 14, 1.5);
+
+    // Monitor Secundário Vertical (9:16) para Terminal / Logs
+    const vMonW = 10;
+    const vMonH = 18;
+    const vMonX = fX + 48;
+    const vMonY = fY + 1;
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(vMonX, vMonY, vMonW, vMonH);
+    ctx.fillStyle = '#064E3B';
+    ctx.fillRect(vMonX + 1, vMonY + 1, vMonW - 2, vMonH - 2);
+
+    // Linhas de log verde terminal
+    ctx.fillStyle = '#34D399';
+    for (let ly = vMonY + 3; ly < vMonY + vMonH - 2; ly += 3) {
+      ctx.fillRect(vMonX + 2, ly, (ly % 2 === 0 ? 5 : 4), 1);
     }
-  } else if (item.type === 'server_cabinet') {
-    ctx.fillStyle = '#090D16';
+
+    // Xícara de café fumegante ☕
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(fX + 8, fY + 16, 5, 5);
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(fX + 9, fY + 17, 3, 3);
+    // Vapor subindo
+    const steamY = Math.sin(time * 5) * 2;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillRect(fX + 10, fY + 12 + steamY, 1, 2);
+
+  } else if (item.type === 'bookshelf') {
+    // ── 2. Estante de Livros Clássica: Madeira Maciça, Lombadas Coloridas & Troféu ──
+    ctx.fillStyle = '#271206';
     ctx.fillRect(fX, fY, W, H);
+    ctx.fillStyle = '#451A03';
+    ctx.fillRect(fX + 2, fY + 2, W - 4, H - 4);
+
+    // Cornija / Moldura do topo
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(fX - 2, fY, W + 4, 3);
+    ctx.fillStyle = '#92400E';
+    ctx.fillRect(fX - 2, fY, W + 4, 1);
+
+    // Troféu acadêmico dourado na prateleira superior
+    ctx.fillStyle = '#F59E0B';
+    ctx.fillRect(fX + 8, fY + 4, 6, 6);
+    ctx.fillStyle = '#FDE047';
+    ctx.fillRect(fX + 9, fY + 5, 4, 3);
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(fX + 9, fY + 10, 4, 2);
+
+    // Prateleiras com livros encadernados
+    const bookColors = ['#DC2626', '#2563EB', '#16A34A', '#D97706', '#7C3AED', '#0284C7', '#EA580C'];
+    const shelfYStarts = [fY + 14, fY + 28, fY + 42];
+
+    shelfYStarts.forEach((sy, sIdx) => {
+      // Régua da prateleira de madeira
+      ctx.fillStyle = '#78350F';
+      ctx.fillRect(fX + 2, sy + 10, W - 4, 2);
+
+      let bx = fX + 4;
+      while (bx < fX + W - 6) {
+        const c = bookColors[(bx + sIdx * 3) % bookColors.length];
+        const bW = 4;
+        const bH = 8 + (bx % 3);
+
+        ctx.fillStyle = c;
+        ctx.fillRect(bx, sy + 10 - bH, bW, bH);
+
+        // Fita dourada na lombada
+        ctx.fillStyle = '#FEF08A';
+        ctx.fillRect(bx, sy + 10 - bH + 2, bW, 1);
+
+        bx += bW + 1;
+      }
+    });
+
+  } else if (item.type === 'server_cabinet') {
+    // ── 3. Rack de Servidores 42U Datacenter com LEDs Cascata & Cabos ──
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(fX, fY, W, H);
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(fX + 2, fY + 2, W - 4, H - 4);
+
+    // Moldura do rack com parafusos de trilho
     ctx.strokeStyle = '#0284C7';
     ctx.lineWidth = 1;
     ctx.strokeRect(fX, fY, W, H);
 
-    for (let ly = fY + 6; ly < fY + H - 6; ly += 8) {
-      const led1 = Math.sin(time * 8 + ly) > 0;
-      const led2 = Math.cos(time * 6 + ly) > 0;
-      ctx.fillStyle = led1 ? '#22C55E' : '#14532D';
-      ctx.fillRect(fX + 4, ly, 3, 3);
-      ctx.fillStyle = led2 ? '#38BDF8' : '#0369A1';
-      ctx.fillRect(fX + 10, ly, 3, 3);
+    // Portas perfuradas e lâminas de servidor
+    for (let sy = fY + 4; sy < fY + H - 6; sy += 9) {
+      // Chassis de servidor 1U/2U
+      ctx.fillStyle = '#1E293B';
+      ctx.fillRect(fX + 4, sy, W - 8, 7);
+
+      // Grade de ventilação frontal
+      ctx.fillStyle = '#0F172A';
+      for (let gx = fX + 6; gx < fX + W - 14; gx += 3) {
+        ctx.fillRect(gx, sy + 2, 1.5, 3);
+      }
+
+      // LEDs de status (Power, Disk I/O, Network Activity)
+      const blink1 = Math.sin(time * 8 + sy) > 0;
+      const blink2 = Math.cos(time * 12 + sy) > 0;
+      const blink3 = Math.sin(time * 15 + sy * 2) > 0.3;
+
+      ctx.fillStyle = blink1 ? '#22C55E' : '#14532D'; // LED verde de energia
+      ctx.fillRect(fX + W - 12, sy + 2, 2, 2);
+
+      ctx.fillStyle = blink2 ? '#F59E0B' : '#78350F'; // LED âmbar de disco
+      ctx.fillRect(fX + W - 9, sy + 2, 2, 2);
+
+      ctx.fillStyle = blink3 ? '#00F0FF' : '#0369A1'; // LED ciano de rede
+      ctx.fillRect(fX + W - 6, sy + 2, 2, 2);
     }
+
+    // Calha de cabeamento lateral com feixe amarelo e ciano
+    ctx.fillStyle = '#FACC15';
+    ctx.fillRect(fX + 2, fY + 4, 1, H - 8);
+    ctx.fillStyle = '#38BDF8';
+    ctx.fillRect(fX + 3, fY + 4, 1, H - 8);
+
   } else if (item.type === 'whiteboard') {
+    // ── 4. Quadro Branco de Engenharia: Moldura de Alumínio, Diagrama de IA & Post-its ──
     ctx.fillStyle = '#F8FAFC';
     ctx.fillRect(fX, fY, W, H);
     ctx.strokeStyle = '#94A3B8';
     ctx.lineWidth = 2;
     ctx.strokeRect(fX, fY, W, H);
 
-    ctx.fillStyle = '#2563EB';
-    ctx.fillRect(fX + 6, fY + 6, 12, 8);
-    ctx.fillRect(fX + W - 18, fY + 6, 12, 8);
+    // Rebites nos cantos da moldura
+    ctx.fillStyle = '#64748B';
+    ctx.fillRect(fX + 1, fY + 1, 2, 2);
+    ctx.fillRect(fX + W - 3, fY + 1, 2, 2);
+
+    // Diagrama de arquitetura desenhado a caneta azul
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(fX + 6, fY + 6, 16, 10); // Caixa LLM
+    ctx.strokeRect(fX + 32, fY + 6, 16, 10); // Caixa Agente
+    ctx.strokeRect(fX + 58, fY + 6, 16, 10); // Caixa MCP
+    // Setas conectando
+    ctx.beginPath();
+    ctx.moveTo(fX + 22, fY + 11);
+    ctx.lineTo(fX + 32, fY + 11);
+    ctx.moveTo(fX + 48, fY + 11);
+    ctx.lineTo(fX + 58, fY + 11);
+    ctx.stroke();
+
+    // Post-its coloridos afixados
+    ctx.fillStyle = '#FEF08A'; // Post-it amarelo
+    ctx.fillRect(fX + 8, fY + 20, 8, 8);
+    ctx.fillStyle = '#BAE6FD'; // Post-it ciano
+    ctx.fillRect(fX + 20, fY + 20, 8, 8);
+    ctx.fillStyle = '#FBCFE8'; // Post-it rosa
+    ctx.fillRect(fX + 32, fY + 20, 8, 8);
+
+    // Calha de marcadores na borda inferior
+    ctx.fillStyle = '#CBD5E1';
+    ctx.fillRect(fX + (W / 2) - 16, fY + H - 3, 32, 3);
+    // Canetas e apagador
+    ctx.fillStyle = '#DC2626'; // Caneta vermelha
+    ctx.fillRect(fX + (W / 2) - 14, fY + H - 4, 6, 1.5);
+    ctx.fillStyle = '#2563EB'; // Caneta azul
+    ctx.fillRect(fX + (W / 2) - 6, fY + H - 4, 6, 1.5);
+    ctx.fillStyle = '#0F172A'; // Apagador
+    ctx.fillRect(fX + (W / 2) + 2, fY + H - 4, 8, 2);
+
   } else if (item.type === 'plant') {
-    ctx.fillStyle = '#B45309';
-    ctx.fillRect(fX + (W / 2) - 6, fY + H - 10, 12, 10);
-    ctx.fillStyle = '#16A34A';
-    ctx.beginPath();
-    ctx.arc(fX + (W / 2), fY + 8, 10, 0, Math.PI * 2);
-    ctx.fill();
+    // ── 5. Vaso de Planta Monstera / Costela-de-Adão em Pixel Art 16-bit ──
+    // Vaso de cerâmica terracota com borda chanfrada
+    const potW = 16;
+    const potH = 12;
+    const potX = fX + (W / 2) - (potW / 2);
+    const potY = fY + H - potH;
+
+    ctx.fillStyle = '#9A3412';
+    ctx.fillRect(potX, potY, potW, potH);
+    ctx.fillStyle = '#EA580C';
+    ctx.fillRect(potX + 1, potY + 1, potW - 2, 2); // Borda iluminada
+    ctx.fillStyle = '#7C2D12';
+    ctx.fillRect(potX + potW - 3, potY, 3, potH); // Sombra do vaso
+
+    // Terra preta orgânica
+    ctx.fillStyle = '#1C1917';
+    ctx.fillRect(potX + 2, potY, potW - 4, 3);
+
+    // Folhagem exuberante da Monstera em camadas de pixel art
+    // Folha esquerda
+    drawPixelFoliageCluster(ctx, potX - 2, potY - 8, 14, 12, '#064E3B', '#15803D', '#22C55E', '#4ADE80');
+    // Folha direita
+    drawPixelFoliageCluster(ctx, potX + potW + 2, potY - 7, 14, 12, '#064E3B', '#15803D', '#22C55E', '#4ADE80');
+    // Folha central erguida
+    drawPixelFoliageCluster(ctx, potX + (potW / 2), potY - 14, 18, 14, '#064E3B', '#16A34A', '#22C55E', '#86EFAC');
+
   } else if (item.type === 'ai_holo') {
-    const floatY = fY + Math.sin(time * 3) * 4;
-    ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+    // ── 6. Emitter Holográfico 3D de Inteligência Artificial ──
+    const floatY = fY + Math.sin(time * 3) * 5;
+    const centerX = fX + (W / 2);
+    const centerY = floatY + (H / 2);
+
+    // Base metálica emissora no piso
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(centerX - 12, fY + H - 6, 24, 6);
+    ctx.fillStyle = '#00F0FF';
+    ctx.fillRect(centerX - 8, fY + H - 5, 16, 2);
+
+    // Feixe vertical de luz volumétrica translúcida
+    const beamGrad = ctx.createLinearGradient(0, fY + H - 6, 0, centerY);
+    beamGrad.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
+    beamGrad.addColorStop(0.7, 'rgba(56, 189, 248, 0.25)');
+    beamGrad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+    ctx.fillStyle = beamGrad;
     ctx.beginPath();
-    ctx.arc(fX + (W / 2), floatY + (H / 2), 16, 0, Math.PI * 2);
+    ctx.moveTo(centerX - 8, fY + H - 6);
+    ctx.lineTo(centerX - 16, centerY);
+    ctx.lineTo(centerX + 16, centerY);
+    ctx.lineTo(centerX + 8, fY + H - 6);
+    ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = '#38BDF8';
-    ctx.beginPath();
-    ctx.arc(fX + (W / 2), floatY + (H / 2), 8, 0, Math.PI * 2);
-    ctx.fill();
+    // Núcleo de IA Holográfico 3D Girando
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(time * 1.8);
+
+    // Anel externo
+    ctx.strokeStyle = '#00F0FF';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-10, -10, 20, 20);
+
+    // Anel interno invertido
+    ctx.rotate(Math.PI / 4 + time);
+    ctx.strokeStyle = '#FACC15';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-7, -7, 14, 14);
+
+    ctx.restore();
+
+    // Ponto focal central super-brilhante
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(centerX - 2, centerY - 2, 4, 4);
+
+    // Fagulhas holográficas flutuantes
+    for (let sp = 0; sp < 4; sp++) {
+      const spY = centerY - 10 + Math.sin(time * 4 + sp * 2) * 8;
+      const spX = centerX + Math.cos(time * 3 + sp * 1.5) * 12;
+      ctx.fillStyle = sp % 2 === 0 ? '#00F0FF' : '#FEF08A';
+      ctx.fillRect(spX, spY, 2, 2);
+    }
   }
 
   ctx.restore();

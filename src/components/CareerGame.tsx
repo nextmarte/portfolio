@@ -35,9 +35,10 @@ import { cn } from '@/lib/utils';
 
 interface CareerGameProps {
   onViewChange?: (view: GameView) => void;
+  onModeChange?: (mode: 'auto' | 'playable') => void;
 }
 
-export default function CareerGame({ onViewChange: externalOnViewChange }: CareerGameProps = {}) {
+export default function CareerGame({ onViewChange: externalOnViewChange, onModeChange: externalOnModeChange }: CareerGameProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<CareerGameEngine | null>(null);
   const { resolvedTheme } = useTheme();
@@ -233,10 +234,12 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
   const toggleMode = useCallback(() => {
     const next = mode === 'auto' ? 'playable' : 'auto';
     setMode(next);
+    externalOnModeChange?.(next);
+    retroAudio.playMenuSelect();
     if (engineRef.current) {
       engineRef.current.setMode(next);
     }
-  }, [mode]);
+  }, [mode, externalOnModeChange]);
 
   const toggleAudio = useCallback(() => {
     const muted = retroAudio.toggleMute();
@@ -247,11 +250,12 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
     if (engineRef.current) {
       if (mode === 'auto') {
         setMode('playable');
+        externalOnModeChange?.('playable');
         engineRef.current.setMode('playable');
       }
       engineRef.current.enterBuilding(bldId);
     }
-  }, [mode]);
+  }, [mode, externalOnModeChange]);
 
   const handleExitBuilding = useCallback(() => {
     if (engineRef.current) {
@@ -259,14 +263,18 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
     }
   }, []);
 
-  const handleTouchControl = useCallback((key: 'left' | 'right' | 'up' | 'down' | 'jump', active: boolean) => {
+  const handleTouchControl = useCallback((key: 'left' | 'right' | 'up' | 'down' | 'jump', active: boolean, e?: React.TouchEvent | React.MouseEvent) => {
+    if (e && 'cancelable' in e && e.cancelable) {
+      e.preventDefault();
+    }
     if (!engineRef.current) return;
     if (mode === 'auto' && active) {
       setMode('playable');
+      externalOnModeChange?.('playable');
       engineRef.current.setMode('playable');
     }
     engineRef.current.setInput({ [key]: active });
-  }, [mode]);
+  }, [mode, externalOnModeChange]);
 
   // Progresso de XP
   const xpPercentage = Math.min(100, Math.floor((stats.currentXp / stats.nextLevelXp) * 100));
@@ -281,184 +289,214 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
       />
 
       {/* ========================================================================= */}
-      {/* HUD SUPERIOR COMPLEXO — STATUS DO DESENVOLVEDOR & XP */}
+      {/* HUD SUPERIOR COMPLEXO — STATUS DO DESENVOLVEDOR, XP & MINIMAPA DA LINHA DO TEMPO */}
       {/* ========================================================================= */}
       {mounted && (
-        <div className="absolute top-20 md:top-22 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
-          {/* Card de Nível & Estatísticas (Esquerda) */}
-          <div className="flex items-center gap-3 pointer-events-auto">
-            {/* Avatar Pixel com Brilho Neural */}
-            <div className="relative group cursor-pointer" onClick={() => setIsTechDexOpen(true)}>
-              <div className="w-11 h-11 rounded-xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center shadow-lg overflow-hidden relative">
-                <span className="text-lg">👨‍💻</span>
-                <span className="absolute -bottom-1 -right-1 px-1 py-0.2 bg-amber-500 text-slate-950 font-mono font-bold text-[9px] rounded">
-                  Nv.{stats.level}
-                </span>
+        <div className="absolute top-20 md:top-22 left-3 right-3 sm:left-4 sm:right-4 z-20 pointer-events-none flex flex-col gap-2">
+          {/* Linha Principal do HUD */}
+          <div className="flex items-center justify-between gap-2 w-full">
+            {/* Card de Nível & Estatísticas (Esquerda) */}
+            <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto shrink-0">
+              {/* Avatar Pixel com Brilho Neural */}
+              <div className="relative group cursor-pointer" onClick={() => setIsTechDexOpen(true)}>
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center shadow-lg overflow-hidden relative">
+                  <span className="text-base sm:text-lg">👨‍💻</span>
+                  <span className="absolute -bottom-1 -right-1 px-1 py-0.2 bg-amber-500 text-slate-950 font-mono font-bold text-[8px] sm:text-[9px] rounded">
+                    Nv.{stats.level}
+                  </span>
+                </div>
+              </div>
+
+              {/* Informações de Nível e Barra de XP */}
+              <div className="flex flex-col gap-1 bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-xl max-w-[200px] sm:max-w-xs md:max-w-md">
+                <div className="flex items-center justify-between gap-2 text-xs font-mono">
+                  <span className="font-bold text-white truncate text-[11px] sm:text-xs">{stats.title}</span>
+                  <span className="text-[9px] sm:text-[10px] text-amber-300 font-bold shrink-0">{stats.currentXp}/{stats.nextLevelXp} XP</span>
+                </div>
+
+                {/* Barra de XP Animada */}
+                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-white/10">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-400 via-amber-400 to-emerald-400 transition-all duration-300"
+                    style={{ width: `${xpPercentage}%` }}
+                  />
+                </div>
+
+                {/* Badges de Coleção Rápidas */}
+                <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-mono text-slate-300">
+                  <span className="flex items-center gap-1 text-cyan-300">
+                    <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                    {stats.totalSkillsCollected}/18
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1 text-emerald-300">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                    {stats.totalOrbsCollected}/{INITIAL_TECH_ORBS.length}
+                  </span>
+                  {stats.dodgeCombo > 1 && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 text-amber-300 font-bold animate-pulse">
+                        <Flame className="w-2.5 h-2.5 text-amber-400" />
+                        x{stats.dodgeCombo}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Informações de Nível e Barra de XP */}
-            <div className="flex flex-col gap-1 bg-slate-950/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 shadow-xl max-w-xs sm:max-w-md">
-              <div className="flex items-center justify-between gap-3 text-xs font-mono">
-                <span className="font-bold text-white truncate">{stats.title}</span>
-                <span className="text-[10px] text-amber-300 font-bold shrink-0">{stats.currentXp}/{stats.nextLevelXp} XP</span>
+            {/* Desktop Center: Linha do Tempo Integrada no Céu (lg:flex) */}
+            {gameView === 'overworld' && (
+              <div className="hidden lg:flex flex-col items-center gap-1 bg-slate-950/90 backdrop-blur-md border border-cyan-500/30 rounded-2xl px-4 py-1.5 shadow-2xl pointer-events-auto max-w-sm xl:max-w-md w-full">
+                <div className="flex items-center justify-between w-full text-[10px] font-mono text-slate-400">
+                  {MILESTONES.map((m) => {
+                    const isVisited = stats.visitedBuildings[m.id];
+                    const isCompleted = stats.completedBuildings[m.id];
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          if (mode === 'playable' && engineRef.current) {
+                            handleEnterBuilding(m.id);
+                          }
+                        }}
+                        className={cn(
+                          "flex items-center gap-1 transition-all hover:scale-110",
+                          isCompleted ? "text-amber-400 font-bold" : isVisited ? "text-cyan-300 font-semibold" : "text-slate-500"
+                        )}
+                        title={`${m.label} (${m.year}) - ${isCompleted ? '100% Dominado' : isVisited ? 'Visitado' : 'Não explorado'}`}
+                      >
+                        <span className="text-xs">{isCompleted ? '⭐' : isVisited ? '🏛️' : '📍'}</span>
+                        <span>{m.year}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="relative w-full h-1.5 bg-slate-900 rounded-full border border-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 via-cyan-500 to-emerald-400 transition-all duration-200"
+                    style={{ width: `${Math.min(100, Math.max(3, (playerX / 7800) * 100))}%` }}
+                  />
+                </div>
               </div>
+            )}
 
-              {/* Barra de XP Animada */}
-              <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-white/10">
-                <div
-                  className="h-full bg-gradient-to-r from-cyan-400 via-amber-400 to-emerald-400 transition-all duration-300"
-                  style={{ width: `${xpPercentage}%` }}
-                />
-              </div>
+            {/* Botões de Ação do HUD (Direita) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto shrink-0">
+              {/* Botão TechDex / Mochila */}
+              <button
+                onClick={() => {
+                  retroAudio.playMenuOpen();
+                  setIsTechDexOpen(true);
+                }}
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border-2 border-cyan-400/80 text-white text-xs font-mono font-bold flex items-center gap-1.5 sm:gap-2 shadow-xl transition-all hover:scale-105"
+                title="Abrir TechDex e Mochila de Habilidades [TAB]"
+              >
+                <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">TechDex</span>
+                <span className="hidden md:inline px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[9px] font-mono">TAB</span>
+              </button>
 
-              {/* Badges de Coleção Rápidas */}
-              <div className="flex items-center gap-2.5 text-[10px] font-mono text-slate-300 mt-0.5">
-                <span className="flex items-center gap-1 text-cyan-300">
-                  <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
-                  {stats.totalSkillsCollected}/18 Skills
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1 text-emerald-300">
-                  <Zap className="w-2.5 h-2.5 text-emerald-400" />
-                  {stats.totalOrbsCollected}/{INITIAL_TECH_ORBS.length} Orbes
-                </span>
-                {stats.dodgeCombo > 1 && (
+              {/* Alternador de Modo: Jogo vs Auto-Run */}
+              <button
+                onClick={toggleMode}
+                className={cn(
+                  "px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xl border",
+                  mode === 'playable'
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold border-cyan-300 shadow-cyan-500/25"
+                    : "bg-black/70 hover:bg-black/90 text-white border-white/10"
+                )}
+                title={mode === 'playable' ? "Alternar para Auto-Run" : "Assumir controle do jogo"}
+              >
+                {mode === 'playable' ? (
                   <>
-                    <span>•</span>
-                    <span className="flex items-center gap-1 text-amber-300 font-bold animate-pulse">
-                      <Flame className="w-2.5 h-2.5 text-amber-400" />
-                      x{stats.dodgeCombo} Combo
-                    </span>
+                    <Gamepad2 className="w-3.5 h-3.5" />
+                    <span className="text-[11px] sm:text-xs">Jogar</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-[11px] sm:text-xs">Auto</span>
                   </>
                 )}
+              </button>
+
+              {/* Alternador de Som */}
+              <button
+                onClick={toggleAudio}
+                className="p-1.5 sm:p-2 rounded-xl bg-black/70 hover:bg-black/90 border border-white/10 text-white transition-all shadow-xl"
+                aria-label={isMuted ? "Ativar som retrô" : "Mutar som"}
+                title={isMuted ? "Ativar som retrô" : "Mutar som"}
+              >
+                {isMuted ? (
+                  <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/60" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile / Tablet Linha do Tempo (No céu logo abaixo do header — NUNCA na passagem da rua) */}
+          {gameView === 'overworld' && (
+            <div className="flex lg:hidden self-center w-full max-w-md pointer-events-auto animate-fade-in-up">
+              <div className="w-full bg-slate-950/90 backdrop-blur-md border border-cyan-500/30 rounded-xl px-3 py-1.5 shadow-2xl flex flex-col gap-1">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  {MILESTONES.map((m) => {
+                    const isVisited = stats.visitedBuildings[m.id];
+                    const isCompleted = stats.completedBuildings[m.id];
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          if (mode === 'playable' && engineRef.current) {
+                            handleEnterBuilding(m.id);
+                          }
+                        }}
+                        className={cn(
+                          "flex flex-col items-center gap-0.5 transition-all active:scale-95",
+                          isCompleted ? "text-amber-400 font-bold" : isVisited ? "text-cyan-300" : "text-slate-500"
+                        )}
+                      >
+                        <span className="text-xs">{isCompleted ? '⭐' : isVisited ? '🏛️' : '📍'}</span>
+                        <span className="text-[9px]">{m.year}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="relative w-full h-1.5 bg-slate-900 rounded-full border border-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 via-cyan-500 to-emerald-400 transition-all duration-200"
+                    style={{ width: `${Math.min(100, Math.max(3, (playerX / 7800) * 100))}%` }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Botões de Ação do HUD (Direita) */}
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {/* Botão TechDex / Mochila */}
-            <button
-              onClick={() => {
-                retroAudio.playMenuOpen();
-                setIsTechDexOpen(true);
-              }}
-              className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border-2 border-cyan-400/80 text-white text-xs font-mono font-bold flex items-center gap-2 shadow-xl transition-all hover:scale-105"
-              title="Abrir TechDex e Mochila de Habilidades [TAB]"
-            >
-              <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">TechDex</span>
-              <span className="px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[9px] font-mono">TAB</span>
-            </button>
-
-            {/* Alternador de Modo: Jogo vs Auto-Run */}
-            <button
-              onClick={toggleMode}
-              className={cn(
-                "px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xl border",
-                mode === 'playable'
-                  ? "bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold border-cyan-300 shadow-cyan-500/25"
-                  : "bg-black/70 hover:bg-black/90 text-white border-white/10"
-              )}
-              title={mode === 'playable' ? "Alternar para Auto-Run" : "Assumir controle do jogo"}
-            >
-              {mode === 'playable' ? (
-                <>
-                  <Gamepad2 className="w-3.5 h-3.5" />
-                  <span>Modo Jogo</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Auto-Run</span>
-                </>
-              )}
-            </button>
-
-            {/* Alternador de Som */}
-            <button
-              onClick={toggleAudio}
-              className="p-2 rounded-xl bg-black/70 hover:bg-black/90 border border-white/10 text-white transition-all shadow-xl"
-              aria-label={isMuted ? "Ativar som retrô" : "Mutar som"}
-              title={isMuted ? "Ativar som retrô" : "Mutar som"}
-            >
-              {isMuted ? (
-                <VolumeX className="w-4 h-4 text-white/60" />
-              ) : (
-                <Volume2 className="w-4 h-4 text-cyan-400" />
-              )}
-            </button>
-          </div>
+          )}
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* MINIMAPA DA LINHA DO TEMPO (RODAPÉ — OVERWORLD) */}
-      {/* ========================================================================= */}
-      {mounted && gameView === 'overworld' && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full max-w-xl px-4 animate-fade-in-up">
-          <div className="bg-slate-950/90 backdrop-blur-md border border-white/10 rounded-2xl p-2.5 shadow-2xl flex flex-col gap-1.5 pointer-events-auto">
-            {/* Marcadores das 6 Eras */}
-            <div className="flex items-center justify-between text-[10px] font-mono px-2 text-slate-400">
-              {MILESTONES.map((m) => {
-                const isVisited = stats.visitedBuildings[m.id];
-                const isCompleted = stats.completedBuildings[m.id];
-                return (
-                  <button
-                    key={m.id}
-                    onClick={() => {
-                      if (mode === 'playable' && engineRef.current) {
-                        handleEnterBuilding(m.id);
-                      }
-                    }}
-                    className={cn(
-                      "flex flex-col items-center gap-0.5 transition-all hover:scale-110",
-                      isCompleted ? "text-amber-400 font-bold" : isVisited ? "text-cyan-300" : "text-slate-500"
-                    )}
-                    title={`${m.label} (${m.year}) - ${isCompleted ? '100% Dominado' : isVisited ? 'Visitado' : 'Não explorado'}`}
-                  >
-                    <span>{isCompleted ? '⭐' : isVisited ? '🏛️' : '📍'}</span>
-                    <span className="hidden sm:inline">{m.year}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Barra de Progresso com Marcador do Jogador */}
-            <div className="relative w-full h-2 bg-slate-900 rounded-full border border-white/10 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 via-cyan-500 to-emerald-400"
-                style={{ width: `${Math.min(100, Math.max(3, (playerX / 7800) * 100))}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* BALÃO DE INTERAÇÃO PARA ENTRAR NO PRÉDIO (OVERWORLD) */}
-      {/* ========================================================================= */}
       {/* ========================================================================= */}
       {/* BALÃO DE INTERAÇÃO PARA ENTRAR NO PRÉDIO (OVERWORLD) */}
       {/* ========================================================================= */}
       {gameView === 'overworld' && nearMilestone && !inspectedMilestone && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex items-center gap-3">
+        <div className="absolute bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up flex items-center gap-2 sm:gap-3 max-w-[92vw] pointer-events-auto">
           <button
             onClick={() => handleEnterBuilding(nearMilestone.id)}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 hover:from-cyan-300 hover:to-cyan-200 text-slate-950 font-black font-mono text-sm shadow-[0_0_30px_rgba(6,182,212,0.5)] border-2 border-white flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 group"
+            className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 hover:from-cyan-300 hover:to-cyan-200 text-slate-950 font-black font-mono text-xs sm:text-sm shadow-[0_0_30px_rgba(6,182,212,0.5)] border-2 border-white flex items-center gap-2 transition-all hover:scale-105 active:scale-95 group truncate"
           >
-            <DoorOpen className="w-5 h-5 text-slate-950 animate-bounce" />
-            <span>EXPLORAR PRÉDIO: <strong className="text-slate-950 underline decoration-amber-500 decoration-2">{nearMilestone.label}</strong></span>
-            <span className="px-2 py-0.5 rounded bg-slate-950 text-cyan-300 text-xs font-mono ml-1 shadow-sm">TECLA [E]</span>
+            <DoorOpen className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 animate-bounce shrink-0" />
+            <span className="truncate">ENTRAR: <strong className="text-slate-950 underline decoration-amber-500 decoration-2">{nearMilestone.label}</strong></span>
+            <span className="hidden sm:inline px-2 py-0.5 rounded bg-slate-950 text-cyan-300 text-xs font-mono ml-1 shadow-sm shrink-0">TECLA [E]</span>
           </button>
 
           <button
             onClick={() => setInspectedMilestone(nearMilestone)}
-            className="p-3 rounded-2xl bg-slate-950/90 hover:bg-slate-900 text-white border-2 border-white/20 shadow-xl transition-all hover:scale-105"
+            className="p-2.5 sm:p-3 rounded-2xl bg-slate-950/90 hover:bg-slate-900 text-white border-2 border-white/20 shadow-xl transition-all hover:scale-105 shrink-0"
             title="Ver informações da era"
           >
-            <Info className="w-5 h-5 text-cyan-400" />
+            <Info className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
           </button>
         </div>
       )}
@@ -872,104 +910,110 @@ export default function CareerGame({ onViewChange: externalOnViewChange }: Caree
       )}
 
       {/* ========================================================================= */}
-      {/* MOBILE VIRTUAL CONTROLS */}
+      {/* CONTROLES VIRTUAIS MOBILE (ERGONÔMICOS & RETRÔ ARCADE) */}
       {/* ========================================================================= */}
       {isTouchDevice && mode === 'playable' && (
-        <div className="absolute bottom-6 left-4 right-4 flex items-center justify-between z-20 pointer-events-auto">
+        <div className="absolute bottom-4 left-3 right-3 sm:bottom-6 sm:left-4 sm:right-4 flex items-center justify-between z-20 pointer-events-auto touch-none select-none">
           {gameView === 'overworld' ? (
             <>
-              {/* Controles Laterais Overworld */}
-              <div className="flex gap-2">
+              {/* Controles Laterais Overworld (Esq / Dir) */}
+              <div className="flex items-center gap-2 touch-none">
                 <button
-                  onTouchStart={() => handleTouchControl('left', true)}
-                  onTouchEnd={() => handleTouchControl('left', false)}
-                  onMouseDown={() => handleTouchControl('left', true)}
-                  onMouseUp={() => handleTouchControl('left', false)}
-                  className="w-12 h-12 rounded-xl bg-black/60 active:bg-cyan-500/80 border border-white/20 text-white flex items-center justify-center shadow-lg"
+                  onTouchStart={(e) => handleTouchControl('left', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('left', false, e)}
+                  onMouseDown={(e) => handleTouchControl('left', true, e)}
+                  onMouseUp={(e) => handleTouchControl('left', false, e)}
+                  className="w-14 h-14 rounded-2xl bg-slate-950/90 active:bg-cyan-500/80 border-2 border-cyan-400/60 text-white flex flex-col items-center justify-center shadow-[0_6px_20px_rgba(0,0,0,0.6)] active:scale-95 transition-transform touch-none"
                   aria-label="Andar para a esquerda"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-6 h-6 text-cyan-300" />
+                  <span className="text-[8px] font-mono text-slate-400 font-bold">ESQ</span>
                 </button>
                 <button
-                  onTouchStart={() => handleTouchControl('right', true)}
-                  onTouchEnd={() => handleTouchControl('right', false)}
-                  onMouseDown={() => handleTouchControl('right', true)}
-                  onMouseUp={() => handleTouchControl('right', false)}
-                  className="w-12 h-12 rounded-xl bg-black/60 active:bg-cyan-500/80 border border-white/20 text-white flex items-center justify-center shadow-lg"
+                  onTouchStart={(e) => handleTouchControl('right', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('right', false, e)}
+                  onMouseDown={(e) => handleTouchControl('right', true, e)}
+                  onMouseUp={(e) => handleTouchControl('right', false, e)}
+                  className="w-14 h-14 rounded-2xl bg-slate-950/90 active:bg-cyan-500/80 border-2 border-cyan-400/60 text-white flex flex-col items-center justify-center shadow-[0_6px_20px_rgba(0,0,0,0.6)] active:scale-95 transition-transform touch-none"
                   aria-label="Andar para a direita"
                 >
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-6 h-6 text-cyan-300" />
+                  <span className="text-[8px] font-mono text-slate-400 font-bold">DIR</span>
                 </button>
               </div>
 
-              {/* Pulo / Entrar */}
-              <div className="flex gap-2">
+              {/* Botões de Ação Overworld (Entrar / Pular) */}
+              <div className="flex items-center gap-2 touch-none">
                 {nearMilestone && (
                   <button
                     onClick={() => handleEnterBuilding(nearMilestone.id)}
-                    className="w-14 h-14 rounded-2xl bg-emerald-500 active:bg-emerald-400 text-white flex items-center justify-center shadow-lg font-bold"
+                    className="w-14 h-14 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 active:from-emerald-400 active:to-teal-300 text-slate-950 flex flex-col items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.5)] border-2 border-white font-bold active:scale-95 transition-transform touch-none"
                     aria-label="Entrar no prédio"
                   >
-                    <DoorOpen className="w-6 h-6" />
+                    <DoorOpen className="w-6 h-6 text-slate-950 animate-bounce" />
+                    <span className="text-[8px] font-mono font-black">ENTRAR</span>
                   </button>
                 )}
                 <button
-                  onTouchStart={() => handleTouchControl('jump', true)}
-                  onTouchEnd={() => handleTouchControl('jump', false)}
-                  onMouseDown={() => handleTouchControl('jump', true)}
-                  onMouseUp={() => handleTouchControl('jump', false)}
-                  className="w-14 h-14 rounded-2xl bg-cyan-500 active:bg-cyan-400 text-white flex items-center justify-center shadow-lg font-bold"
+                  onTouchStart={(e) => handleTouchControl('jump', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('jump', false, e)}
+                  onMouseDown={(e) => handleTouchControl('jump', true, e)}
+                  onMouseUp={(e) => handleTouchControl('jump', false, e)}
+                  className="w-14 h-14 rounded-2xl bg-gradient-to-r from-cyan-400 to-sky-500 active:from-cyan-300 active:to-sky-400 text-slate-950 flex flex-col items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.5)] border-2 border-white font-bold active:scale-95 transition-transform touch-none"
                   aria-label="Pular"
                 >
-                  <ArrowUp className="w-6 h-6" />
+                  <ArrowUp className="w-6 h-6 text-slate-950" />
+                  <span className="text-[8px] font-mono font-black">PULAR</span>
                 </button>
               </div>
             </>
           ) : (
             /* Controles D-Pad 4 Direções Top-Down */
-            <div className="w-full flex items-center justify-between">
-              <div className="grid grid-cols-3 gap-1.5 w-36 h-36">
+            <div className="w-full flex items-center justify-between touch-none">
+              <div className="grid grid-cols-3 gap-1.5 w-36 h-36 touch-none">
                 <div />
                 <button
-                  onTouchStart={() => handleTouchControl('up', true)}
-                  onTouchEnd={() => handleTouchControl('up', false)}
-                  className="w-11 h-11 rounded-xl bg-black/60 active:bg-cyan-500/80 border border-white/20 text-white flex items-center justify-center"
+                  onTouchStart={(e) => handleTouchControl('up', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('up', false, e)}
+                  className="w-11 h-11 rounded-xl bg-slate-950/90 active:bg-cyan-500/80 border-2 border-cyan-400/60 text-white flex items-center justify-center shadow-lg active:scale-95 touch-none"
                 >
-                  <ArrowUp className="w-5 h-5" />
+                  <ArrowUp className="w-5 h-5 text-cyan-300" />
                 </button>
                 <div />
                 <button
-                  onTouchStart={() => handleTouchControl('left', true)}
-                  onTouchEnd={() => handleTouchControl('left', false)}
-                  className="w-11 h-11 rounded-xl bg-black/60 active:bg-cyan-500/80 border border-white/20 text-white flex items-center justify-center"
+                  onTouchStart={(e) => handleTouchControl('left', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('left', false, e)}
+                  className="w-11 h-11 rounded-xl bg-slate-950/90 active:bg-cyan-500/80 border-2 border-cyan-400/60 text-white flex items-center justify-center shadow-lg active:scale-95 touch-none"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-5 h-5 text-cyan-300" />
+                </button>
+                <div className="w-11 h-11 rounded-xl bg-slate-900/60 border border-white/10 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-cyan-400/40" />
+                </div>
+                <button
+                  onTouchStart={(e) => handleTouchControl('right', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('right', false, e)}
+                  className="w-11 h-11 rounded-xl bg-slate-950/90 active:bg-cyan-500/80 border-2 border-cyan-400/60 text-white flex items-center justify-center shadow-lg active:scale-95 touch-none"
+                >
+                  <ArrowRight className="w-5 h-5 text-cyan-300" />
                 </button>
                 <div />
                 <button
-                  onTouchStart={() => handleTouchControl('right', true)}
-                  onTouchEnd={() => handleTouchControl('right', false)}
-                  className="w-11 h-11 rounded-xl bg-black/60 active:bg-cyan-500/80 border border-white/20 text-white flex items-center justify-center"
+                  onTouchStart={(e) => handleTouchControl('down', true, e)}
+                  onTouchEnd={(e) => handleTouchControl('down', false, e)}
+                  className="w-11 h-11 rounded-xl bg-slate-950/90 active:bg-cyan-500/80 border-2 border-cyan-400/60 text-white flex items-center justify-center shadow-lg active:scale-95 touch-none"
                 >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-                <div />
-                <button
-                  onTouchStart={() => handleTouchControl('down', true)}
-                  onTouchEnd={() => handleTouchControl('down', false)}
-                  className="w-11 h-11 rounded-xl bg-black/60 active:bg-cyan-500/80 border border-white/20 text-white flex items-center justify-center"
-                >
-                  <ArrowDown className="w-5 h-5" />
+                  <ArrowDown className="w-5 h-5 text-cyan-300" />
                 </button>
                 <div />
               </div>
 
               <button
                 onClick={handleExitBuilding}
-                className="px-4 py-3 rounded-2xl bg-rose-600 active:bg-rose-500 text-white font-mono text-xs font-bold shadow-xl flex items-center gap-1.5"
+                className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 active:from-rose-500 active:to-red-400 text-white font-mono text-xs font-black shadow-[0_0_20px_rgba(244,63,94,0.5)] border-2 border-white flex items-center gap-2 active:scale-95 transition-transform"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Sair</span>
+                <span>SAIR [E]</span>
               </button>
             </div>
           )}

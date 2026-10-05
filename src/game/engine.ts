@@ -702,7 +702,9 @@ export class CareerGameEngine {
     this.ctx.scale(dpr, dpr);
     this.ctx.imageSmoothingEnabled = false;
 
-    this.groundY = this.height - 40;
+    // Em telas mobile (< 768px), eleva o solo para dar espaço de respiro total aos controles virtuais touch
+    const isMobile = this.width < 768;
+    this.groundY = isMobile ? Math.floor(this.height - 110) : Math.floor(this.height - 65);
     this.player.y = this.groundY;
 
     this.obstacles.forEach(obs => {
@@ -930,9 +932,11 @@ export class CareerGameEngine {
       this.onYearUpdate(currentYear);
     }
 
-    // Câmera
-    const lookAhead = this.player.facing === 'right' ? 80 : -80;
-    const targetCameraX = this.player.x - (this.width * 0.35) + lookAhead;
+    // Câmera adaptativa (melhor centralização e framing em telas móveis)
+    const isMobile = this.width < 768;
+    const lookAhead = this.player.facing === 'right' ? (isMobile ? 35 : 75) : (isMobile ? -35 : -75);
+    const screenFraction = isMobile ? 0.45 : 0.35;
+    const targetCameraX = this.player.x - (this.width * screenFraction) + lookAhead;
     this.cameraX += (targetCameraX - this.cameraX) * 0.08;
     this.cameraX = Math.max(0, this.cameraX);
 
@@ -1098,12 +1102,10 @@ export class CareerGameEngine {
             retroAudio.playVictory();
           }
 
-          // Cria partículas de celebração ao redor da skill
-          const originX = Math.floor((this.width - interior.roomWidth) / 2);
-          const originY = Math.floor((this.height - interior.roomHeight) / 2);
+          // Cria partículas de celebração ao redor da skill nas coordenadas locais da sala
           this.createSparkles(
-            originX + skill.x,
-            originY + skill.y,
+            skill.x,
+            skill.y,
             16,
             ['#38BDF8', '#FACC15', '#34D399', '#F43F5E']
           );
@@ -1392,26 +1394,45 @@ export class CareerGameEngine {
     if (!this.currentInterior) return;
     const ctx = this.ctx;
     const interior = this.currentInterior;
-    const originX = Math.floor((this.width - interior.roomWidth) / 2);
-    const originY = Math.floor((this.height - interior.roomHeight) / 2);
     const assets = assetManager.getAssets();
 
+    const roomW = interior.roomWidth;
+    const roomH = interior.roomHeight;
+
+    // Escala adaptativa para visualização em qualquer dispositivo (mobile / tablet / desktop)
+    const isMobile = this.width < 768;
+    const bottomSpace = isMobile ? 120 : 60;
+    const scale = Math.min(1, (this.width - 24) / roomW, (this.height - bottomSpace) / roomH);
+
+    const scaledW = roomW * scale;
+    const scaledH = roomH * scale;
+    const originX = Math.floor((this.width - scaledW) / 2);
+    const originY = Math.floor((this.height - bottomSpace - scaledH) / 2) + (isMobile ? 10 : 20);
+
+    ctx.save();
+    // Fundo ultra-escuro fora da sala
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    ctx.translate(originX, originY);
+    ctx.scale(scale, scale);
+
     // 1. Sala (Piso, Paredes, Porta)
-    drawTopDownRoom(ctx, interior, this.width, this.height, now);
+    drawTopDownRoom(ctx, interior, roomW, roomH, now);
 
     // 2. Móveis
     interior.furniture.forEach(item => {
-      drawFurniture(ctx, item, originX, originY, now);
+      drawFurniture(ctx, item, 0, 0, now);
     });
 
     // 3. NPC / Mentor
     if (interior.npc) {
-      drawNPC(ctx, interior.npc, originX, originY, now);
+      drawNPC(ctx, interior.npc, 0, 0, now);
     }
 
     // 4. Skills Colecionáveis na Sala
     interior.skills.forEach(skill => {
-      drawInteriorSkillItem(ctx, skill, originX, originY, now);
+      drawInteriorSkillItem(ctx, skill, 0, 0, now);
     });
 
     // 5. Partículas na Sala
@@ -1428,12 +1449,14 @@ export class CareerGameEngine {
 
     drawTopDownCharacter(
       ctx,
-      originX + this.topDownPlayer.x,
-      originY + this.topDownPlayer.y,
+      this.topDownPlayer.x,
+      this.topDownPlayer.y,
       this.topDownPlayer.direction,
       this.topDownPlayer.frame,
       this.topDownPlayer.outfit,
       tdSprite
     );
+
+    ctx.restore();
   }
 }
