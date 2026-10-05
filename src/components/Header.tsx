@@ -30,7 +30,7 @@ export function Header() {
               viewBox="0 0 16 20"
               width={24}
               height={30}
-              className="animate-[headerBounce_0.8s_ease-in-out_infinite]"
+              className="motion-safe:animate-[headerBounce_0.8s_ease-in-out_infinite]"
               shapeRendering="crispEdges"
               aria-hidden="true"
             >
@@ -109,7 +109,9 @@ export function Header() {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 text-foreground"
-              aria-label="Toggle menu"
+              aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -118,6 +120,7 @@ export function Header() {
 
         {/* Mobile Menu */}
         <div
+          id="mobile-menu"
           className={cn(
             "md:hidden overflow-hidden transition-all duration-300",
             isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"

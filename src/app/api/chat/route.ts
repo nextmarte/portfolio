@@ -71,7 +71,8 @@ Formação EM CURSO: Doutorado COPPEAD/UFRJ (2025–presente).
 - GitHub: github.com/nextmarte
 - LinkedIn: linkedin.com/in/marcus-ramalho-8a440545
 - Lattes: lattes.cnpq.br/9578799014185405
-- Site: baxijen.tech
+- Site: marcusramalho.com.br
+- Empresa: BaXiJen (www.baxijen.com.br)
 
 ## Regras de Comportamento
 

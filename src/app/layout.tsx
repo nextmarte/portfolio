@@ -22,34 +22,38 @@ const outfit = Outfit({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const SITE_URL = "https://marcusramalho.com.br";
+const PHOTO_URL = "https://www.baxijen.com.br/marcus.jpg";
+const TITLE = "Marcus Ramalho | Pesquisador em IA e Cientista de Dados";
+const DESCRIPTION =
+  "Pesquisador em IA, doutorando no COPPEAD/UFRJ, cientista de dados no CID-UFF e professor de MBA na UFF. Projetos em Inteligência Artificial, Ciência de Dados e Desenvolvimento Web.";
+
 export const metadata: Metadata = {
-  title: "Marcus Ramalho | AI Researcher & Data Scientist",
-  description:
-    "AI Researcher, Ph.D. Student at COPPEAD/UFRJ, Data Scientist at CID-UFF, Professor at UFF's MBA programs. Portfolio showcasing projects in AI, Data Science, and Web Development.",
-  metadataBase: new URL("https://www.baxijen.tech"),
+  title: TITLE,
+  description: DESCRIPTION,
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Marcus Ramalho | AI Researcher & Data Scientist",
-    description:
-      "AI Researcher, Ph.D. Student at COPPEAD/UFRJ, Data Scientist at CID-UFF. Portfolio showcasing projects in AI, Data Science, and Web Development.",
-    url: "https://www.baxijen.tech",
-    siteName: "Marcus Ramalho Portfolio",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Marcus Ramalho",
     images: [
       {
-        url: "https://www.baxijen.tech/marcus.jpg",
-        width: 256,
-        height: 600,
-        alt: "Marcus Ramalho",
+        url: PHOTO_URL,
+        alt: "Marcus Ramalho, pesquisador em IA e cientista de dados",
       },
     ],
     locale: "pt_BR",
-    type: "website",
+    type: "profile",
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Marcus Ramalho | AI Researcher & Data Scientist",
-    description:
-      "AI Researcher, Ph.D. Student at COPPEAD/UFRJ, Data Scientist at CID-UFF.",
-    images: ["https://www.baxijen.tech/marcus.jpg"],
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [PHOTO_URL],
   },
   robots: {
     index: true,
@@ -61,12 +65,21 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Marcus Ramalho",
-  jobTitle: "AI Researcher & Data Scientist",
+  jobTitle: "Pesquisador em IA e Cientista de Dados",
+  image: PHOTO_URL,
+  email: "mailto:nextmarted@gmail.com",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Niterói",
+    addressRegion: "RJ",
+    addressCountry: "BR",
+  },
   affiliation: [
     { "@type": "Organization", name: "COPPEAD/UFRJ" },
     { "@type": "Organization", name: "CID-UFF" },
   ],
-  url: "https://www.baxijen.tech",
+  worksFor: { "@type": "Organization", name: "BaXiJen", url: "https://baxijen.com.br" },
+  url: SITE_URL,
   sameAs: [
     "https://github.com/nextmarte",
     "https://www.linkedin.com/in/marcus-ramalho-8a440545/",

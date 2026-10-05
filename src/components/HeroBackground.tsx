@@ -223,6 +223,12 @@ export default function HeroBackground() {
   }, []);
 
   useEffect(() => {
+    // Respect users who prefer reduced motion: show the final scene immediately
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      progressRef.current = 1;
+      setProgress(1);
+      return;
+    }
     // Short delay so the page content renders first
     const timer = setTimeout(() => {
       animationRef.current = requestAnimationFrame(animate);

@@ -17,7 +17,7 @@ export function ThemeToggle() {
     return (
       <button
         className="p-2 rounded-lg bg-secondary text-secondary-foreground"
-        aria-label="Toggle theme"
+        aria-label="Alternar tema claro/escuro"
       >
         <Sun className="w-5 h-5" />
       </button>
@@ -32,7 +32,7 @@ export function ThemeToggle() {
         "bg-secondary text-secondary-foreground",
         "hover:bg-muted hover:text-muted-foreground"
       )}
-      aria-label="Toggle theme"
+      aria-label="Alternar tema claro/escuro"
     >
       {theme === "dark" ? (
         <Sun className="w-5 h-5" />

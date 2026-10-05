@@ -1,11 +1,20 @@
 "use client";
 
-import { Folder, ExternalLink, Github } from "lucide-react";
+import { Folder, ExternalLink, Github, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/lib/useInView";
 import { SectionTitle } from "./SectionTitle";
 
-const projects = [
+interface Project {
+  title: string;
+  description: string;
+  tags: string[];
+  /** Public repository URL, or null if the code is private */
+  github: string | null;
+  demo: string | null;
+}
+
+const projects: Project[] = [
   {
     title: "TalkingHead AI",
     description:
@@ -19,7 +28,7 @@ const projects = [
     description:
       "Agente autônomo de revisão de literatura científica vencedor do Gradio MCP Hackathon. Extrai referências de PDFs, busca em 6 bases acadêmicas (CrossRef, Semantic Scholar, OpenAlex), avalia papers com IA e expõe MCP Server para Claude Desktop e Cursor.",
     tags: ["LangGraph", "Gradio", "GPT-4o", "MCP Server", "Python", "🏆 Hackathon Winner"],
-    github: "https://github.com/nextmarte/snowball",
+    github: null,
     demo: "https://www.gradio.app/mcp-birthday-winners",
   },
   {
@@ -51,7 +60,7 @@ const projects = [
     description:
       "Sistema de gestão de oportunidades de vendas com autenticação OAuth 2.0 (Google/GitHub), controle de acesso baseado em roles (RBAC), pipeline de vendas com etapas e atividades, painel admin completo e auditoria de ações.",
     tags: ["Django", "PostgreSQL", "HTMX", "Tailwind CSS", "OAuth 2.0"],
-    github: "https://github.com/nextmarte/Outlook",
+    github: null,
     demo: null,
   },
   {
@@ -98,23 +107,33 @@ export function Projects() {
                   <h3 className="text-xl font-semibold text-foreground">
                     {project.title}
                   </h3>
-                  <div className="flex gap-2">
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Ver código no GitHub"
-                    >
-                      <Github className="w-5 h-5" />
-                    </a>
+                  <div className="flex gap-2 items-center">
+                    {project.github ? (
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={`Ver código de ${project.title} no GitHub`}
+                      >
+                        <Github className="w-5 h-5" />
+                      </a>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground"
+                        title="Repositório privado — demonstração sob pedido"
+                      >
+                        <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                        Código privado
+                      </span>
+                    )}
                     {project.demo && (
                       <a
                         href={project.demo}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="Ver demonstração"
+                        aria-label={`Ver demonstração de ${project.title}`}
                       >
                         <ExternalLink className="w-5 h-5" />
                       </a>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Linkedin, Github, MapPin } from "lucide-react";
+import { Mail, Linkedin, Github, MapPin, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/lib/useInView";
 import { SectionTitle } from "./SectionTitle";
@@ -24,6 +24,12 @@ const contactLinks = [
     value: "nextmarte",
     href: "https://github.com/nextmarte",
   },
+  {
+    icon: Building2,
+    label: "BaXiJen — consultoria em IA e dados",
+    value: "baxijen.com.br",
+    href: "https://www.baxijen.com.br",
+  },
 ];
 
 export function Contact() {
@@ -44,7 +50,8 @@ export function Contact() {
           }}
         >
           <p className="text-muted-foreground text-center mb-8">
-            Interessado em trabalhar junto? Entre em contato através dos canais abaixo.
+            Aberto a projetos de consultoria em IA e dados, parcerias de pesquisa,
+            palestras e aulas. Entre em contato pelos canais abaixo.
           </p>
 
           <div className="space-y-4">
@@ -52,8 +59,9 @@ export function Contact() {
               <a
                 key={link.label}
                 href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                {...(link.href.startsWith("mailto:")
+                  ? {}
+                  : { target: "_blank", rel: "noopener noreferrer" })}
                 className={cn(
                   "flex items-center gap-4 p-4 rounded-xl border border-border",
                   "bg-card text-card-foreground",

@@ -7,7 +7,7 @@ import { SectionTitle } from "./SectionTitle";
 import { cn } from "@/lib/utils";
 
 const stats = [
-  { icon: Calendar, value: "+8", label: "Anos em Data & IA" },
+  { icon: Calendar, value: "8+", label: "Anos em Data & IA" },
   { icon: BookOpen, value: "4", label: "Livros Publicados" },
   { icon: GraduationCap, value: "3", label: "Orientações de MBA" },
   { icon: Wrench, value: "25+", label: "Tecnologias" },
@@ -72,10 +72,11 @@ export function About() {
           )}>
             <div className="card-3d w-64 h-90 rounded-2xl overflow-hidden border-4 border-border shadow-lg">
               <Image
-                src="https://www.baxijen.tech/marcus.jpg"
-                alt="Foto de Marcus"
+                src="https://www.baxijen.com.br/marcus.jpg"
+                alt="Marcus Ramalho, pesquisador em IA e cientista de dados"
                 width={256}
-                height={600}
+                height={360}
+                sizes="256px"
                 className="w-full h-full object-cover"
                 priority
               />

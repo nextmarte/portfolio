@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, FileText, Languages, Presentation } from "lucide-react";
+import { BookOpen, ExternalLink, FileText, Languages, Presentation } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/lib/useInView";
 import { SectionTitle } from "./SectionTitle";
@@ -10,6 +10,8 @@ interface Publication {
   description: string;
   year: string;
   type: "book" | "article" | "conference" | "translation";
+  /** Optional link (DOI, publisher page, etc.). When set, the title becomes clickable. */
+  url?: string;
 }
 
 const publications: Publication[] = [
@@ -42,6 +44,7 @@ const publications: Publication[] = [
     description: "Artigo completo publicado em periódico (DOI: 10.5281/zenodo.12709058). Pesquisa sobre aprendizagem baseada em problemas com IA.",
     year: "2024",
     type: "article",
+    url: "https://doi.org/10.5281/zenodo.12709058",
   },
   {
     title: "R para Ciência de Dados",
@@ -95,7 +98,19 @@ export function Publications() {
                         </span>
                       </div>
                       <h3 className="font-semibold text-foreground mb-2">
-                        {pub.title}
+                        {pub.url ? (
+                          <a
+                            href={pub.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-start gap-1 hover:text-primary transition-colors"
+                          >
+                            {pub.title}
+                            <ExternalLink className="w-3.5 h-3.5 mt-1 flex-shrink-0" aria-hidden="true" />
+                          </a>
+                        ) : (
+                          pub.title
+                        )}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {pub.description}

@@ -8,7 +8,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "www.baxijen.tech",
+        hostname: "baxijen.com.br",
+      },
+      {
+        protocol: "https",
+        hostname: "www.baxijen.com.br",
       },
     ],
   },

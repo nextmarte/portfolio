@@ -181,7 +181,8 @@ Orientadora: Profa. Elaine Maria Tavares Rodrigues.
 - GitHub: github.com/nextmarte
 - LinkedIn: linkedin.com/in/marcus-ramalho-8a440545
 - Lattes: lattes.cnpq.br/9578799014185405
-- Site: baxijen.tech
+- Site: marcusramalho.com.br
+- Empresa: BaXiJen (www.baxijen.com.br)
 
 ## Interesses de Pesquisa
 - Governança de Inteligência Artificial

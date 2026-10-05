@@ -24,10 +24,15 @@ const socialLinks = [
 ];
 
 export function Hero() {
-  const [displayedText, setDisplayedText] = useState("");
   const fullText = "Marcus Ramalho";
+  const [displayedText, setDisplayedText] = useState("");
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplayedText(fullText);
+      return;
+    }
+
     let index = 0;
     const interval = setInterval(() => {
       if (index <= fullText.length) {
@@ -55,10 +60,14 @@ export function Hero() {
       <div className="container mx-auto px-4 text-center relative z-10 pb-48 md:pb-56">
         <div className="animate-fade-in-up mb-6">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-sm">
-            Olá, eu sou{" "}
-            <span className="text-primary">
-              {displayedText}
-              <span className="animate-blink-cursor">|</span>
+            {/* Full name always present in server HTML for SEO and screen readers */}
+            <span className="sr-only">Olá, eu sou {fullText}</span>
+            <span aria-hidden="true">
+              Olá, eu sou{" "}
+              <span className="text-primary">
+                {displayedText}
+                <span className="animate-blink-cursor">|</span>
+              </span>
             </span>
           </h1>
         </div>
@@ -67,7 +76,7 @@ export function Hero() {
           className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-2xl mx-auto animate-slide-in-left drop-shadow-sm"
           style={{ animationDelay: "0.2s" }}
         >
-          AI Researcher/Developer • Ph.D. Student @ COPPEAD/UFRJ • Data Scientist @ CID-UFF
+          Pesquisador e Desenvolvedor em IA • Doutorando no COPPEAD/UFRJ • Cientista de Dados no CID-UFF
         </p>
 
         {/* Social Links */}
@@ -83,6 +92,7 @@ export function Hero() {
               rel="noopener noreferrer"
               className="p-2.5 rounded-full border border-border bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-300 hover:scale-110"
               title={link.label}
+              aria-label={link.label}
             >
               <link.icon className="w-5 h-5" />
             </a>
